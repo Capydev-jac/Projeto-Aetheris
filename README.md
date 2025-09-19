@@ -3,48 +3,19 @@
 <p align="center">A CapyDev é reconhecida por sua abordagem ágil e por desenvolver produtos tecnológicos de ponta que ajudam seus clientes a alcançar ao próximo nível em inovação digital. em busca de novos desafios, a equipe continua crescendo e se reinventando, com a missão de criar soluções que façam a diferença no mundo conctado.
 A CapyDev é uma equipe de desenvolvedores criada em 2024 por um grupo de estudantes da Fatec Jacareí apaixonados por tecnologia e inovação. Inspirados pela resiliência das Capivaras, animal símbolo da equipe, os decidiram unir suas habilidades de desenvolvimento de software, Design digital, Gerenciamento de dados, entre outros conhecimentos, para resolver problemas de maneira eficiente e colaborativa.</p>
 
-<h2 align="center">📌Sobre o Projeto</h2>
-
-# 🛰️ Aetheris – Aplicação Web para a visualização e comparação de dados geo-espaciais.
+# Tasks
+//Gestão Ágil
+Felipe Adriano - GA - 01;
+Felipe Ribeiro - GA - 02;
+Gabriel Camargo - GA - 03;
+Gabriel Renato - GA - 04;
+João Victor Estreano - GA - 05;
+Pedro Henrique - GA - 06
  
----
-
-<h2>Sprints</h2>
-
-| Sprints | Início | Fim | Relatório |
-| ------- | ------ | --- | --------- |
-| 1ª sprint | 16/09/2025 | 07/10/2025 |
-| 2ª sprint | 13/10/2025 | 04/11/2025 |
-| 3ª sprint | 06/11/2025 | 25/11/2025 |
-
-<h2>Product Backlog</h2>
-
-| ID    | Requisito                                 | Descrição                                                                                 | Prioridade | User Story                                                                                                      | Critérios de Aceitação (DoD)                                                                                                                                             | Definição de Pronto (DoR)                                                                                   |
-|-------|--------------------------------------------|-------------------------------------------------------------------------------------------|------------|-----------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------|
-| RF01  | Seleção de área no mapa                    | Permitir seleção de área de interesse via clique no mapa interativo ou inserção de coordenadas. | Alta       | Como usuário, quero selecionar um ponto no mapa para visualizar dados de satélite da região.                     | ✅ Exibir mapa interativo (Leaflet/Mapbox). <br> ✅ Permitir clique direto ou entrada manual de coordenadas. <br> ✅ Área selecionada destacada visualmente.                | 🔹 Biblioteca de mapas escolhida e integrada. <br> 🔹 API configurada para receber coordenadas.              |
-| RF02  | Consulta ao catálogo STAC                  | Listar satélites, períodos, resoluções e variáveis disponíveis via API STAC.                | Alta       | Como usuário, quero consultar os satélites e variáveis disponíveis para minha área de interesse.                 | ✅ Integração com API STAC do BDC. <br> ✅ Lista de satélites exibida com resolução espacial e temporal. <br> ✅ Variáveis (NDVI, EVI, etc.) exibidas corretamente.        | 🔹 Acesso à API STAC funcional. <br> 🔹 Estrutura de exibição definida.                                     |
-| RF03  | Visualização de metadados                  | Exibir metadados detalhados (fonte, período, variável, resolução).                         | Alta       | Como usuário, quero visualizar metadados de cada dataset para avaliar sua adequação.                            | ✅ Exibir metadados em formato claro e responsivo. <br> ✅ Fonte dos dados identificada. <br> ✅ Dados sempre atualizados conforme API STAC.                               | 🔹 Estrutura de metadados definida. <br> 🔹 Integração testada com datasets reais.                           |
-| RF04  | Recuperação de séries temporais via WTSS   | Consultar séries temporais de variáveis geoespaciais em uma área selecionada.               | Alta       | Como usuário, quero recuperar séries temporais de NDVI, EVI ou temperatura para comparar ao longo do tempo.      | ✅ Integração com API WTSS do BDC. <br> ✅ Consultas retornam valores temporais para o pixel/área. <br> ✅ Dados exibidos em tabelas e gráficos.                           | 🔹 Conexão WTSS estabelecida. <br> 🔹 Estrutura de gráficos definida.                                       |
-| RF05  | Comparação de séries temporais             | Visualizar lado a lado séries temporais de diferentes satélites.                           | Alta       | Como usuário, quero comparar NDVI do Sentinel-2 e Landsat-8 na mesma área para avaliar diferenças.               | ✅ Usuário seleciona múltiplas séries. <br> ✅ Gráficos exibidos lado a lado. <br> ✅ Visualização responsiva e interativa.                                                 | 🔹 Ferramenta de gráficos integrada (D3/Recharts/Chart.js). <br> 🔹 Protótipo validado com dataset real.      |
-| RF06  | Filtragem por satélite, variável e período | Filtrar dados listados por satélite, variável e período temporal.                          | Alta       | Como usuário, quero filtrar datasets para encontrar apenas os que me interessam.                               | ✅ Filtros aplicáveis dinamicamente. <br> ✅ Interface de filtros intuitiva. <br> ✅ Resultados atualizados sem recarregar a página.                                       | 🔹 Regras de filtragem definidas. <br> 🔹 Testes unitários criados.                                          |
-| RF07  | Exportação de metadados                    | Permitir exportação de metadados em CSV ou JSON.                                           | Média      | Como usuário, quero exportar metadados para análise posterior em outras ferramentas.                             | ✅ Exportação em CSV e JSON disponível. <br> ✅ Arquivos mantêm integridade dos dados. <br> ✅ Download rápido e sem erros.                                                | 🔹 Formatos de exportação definidos. <br> 🔹 Teste de exportação realizado.                                  |
-| RF08  | Pré-visualização rápida (thumbnails)       | Exibir representações visuais simplificadas dos dados antes da análise detalhada.          | Baixa      | Como usuário, quero ver uma pré-visualização rápida para entender a disponibilidade dos dados.                   | ✅ Miniaturas ou ícones exibidos junto aos metadados. <br> ✅ Visualização não exige processamento local.                                                                 | 🔹 Definição de formato de preview (icones, imagens baixas resoluções).                                     |
-| RNF01 | Usabilidade                                | Interface intuitiva, com suporte a usuários iniciantes e avançados.                        | Alta       | Como usuário sem experiência, quero uma interface simples, mas que ofereça recursos avançados se necessário.     | ✅ Testes de usabilidade realizados. <br> ✅ Tutoriais ou guias rápidos disponíveis. <br> ✅ Navegação clara e responsiva em desktop e mobile.                               | 🔹 Protótipo aprovado pelo PO. <br> 🔹 Feedback inicial coletado.                                            |
-| RNF02 | Performance                                | Garantir carregamento rápido do mapa e consultas ágeis ao STAC e WTSS.                     | Alta       | Como usuário, quero que o mapa e os dados carreguem rapidamente, mesmo com alto volume de informações.           | ✅ Mapa inicial em até 3s. <br> ✅ Consultas ao STAC e WTSS respondem em tempo aceitável (<5s). <br> ✅ Testes de carga realizados.                                        | 🔹 Benchmarks de tempo definidos. <br> 🔹 Ambiente de testes configurado.                                    |
-| RNF03 | Escalabilidade                             | Suportar aumento de usuários e de fontes de satélite.                                      | Média      | Como administrador, quero que a aplicação suporte novos usuários e datasets sem perda de performance.            | ✅ Estrutura modular preparada para novos satélites. <br> ✅ Testes de escalabilidade realizados.                                                                       | 🔹 Arquitetura escalável definida. <br> 🔹 Estratégia de cache documentada.                                  |
-| RNF04 | Confiabilidade                             | Garantir precisão e atualização dos dados exibidos.                                        | Alta       | Como usuário, quero confiar que os dados exibidos são precisos e corretamente atribuídos às fontes originais.    | ✅ Dados validados contra API oficial. <br> ✅ Fonte exibida junto ao dataset. <br> ✅ Testes automatizados de consistência implementados.                                 | 🔹 Rotina de validação implementada. <br> 🔹 Fonte de dados oficial confirmada.                              |
-| RP01  | Dados gratuitos                            | Utilizar apenas dados gratuitos de satélites (Landsat, Sentinel, MODIS, etc.).             | Alta       | Como usuário, quero acesso a dados gratuitos sem custo adicional.                                                | ✅ Apenas fontes abertas usadas (STAC/WTSS). <br> ✅ Lista de satélites limitada a missões gratuitas.                                                                    | 🔹 Fontes validadas.                                                                                         |
-| RP02  | Tempo de desenvolvimento (MVP)             | Definir um escopo mínimo viável para entrega no semestre.                                  | Alta       | Como equipe, quero entregar um MVP funcional (mapa, consulta ao STAC, consulta ao WTSS e comparação básica).     | ✅ MVP contém seleção de área, consulta STAC, consulta WTSS, visualização básica e filtros simples. <br> ✅ Funcionalidade entregue no prazo definido.                     | 🔹 MVP aprovado pelo cliente.                                                                               |
-| RP03  | Recursos computacionais                    | Respeitar limitações de infraestrutura própria (cache/processamento).                      | Média      | Como administrador, quero que o sistema funcione sem exigir grandes recursos locais.                            | ✅ Uso de cache apenas quando necessário. <br> ✅ Arquitetura considera restrições de servidor. <br> ✅ Testes de consumo de recursos realizados.                           | 🔹 Estratégia de uso eficiente de recursos definida.                                                          |
-
-
-<h2>Equipe</h2>
-
-| Nome | Cargo | Midia Social |
-| ---- | ----- | ------------ |
-| Gabriel Frois | Scrum Master | <a href="https://github.com/GabrielFrois"><img src="https://skillicons.dev/icons?i=github"></a> |
-| Gabriel Camargo | Project Owner | <a href="https://github.com/AllanDreemur"><img src="https://skillicons.dev/icons?i=github"></a> |
-| Felipe Ribeiro | Desenvolvedor | <a href="https://github.com/feliperib286"><img src="https://skillicons.dev/icons?i=github"></a> |
-| Felipe Adriano | Desenvolvedor | <a href="https://github.com/Felipe-ACG"><img src="https://skillicons.dev/icons?i=github"></a> |
-| João Victor | Desenvolvedor | <a href="https://github.com/joaoestreano"><img src="https://skillicons.dev/icons?i=github"></a> |
-| Pedro Prado | Desenvolvedor | <a href="https://github.com/PeedroPrado"><img src="https://skillicons.dev/icons?i=github"></a> |
+//Interação Humano Computador
+Felipe Adriano - IH - 01;
+Felipe Ribeiro - IH - 02;
+Gabriel Camargo - IH - 03;
+Gabriel Renato - IH - 04;
+João Victor Estreano - IH - 05;
+Pedro Henrique - IH - 06

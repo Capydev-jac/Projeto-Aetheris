@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"> <!-- Define o padrão de caracteres para UTF-8 -->
+  <title>Aetheris</title> <!-- Título da página exibido na aba do navegador -->
+  <link rel="stylesheet" href="style.css"> <!-- Importa o arquivo CSS local -->
+
+  <!-- Importa o CSS da biblioteca Leaflet (necessário para o mapa) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+  <!-- Importa o JavaScript da biblioteca Leaflet (necessário para interatividade do mapa) -->
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+</head>
+<body>
+  <!-- Painel lateral (sidebar) -->
+  <div id="sidebar">
+    <h1>Aetheris</h1> <!-- Título do painel -->
+    <img src="logo aetheris.png" alt="Logo" class="logo"> <!-- Logo centralizada -->
+
+    <!-- Lista de opções com checkboxes para selecionar satélites -->
+    <ul>
+      <li><input type="checkbox" id="cbers4a"> <label for="cbers4a">CBERS-4A</label></li>
+      <li><input type="checkbox" id="cbers4"> <label for="cbers4">CBERS-4</label></li>
+      <li><input type="checkbox" id="amazonia1"> <label for="amazonia1">AMAZONIA-1</label></li>
+      <li><input type="checkbox" id="landsat8"> <label for="landsat8">Landsat-8</label></li>
+      <li><input type="checkbox" id="modis"> <label for="modis">MODIS</label></li>
+      <li><input type="checkbox" id="sentinel2"> <label for="sentinel2">Sentinel-2</label></li>
+    </ul>
+  </div>
+
+  <!-- Área onde o mapa será renderizado pelo Leaflet -->
+  <div id="map"></div>
+
+  <!-- Importa o arquivo JS local para controlar a lógica do mapa -->
+  <script src="script.js"></script>
+
+</body>
+</html>

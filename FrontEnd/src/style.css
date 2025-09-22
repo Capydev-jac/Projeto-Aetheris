@@ -1,0 +1,69 @@
+/* Resetando margens e preenchimentos básicos do body e html,
+   definindo altura total da tela e aplicando uma fonte padrão */
+body, html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: Arial, sans-serif;
+}
+
+/* Área do mapa ocupando toda a largura e altura disponíveis */
+#map {
+  width: 100%;
+  height: 100%;
+}
+
+/* Painel lateral que aparece vindo de baixo */
+#sidebar {
+  position: absolute; /* Fixa em relação à tela */
+  bottom: 0px; /* Encostado no rodapé */
+  left: 10px; /* Pequeno espaço à esquerda */
+  width: 25%; /* Largura relativa */
+  max-width: 500px; /* Limite máximo de largura */
+  background: linear-gradient(180deg, #1a1a1a, #243b55, #141E30); /* Gradiente escuro */
+  color: white; /* Texto branco */
+  padding: 20px; /* Espaçamento interno */
+  border-top-left-radius: 20px; /* Bordas arredondadas no topo */
+  border-top-right-radius: 20px;
+  z-index: 1000; /* Mantém o painel acima de outros elementos */
+  box-shadow: 0px 6px 16px rgba(0,0,0,0.5); /* Sombra para destacar */
+}
+
+/* Título dentro do sidebar */
+#sidebar h1 {
+  font-size: 22px;
+  margin: 0 0 10px;
+  text-align: center;
+}
+
+/* Estilo da logo dentro do painel */
+.logo {
+  display: block;
+  margin: 0 auto 15px; /* Centralizada e com espaçamento inferior */
+  width: 70%; /* Reduz a largura da imagem */
+  opacity: 0.9; /* Leve transparência */
+}
+
+/* Lista de opções do sidebar */
+#sidebar ul {
+  list-style: none; /* Remove marcadores padrão */
+  padding: 0;
+  margin: 0;
+  display:block /* <-- aqui falta um ponto e vírgula; 
+                   além disso, "grid-template-columns" não terá efeito com display:block */
+  grid-template-columns: 1fr 1fr; /* Tentativa de duas colunas */
+  gap: 10px; /* Espaçamento entre itens */
+}
+
+/* Cada item da lista (li) dentro do sidebar */
+#sidebar li {
+  display: flex; /* Coloca conteúdo lado a lado */
+  margin-top: 6%; /* Espaçamento superior relativo */
+  align-items: center; /* Alinha checkbox e texto verticalmente */
+}
+
+/* Estilo específico para checkboxes */
+#sidebar input[type="checkbox"] {
+  margin-right: 8px; /* Espaço entre checkbox e texto */
+  accent-color: #4CAF50; /* Cor do checkbox (verde) */
+}

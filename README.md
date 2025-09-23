@@ -7,4 +7,7 @@ A CapyDev é uma equipe de desenvolvedores criada em 2024 por um grupo de estuda
 //Gestão Ágil Felipe Adriano - GA - 01; Felipe Ribeiro - GA - 02; Gabriel Camargo - GA - 03; Gabriel Renato - GA - 04; João Victor Estreano - GA - 05; Pedro Henrique - GA - 06
 
 //Interação Humano Computador Felipe Adriano - IH - 01; Felipe Ribeiro - IH - 02; Gabriel Camargo - IH - 03; Gabriel Renato - IH - 04; João Victor Estreano - IH - 05; Pedro Henrique - IH - 06
+
+
+
 // Banco de Dados nao Relacional Felipe Ribeiro- BDNR 01;

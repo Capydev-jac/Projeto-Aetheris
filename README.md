@@ -10,4 +10,4 @@ A CapyDev é uma equipe de desenvolvedores criada em 2024 por um grupo de estuda
 
 
 
-// Banco de Dados nao Relacional Felipe Ribeiro- BDNR 01;
+// Banco de Dados não Relacional Felipe Ribeiro- BDNR 01;

@@ -7,7 +7,7 @@ var brasilBounds = [
 // Inicializa o mapa na div com id "map"
 var map = L.map('map', {
   maxBounds: brasilBounds,      // Limita o mapa para não sair do Brasil
-  maxBoundsViscosity: 1.0,      // "Força" o usuário a não sair da área definida
+  maxBoundsViscosity: 2.0,      // "Força" o usuário a não sair da área definida
   minZoom: 5,                    // Zoom mínimo permitido
   maxZoom: 15                    // Zoom máximo permitido
 }).setView([-14.2, -51.9], 4);  // Define o centro inicial do mapa (aprox. centro do Brasil) e nível de zoom
@@ -17,3 +17,14 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   maxZoom: 19,                   // Zoom máximo da camada de tiles
   attribution: '© OpenStreetMap' // Créditos obrigatórios da fonte do mapa
 }).addTo(map);                   // Adiciona essa camada ao mapa
+
+
+function abrirMenu() {
+  document.getElementById("sidebar").classList.add("ativo");
+  document.getElementById("menu-icon").style.display = "none";
+}
+
+function fecharMenu() {
+  document.getElementById("sidebar").classList.remove("ativo");
+  document.getElementById("menu-icon").style.display = "block";
+}

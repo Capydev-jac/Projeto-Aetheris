@@ -1,0 +1,117 @@
+/* Resetando margens e preenchimentos básicos do body e html,
+   definindo altura total da tela e aplicando uma fonte padrão */
+body, html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: Arial, sans-serif;
+}
+
+#menu-icon {
+  font-size: 30px;
+  padding: 20px;
+  cursor: pointer;
+  user-select: none;
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 1001;
+}
+
+/* Área do mapa ocupando toda a largura e altura disponíveis */
+#map {
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
+}
+
+/* Painel lateral que aparece vindo de baixo */
+#sidebar {
+  position: fixed;
+  top: 0;
+  left: -260px; /* Escondido, só a aba aparece */
+  width: 220px;
+  height: 100%;
+  border-top-right-radius: 20px;
+  border-bottom-right-radius: 1000px;
+  background: linear-gradient(145deg, #1a1a1a 20%, #4A59FF);
+  color: white;
+  padding: 20px;
+  box-shadow: 2px 0 5px rgba(0,0,0,0.5);
+  transition: left 0.3s ease;
+  z-index: 1001;
+}
+
+#sidebar.ativo {
+  left: 0;
+}
+
+#aba {
+  position: absolute;
+  top: 50%;
+  right: -40px; /* Posiciona a aba para fora da sidebar */
+  transform: translateY(-50%);
+  width: 40px;
+  height: 100px;
+  background-color: #262e89;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-orientation: mixed;
+  border-top-right-radius: 8px;
+  border-bottom-right-radius: 8px;
+  font-size: 20px;
+}
+
+#sidebar button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 20px;
+  margin-bottom: 20px;
+  cursor: pointer;
+}
+
+/* Título dentro do sidebar */
+#sidebar h1 {
+  font-size: 22px;
+  margin: 0 0 10px;
+  text-align: center;
+}
+
+/* Estilo da logo dentro do painel */
+.logo {
+  display: block;
+  margin: 0 auto 15px; /* Centralizada e com espaçamento inferior */
+  width: 70%; /* Reduz a largura da imagem */
+  opacity: 0.9; /* Leve transparência */
+}
+
+/* Lista de opções do sidebar */
+#sidebar ul {
+  list-style: none; /* Remove marcadores padrão */
+  padding: 0;
+  margin: 0;
+  display:block /* <-- aqui falta um ponto e vírgula; 
+                   além disso, "grid-template-columns" não terá efeito com display:block */
+  grid-template-columns: 1fr 1fr; /* Tentativa de duas colunas */
+  gap: 10px; /* Espaçamento entre itens */
+}
+
+/* Cada item da lista (li) dentro do sidebar */
+#sidebar li {
+  display: flex; /* Coloca conteúdo lado a lado */
+  margin-top: 6%; /* Espaçamento superior relativo */
+  align-items: center; /* Alinha checkbox e texto verticalmente */
+}
+
+/* Estilo específico para checkboxes */
+#sidebar input[type="checkbox"] {
+  margin-right: 8px; /* Espaço entre checkbox e texto */
+  accent-color: #4CAF50; /* Cor do checkbox (verde) */
+}

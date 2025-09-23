@@ -1,0 +1,13 @@
+TASK do dia 22/09/2025 de Felipe Ribeiro
+1º Esboço do Projeto – Banco de Dados
+Com o primeiro esboço do projeto, realizamos os primeiros procedimentos relacionados ao banco de dados MongoDB.
+Procedimentos realizados:
+1.	Instalação do banco não relacional MongoDB em todas as máquinas da equipe.
+o	Configuração do serviço para inicialização automática.
+o	Teste de execução pelo Mongo Compass.
+2.	Criação da base inicial
+o	Banco criado: aetheris_db.
+o	Primeira coleção definida: satelites.
+3.	Testes iniciais de conectividade
+o	Conexão validada por scripts em Node.js.
+

@@ -1,5 +1,8 @@
-/* Resetando margens e preenchimentos básicos do body e html,
-   definindo altura total da tela e aplicando uma fonte padrão */
+/* ========================================================
+   RESET & CONFIGURAÇÕES GERAIS
+   ======================================================== */
+
+/* Resetando margens, preenchimentos e altura total */
 body, html {
   margin: 0;
   padding: 0;
@@ -7,6 +10,9 @@ body, html {
   font-family: Arial, sans-serif;
 }
 
+/* ========================================================
+   ÍCONE DO MENU (botão de hambúrguer)
+   ======================================================== */
 #menu-icon {
   font-size: 30px;
   padding: 20px;
@@ -15,10 +21,14 @@ body, html {
   position: fixed;
   top: 20px;
   left: 20px;
-  z-index: 1001;
+  z-index: 1001; /* Acima do mapa */
 }
 
-/* Área do mapa ocupando toda a largura e altura disponíveis */
+/* ========================================================
+   MAPA (Leaflet.js)
+   ======================================================== */
+
+/* Ocupa toda a tela */
 #map {
   height: 100%;
   width: 100%;
@@ -28,11 +38,14 @@ body, html {
   z-index: 0;
 }
 
-/* Painel lateral que aparece vindo de baixo */
+/* ========================================================
+   SIDEBAR (Painel lateral retrátil)
+   ======================================================== */
+
 #sidebar {
   position: fixed;
   top: 0;
-  left: -260px; /* Escondido, só a aba aparece */
+  left: -260px; /* Inicialmente escondido */
   width: 220px;
   height: 100%;
   border-top-right-radius: 20px;
@@ -45,14 +58,16 @@ body, html {
   z-index: 1001;
 }
 
+/* Quando a sidebar está ativa */
 #sidebar.ativo {
   left: 0;
 }
 
+/* Aba que fica visível quando a sidebar está fechada */
 #aba {
   position: absolute;
   top: 50%;
-  right: -40px; /* Posiciona a aba para fora da sidebar */
+  right: -40px;
   transform: translateY(-50%);
   width: 40px;
   height: 100px;
@@ -68,6 +83,7 @@ body, html {
   font-size: 20px;
 }
 
+/* Botões dentro do sidebar */
 #sidebar button {
   background: none;
   border: none;
@@ -77,41 +93,123 @@ body, html {
   cursor: pointer;
 }
 
-/* Título dentro do sidebar */
+/* Título do painel */
 #sidebar h1 {
   font-size: 22px;
   margin: 0 0 10px;
   text-align: center;
 }
 
-/* Estilo da logo dentro do painel */
+/* Logo (imagem) centralizada */
 .logo {
   display: block;
-  margin: 0 auto 15px; /* Centralizada e com espaçamento inferior */
-  width: 70%; /* Reduz a largura da imagem */
-  opacity: 0.9; /* Leve transparência */
+  margin: 0 auto 15px;
+  width: 70%;
+  opacity: 0.9;
 }
 
-/* Lista de opções do sidebar */
+/* ========================================================
+   LISTA DE OPÇÕES (checkboxes) NO SIDEBAR
+   ======================================================== */
+
 #sidebar ul {
-  list-style: none; /* Remove marcadores padrão */
+  list-style: none;
   padding: 0;
   margin: 0;
-  display:block /* <-- aqui falta um ponto e vírgula; 
-                   além disso, "grid-template-columns" não terá efeito com display:block */
-  grid-template-columns: 1fr 1fr; /* Tentativa de duas colunas */
-  gap: 10px; /* Espaçamento entre itens */
+  display: block; /* Corrigido: faltava ponto e vírgula */
+  /* grid-template-columns: 1fr 1fr; - Não tem efeito com display: block */
+  gap: 10px; /* Sem efeito com display: block, válido se usar grid/flex */
 }
 
-/* Cada item da lista (li) dentro do sidebar */
+/* Estilo de cada item da lista */
 #sidebar li {
-  display: flex; /* Coloca conteúdo lado a lado */
-  margin-top: 6%; /* Espaçamento superior relativo */
-  align-items: center; /* Alinha checkbox e texto verticalmente */
+  display: flex;
+  margin-top: 6%;
+  align-items: center;
 }
 
-/* Estilo específico para checkboxes */
+/* Estilo dos checkboxes */
 #sidebar input[type="checkbox"] {
-  margin-right: 8px; /* Espaço entre checkbox e texto */
-  accent-color: #4CAF50; /* Cor do checkbox (verde) */
+  margin-right: 8px;
+  accent-color: #4CAF50;
+}
+
+/* ========================================================
+   SELETOR DE TAGS (Tag Input)
+   ======================================================== */
+
+.tag-selector {
+  max-width: 400px;
+  position: relative;
+}
+
+/* Container das tags selecionadas */
+.selected-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 8px;
+}
+
+/* Estilo de cada tag */
+.selected-tags .tag {
+  background-color: #007BFF;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* Ícone de remover tag */
+.selected-tags .tag .remove {
+  cursor: pointer;
+  font-weight: bold;
+}
+
+/* ========================================================
+   SUGESTÕES (Dropdown)
+   ======================================================== */
+
+.suggestions {
+  position: absolute;
+  width: 100%;
+  border: 1px solid #ccc;
+  max-height: 150px;
+  overflow-y: auto;
+  background: rgb(24, 48, 120);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  z-index: 1;
+}
+
+.suggestions li {
+  padding: 8px;
+  cursor: pointer;
+}
+
+.suggestions li:hover {
+  background-color: #1c4cb3;
+}
+
+/* ========================================================
+   INPUT DE TAG
+   ======================================================== */
+
+#tag-input {
+  width: 100%;
+  padding: 10px 12px;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  outline: none;
+}
+
+#tag-input:focus {
+  border-color: #007BFF;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
 }

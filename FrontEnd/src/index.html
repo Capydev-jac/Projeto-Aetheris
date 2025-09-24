@@ -16,14 +16,11 @@
     <h1>Aetheris</h1>
     <img src="logo aetheris.png" alt="Logo" class="logo">
 
-    <ul>
-      <li><input type="checkbox" id="cbers4a"> <label for="cbers4a">CBERS-4A</label></li>
-      <li><input type="checkbox" id="cbers4"> <label for="cbers4">CBERS-4</label></li>
-      <li><input type="checkbox" id="amazonia1"> <label for="amazonia1">AMAZONIA-1</label></li>
-      <li><input type="checkbox" id="landsat8"> <label for="landsat8">Landsat-8</label></li>
-      <li><input type="checkbox" id="modis"> <label for="modis">MODIS</label></li>
-      <li><input type="checkbox" id="sentinel2"> <label for="sentinel2">Sentinel-2</label></li>
-    </ul>
+    <div class="tag-selector">
+      <div id="selected-tags" class="selected-tags"></div>
+      <input type="text" id="tag-input" placeholder="Buscar ou selecionar..." autocomplete="off" />
+      <ul id="suggestions" class="suggestions"></ul>
+    </div>
   </div>
 
   <!-- Mapa -->

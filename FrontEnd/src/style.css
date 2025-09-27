@@ -213,3 +213,52 @@ body, html {
   border-color: #007BFF;
   box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
 }
+
+/* Estilos para o conteúdo do Popup do Leaflet */
+
+/* Estilo geral do conteúdo para garantir espaçamento interno */
+.leaflet-popup-content {
+    padding: 10px;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+}
+
+/* Estilo para o cabeçalho/coordenadas do popup */
+.satelite-popup-header {
+    font-size: 1.1em;
+    margin-bottom: 5px;
+    color: #0056b3;
+}
+
+.satelite-popup-header strong {
+    font-weight: bold;
+}
+
+/* Linha divisória fina */
+.satelite-popup-divider {
+    border: 0;
+    height: 1px;
+    background-color: #ccc;
+    margin: 10px 0;
+}
+
+/* Bloco individual de informação do produto */
+.product-info-block {
+    margin-bottom: 15px;
+    padding: 8px;
+    border-left: 3px solid #007bff;
+    background-color: #f7f7f7;
+}
+
+.product-info-block strong {
+    display: block;
+    margin-bottom: 3px;
+    color: #333;
+}
+
+.product-info-block p {
+    margin: 0;
+    font-size: 0.9em;
+    color: #444;
+    white-space: pre-wrap;
+}

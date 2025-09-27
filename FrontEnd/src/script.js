@@ -1,7 +1,3 @@
-// ================================
-// MAPA - Configuração do Leaflet
-// ================================
-
 // Coordenadas aproximadas da caixa que engloba o Brasil
 var brasilBounds = [
   [-34.0, -74.0], // Ponto sudoeste (latitude, longitude)
@@ -18,10 +14,9 @@ var map = L.map('map', {
 
 // Adiciona a camada base do mapa (tiles) usando OpenStreetMap
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  maxZoom: 19,                   // Zoom máximo suportado pelos tiles
-  attribution: '© OpenStreetMap' // Créditos obrigatórios da fonte do mapa
-}).addTo(map);                   // Adiciona a camada ao mapa
-
+  maxZoom: 19,   // Zoom máximo suportado pelos tiles
+  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+}).addTo(map);
 // ================================
 // MENU LATERAL - Abertura/Fechamento
 // ================================
@@ -37,7 +32,7 @@ function fecharMenu() {
   document.getElementById("sidebar").classList.remove("ativo");
   document.getElementById("menu-icon").style.display = "block";
 }
-
+// ================================
 // ================================
 // TAG INPUT - Sugestões e Seleção
 // ================================
@@ -57,7 +52,6 @@ const allSuggestions = [
   "Estações meteorológicas / satélite",
   "CBERS WFI"
 ];
-
 // Elementos do DOM relacionados ao input de tags
 const input = document.getElementById("tag-input");
 const suggestionsBox = document.getElementById("suggestions");
@@ -65,7 +59,6 @@ const selectedTagsContainer = document.getElementById("selected-tags");
 
 // Armazena as tags já selecionadas
 let selectedTags = [];
-
 // ================================
 // EVENTOS DO INPUT
 // ================================
@@ -95,7 +88,6 @@ input.addEventListener("keydown", (e) => {
     }
   }
 });
-
 // ================================
 // FUNÇÕES DE SUGESTÃO
 // ================================
@@ -162,4 +154,138 @@ document.addEventListener("click", function (e) {
   if (!wrapper.contains(target)) {
     suggestionsBox.innerHTML = "";
   }
+});
+
+// Objeto para armazenar as camadas de satélites
+const markers = {};
+let activeMarkers = [];
+
+// Função para buscar dados do satélite e adicionar marcador
+async function fetchsateliteData(sateliteId) {
+    try {
+        const response = await fetch(`http://localhost:3000/api/satelites/${sateliteId}`);
+        if (!response.ok) {
+            throw new Error(`Erro ao buscar dados: ${response.status}`);
+        }
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Houve um problema com a sua requisição:', error);
+        alert(`Houve um problema com a sua requisição para ${sateliteId}: ${error.message}`);
+        return null;
+    }
+}
+
+// Lidar com a seleção de satélites
+document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+    checkbox.addEventListener('change', async (event) => {
+        const sateliteId = event.target.id;
+        if (event.target.checked) {
+            const data = await fetchsateliteData(sateliteId);
+            if (data) {
+                const marker = L.marker([data.latitude, data.longitude]).addTo(map)
+                    .bindPopup(`<b>${data.name}</b><br>Latitude: ${data.latitude}<br>Longitude: ${data.longitude}<br>Altitude: ${data.altitude} km`);
+                
+                markers[sateliteId] = marker;
+                marker.openPopup();
+            }
+        } else {
+            if (markers[sateliteId]) {
+                map.removeLayer(markers[sateliteId]);
+                delete markers[sateliteId];
+            }
+        }
+    });
+});
+
+// Adicionar a nova funcionalidade de clique no mapa
+map.on('click', async function(e) {
+    const { lat, lng } = e.latlng;
+    
+    // Remover marcadores anteriores
+    activeMarkers.forEach(marker => map.removeLayer(marker));
+    activeMarkers = [];
+
+    // Fazer a requisição para o back-end
+    try {
+        const response = await fetch(`http://localhost:3000/api/geodata?lat=${lat}&lng=${lng}`);
+        if (!response.ok) {
+            throw new Error(`Erro ao buscar dados geográficos: ${response.status}`);
+        }
+        const data = await response.json();
+
+        if (data.length > 0) {
+            let popupContent = `<b>Dados para as coordenadas ${lat.toFixed(2)}, ${lng.toFixed(2)}:</b><br><br>`;
+            
+            // Exibir as informações retornadas pela API
+            data.forEach(item => {
+                popupContent += `<b>Produto:</b> ${item.productName}<br>`;
+                popupContent += `<b>Descrição:</b> ${item.description}<br><br>`;
+
+                // Criar um novo marcador no local do clique
+                const newMarker = L.marker([lat, lng]).addTo(map)
+                    .bindPopup(popupContent)
+                    .openPopup();
+                
+                activeMarkers.push(newMarker);
+            });
+        } else {
+            // Se nenhum dado foi encontrado
+            const notFoundMarker = L.marker([lat, lng]).addTo(map)
+                .bindPopup(`Nenhum dado encontrado para esta área.`);
+            
+            activeMarkers.push(notFoundMarker);
+        }
+
+    } catch (error) {
+        console.error('Houve um problema com a requisição de geodados:', error);
+        alert(`Erro: ${error.message}`);
+    }
+});
+
+// ================================
+// MAPA - Clique para selecionar ponto com área
+// ================================
+
+// Grupo para armazenar marcador e área selecionada
+let selectedMarker;
+let selectedArea;
+
+map.on("click", function (e) {
+  // Remove marcador e área anteriores, se existirem
+  if (selectedMarker) map.removeLayer(selectedMarker);
+  if (selectedArea) map.removeLayer(selectedArea);
+
+  // Adiciona marcador central
+  selectedMarker = L.circleMarker(e.latlng, {
+    radius: 10,
+    color: "#ff0000",
+    weight: 3,
+    fillColor: "#ff4d4d",
+    fillOpacity: 0.7
+  }).addTo(map);
+
+  // Área transparente em volta do ponto (raio em metros)
+  selectedArea = L.circle(e.latlng, {
+    radius: 20000,        // raio em metros (ex: 20 km)
+    color: "#ff0000",
+    weight: 2,
+    fillColor: "#ff4d4d",
+    fillOpacity: 0.15     // bem transparente
+  }).addTo(map);
+
+  // Pulso de destaque (efeito temporário)
+  let pulse = L.circle(e.latlng, {
+    radius: 5000,
+    color: "#ff0000",
+    fillColor: "#ff4d4d",
+    fillOpacity: 0.25
+  }).addTo(map);
+
+  setTimeout(() => {
+    map.removeLayer(pulse);
+  }, 600);
+
+  // Popup no ponto
+  selectedMarker.bindPopup("📍 Ponto selecionado").openPopup();
 });

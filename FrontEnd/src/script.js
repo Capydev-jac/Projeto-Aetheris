@@ -1,137 +1,139 @@
 // Coordenadas aproximadas da caixa que engloba o Brasil
-var brasilBounds = [
+const brasilBounds = [
   [-34.0, -74.0], // Ponto sudoeste (latitude, longitude)
   [5.3, -34.0]    // Ponto nordeste (latitude, longitude)
 ];
 
 // Inicializa o mapa na div com id "map"
-var map = L.map('map', {
-  maxBounds: brasilBounds,      // Limita o mapa para não sair do Brasil
-  maxBoundsViscosity: 2.0,      // "Força" o usuário a não sair da área definida
-  minZoom: 5,                   // Zoom mínimo permitido
-  maxZoom: 15                   // Zoom máximo permitido
-}).setView([-14.2, -51.9], 4);  // Define o centro inicial do mapa (aproximadamente o centro do Brasil) e o nível de zoom
+const map = L.map('map', {
+  maxBounds: brasilBounds,
+  maxBoundsViscosity: 2.0,
+  minZoom: 5,
+  maxZoom: 15
+}).setView([-14.2, -51.9], 4);
 
 // Adiciona a camada base do mapa (tiles) usando OpenStreetMap
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  maxZoom: 19,   // Zoom máximo suportado pelos tiles
+  maxZoom: 19,
   attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 }).addTo(map);
-// ================================
-// MENU LATERAL - Abertura/Fechamento
-// ================================
 
-// Abre o menu lateral
-function abrirMenu() {
-  document.getElementById("sidebar").classList.add("ativo");
-  document.getElementById("menu-icon").style.display = "none";
-}
+// ========================================================
+// VARIÁVEIS GLOBAIS
+// ========================================================
 
-// Fecha o menu lateral
-function fecharMenu() {
-  document.getElementById("sidebar").classList.remove("ativo");
-  document.getElementById("menu-icon").style.display = "block";
-}
-// ================================
-// ================================
-// TAG INPUT - Sugestões e Seleção
-// ================================
+// Variáveis para o menu
+const sidebar = document.getElementById('sidebar');
 
-// Lista de sugestões disponíveis
-const allSuggestions = [
-  "CBERS4A",
-  "Landsat-8",
-  "CBERS-2B",
-  "GOES-19",
-  "Sentinel-2",
-  "MODIS Terra/Aqua",
-  "Landsat series",
-  "MODIS Aqua",
-  "Sentinel-3 OLCI",
-  "CBERS-4",
-  "Estações meteorológicas / satélite",
-  "CBERS WFI"
-];
-// Elementos do DOM relacionados ao input de tags
+// Variáveis para o Tag Input
 const input = document.getElementById("tag-input");
 const suggestionsBox = document.getElementById("suggestions");
 const selectedTagsContainer = document.getElementById("selected-tags");
 
-// Armazena as tags já selecionadas
+// Lista de sugestões disponíveis
+const allSuggestions = [
+  "CBERS4A", "Landsat-8", "CBERS-2B", "GOES-19", "Sentinel-2", 
+  "MODIS Terra/Aqua", "Landsat series", "MODIS Aqua", "Sentinel-3 OLCI", 
+  "CBERS-4", "Estações meteorológicas / satélite", "CBERS WFI"
+];
 let selectedTags = [];
-// ================================
-// EVENTOS DO INPUT
-// ================================
 
-// Ao focar no input, mostra todas as sugestões
+// Variáveis para Marcadores do Mapa
+let selectedMarker; // Marcador do ponto clicado (círculo vermelho)
+let selectedArea;   // Área de 20km (círculo transparente)
+let activeMarkers = []; // Usado para armazenar o popup de metadados ou gráfico.
+
+// Objeto para mapear o nome popular do frontend para o ID da plataforma no DB/Backend (usado no filtro do /api/geodata)
+const sateliteIdMap = {
+    "CBERS4A": "cbers4a",
+    "CBERS-4": "cbers4",
+    "Landsat-8": "landsat8",
+    "Sentinel-2": "sentinel2",
+    "MODIS Terra/Aqua": "modis",
+    "GOES-19": "goes16",
+    "Landsat series": "landsat8",
+};
+
+// Objeto para converter o nome técnico do produto (DB/WTSS) para o nome popular (usado na exibição)
+const productNameToPopularName = {
+    'mosaic-cbers4a-paraiba-3m-1': 'CBERS-4A (Paraíba)', 
+    'mosaic-cbers4-paraiba-3m-1': 'CBERS-4 (Paraíba)',
+    'AMZ1-WFI-L4-SR-1': 'Amazônia-1 (WFI)',
+    'LCC_L8_30_16D_STK_Cerrado-1': 'Landsat-8 (Cerrado 16D)',
+    'myd13q1-6.1': 'MODIS (NDVI/EVI 16D)',
+    'mosaic-s2-yanomami_territory-6m-1': 'Sentinel-2 (Yanomami 6M)',
+    'LANDSAT-16D-1': 'Landsat (Data Cube 16D)',
+    'S2-16D-2': 'Sentinel-2 (Data Cube 16D)',
+    'prec_merge_daily-1': 'Precipitação Diária',
+    'EtaCCDay_CMIP5-1': 'Modelo Climático (CMIP5)',
+};
+
+// ========================================================
+// FUNÇÕES DE MENU LATERAL (Corrigido para toggleMenu)
+// ========================================================
+
+/**
+ * Alterna a visibilidade do menu lateral.
+ */
+function toggleMenu() {
+  sidebar.classList.toggle('ativo');
+}
+
+// ========================================================
+// FUNÇÕES DE TAG INPUT (Preservado)
+// ========================================================
+
 input.addEventListener("focus", () => {
-  showSuggestions(""); // Sem filtro
+  showSuggestions("");
 });
 
-// Ao digitar no input, filtra sugestões
 input.addEventListener("input", () => {
   const value = input.value.toLowerCase();
   showSuggestions(value);
 });
 
-// Ao pressionar "Enter", tenta adicionar a tag
 input.addEventListener("keydown", (e) => {
   if (e.key === "Enter") {
-    e.preventDefault(); // Previne envio de formulário, se houver
-
+    e.preventDefault();
     const value = input.value.trim();
     const match = allSuggestions.find(item => item.toLowerCase() === value.toLowerCase());
-
-    // Adiciona a tag somente se for uma sugestão válida e ainda não foi selecionada
     if (match && !selectedTags.includes(match)) {
       selectTag(match);
     }
   }
 });
-// ================================
-// FUNÇÕES DE SUGESTÃO
-// ================================
 
-// Mostra as sugestões filtradas
 function showSuggestions(filter) {
   suggestionsBox.innerHTML = "";
-
   const filtered = allSuggestions.filter(item =>
     item.toLowerCase().includes(filter.toLowerCase()) &&
     !selectedTags.includes(item)
   );
-
   filtered.forEach(item => {
     const li = document.createElement("li");
     li.textContent = item;
     li.addEventListener("click", () => selectTag(item));
     suggestionsBox.appendChild(li);
   });
-
-  // Exibe ou oculta a caixa de sugestões
   suggestionsBox.style.display = filtered.length ? "block" : "none";
 }
 
-// Seleciona uma tag
 function selectTag(tag) {
   selectedTags.push(tag);
   input.value = "";
   suggestionsBox.innerHTML = "";
   renderSelectedTags();
-  input.focus(); // Mantém o foco no input
+  input.focus();
 }
 
-// Remove uma tag
-function removeTag(tag) {
+window.removeTag = function(tag) {
   selectedTags = selectedTags.filter(t => t !== tag);
   renderSelectedTags();
-  showSuggestions(input.value); // Atualiza sugestões com base no input atual
-}
+  showSuggestions(input.value);
+};
 
-// Atualiza a interface com as tags selecionadas
 function renderSelectedTags() {
   selectedTagsContainer.innerHTML = "";
-
   selectedTags.forEach(tag => {
     const tagEl = document.createElement("div");
     tagEl.classList.add("tag");
@@ -142,258 +144,267 @@ function renderSelectedTags() {
   });
 }
 
-// ================================
-// EVENTO GLOBAL - Clique fora do input fecha sugestões
-// ================================
-
 document.addEventListener("click", function (e) {
   const target = e.target;
   const wrapper = document.querySelector(".tag-selector");
-
-  // Se clicou fora do componente de tags, esconde as sugestões
-  if (!wrapper.contains(target)) {
+  if (wrapper && !wrapper.contains(target)) {
     suggestionsBox.innerHTML = "";
   }
 });
 
-// Objeto para armazenar as camadas de satélites
-const markers = {};
-let activeMarkers = [];
 
-// Função para buscar dados do satélite e adicionar marcador
-async function fetchsateliteData(sateliteId) {
+// ========================================================
+// FUNÇÕES WTSS E GRÁFICOS (Novas Funções de Extração e Plotagem)
+// ========================================================
+
+function applyScale(rawValue) {
+    const SCALE_FACTOR = 0.0001; 
+    return rawValue * SCALE_FACTOR;
+}
+
+
+/**
+ * 🛰️ Chama a rota WTSS do backend para extrair a série temporal de um ponto e plota o gráfico.
+ * * @param {number} lat - Latitude.
+ * @param {number} lng - Longitude.
+ * @param {string} coverage - O nome técnico da coleção.
+ * @param {string} band - As bandas a serem solicitadas (pode ser string vazia para usar o padrão do backend).
+ * @param {string} friendlyName - Nome amigável do produto.
+ */
+window.fetchTimeSeriesAndPlot = async function(lat, lng, coverage, band, friendlyName) {
+    // 1. Fecha o popup de metadados
+    map.closePopup();
+
+    // 2. Cria um popup temporário para feedback ao usuário
+    const tempPopupContent = `
+        <div class="satelite-popup-header"><strong>Carregando Série Temporal...</strong></div>
+        <p>Produto: ${friendlyName}</p>
+        <p>Aguarde, extraindo dados do pixel via WTSS.</p>
+    `;
+
+    // Remove marcadores e áreas anteriores, mantendo apenas o ponto central
+    if (selectedMarker) map.removeLayer(selectedMarker);
+    if (selectedArea) map.removeLayer(selectedArea);
+    activeMarkers.forEach(marker => map.removeLayer(marker));
+    activeMarkers = [];
+    
+    selectedMarker = L.circleMarker([lat, lng], {
+        radius: 10, color: "#ff0000", weight: 3, fillColor: "#ff4d4d", fillOpacity: 0.7
+    }).addTo(map);
+
+    selectedArea = L.circle([lat, lng], {
+        radius: 20000, color: "#ff0000", weight: 2, fillColor: "#ff4d4d", fillOpacity: 0.15
+    }).addTo(map);
+    
+    selectedMarker.bindPopup(tempPopupContent, { minWidth: 300 }).openPopup();
+
+    // 🟢 FIX NO FRONTEND: Adiciona o parâmetro 'bands' apenas se ele não for vazio
+    const bandQuery = band ? `&bands=${band}` : '';
+
     try {
-        const response = await fetch(`http://localhost:3000/api/satelites/${sateliteId}`);
+        const response = await fetch(`http://localhost:3000/api/timeseries?lat=${lat}&lng=${lng}&coverage=${coverage}${bandQuery}`);
+        
         if (!response.ok) {
-            throw new Error(`Erro ao buscar dados: ${response.status}`);
+            const errorData = await response.json();
+            // Melhora a mensagem de erro usando o campo 'details.description' retornado pelo backend
+            throw new Error(errorData.details?.description || `Erro ${response.status}: Falha ao extrair série temporal.`);
         }
+        
         const data = await response.json();
-        return data;
+        
+        // 3. Processa e Plota os dados
+        createChartPopup(lat, lng, friendlyName, data);
+
     } catch (error) {
-        console.error('Houve um problema com a sua requisição:', error);
-        alert(`Houve um problema com a sua requisição para ${sateliteId}: ${error.message}`);
-        return null;
+        console.error('Erro ao plotar série temporal:', error);
+        
+        // Atualiza o marcador com a mensagem de erro
+        selectedMarker.setPopupContent(`
+            <div style="color: red;"><strong>Erro ao buscar dados:</strong></div>
+            <p>${error.message}</p>
+        `).openPopup();
     }
 }
 
-// Lidar com a seleção de satélites
-document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-    checkbox.addEventListener('change', async (event) => {
-        const sateliteId = event.target.id;
-        if (event.target.checked) {
-            const data = await fetchsateliteData(sateliteId);
-            if (data) {
-                const marker = L.marker([data.latitude, data.longitude]).addTo(map)
-                    .bindPopup(`<b>${data.name}</b><br>Latitude: ${data.latitude}<br>Longitude: ${data.longitude}<br>Altitude: ${data.altitude} km`);
-                
-                markers[sateliteId] = marker;
-                marker.openPopup();
-            }
-        } else {
-            if (markers[sateliteId]) {
-                map.removeLayer(markers[sateliteId]);
-                delete markers[sateliteId];
-            }
-        }
-    });
-});
 
-// Adicionar a nova funcionalidade de clique no mapa
+function createChartPopup(lat, lng, title, timeSeriesData) {
+    const dates = timeSeriesData.timeline;
+    const chartDatasets = [];
+    const bands = timeSeriesData.attributes;
+
+    bands.forEach((band, index) => {
+        const rawValues = timeSeriesData.values.map(v => v[band]);
+        
+        // Aplica o fator de escala (conversão de inteiro para float)
+        const scaledData = rawValues.map(rawValue => rawValue !== undefined && rawValue !== null ? applyScale(rawValue) : null);
+
+        let color;
+        if (band.toUpperCase().includes('NDVI')) color = 'rgba(0, 128, 0, 1)';
+        else if (band.toUpperCase().includes('EVI')) color = 'rgba(0, 0, 255, 1)';
+        else if (band.toUpperCase().includes('PR')) color = 'rgba(0, 100, 255, 1)'; 
+        else if (band.toUpperCase().includes('TAS')) color = 'rgba(255, 100, 0, 1)'; 
+        else color = `hsl(${index * 60}, 70%, 50%)`;
+        
+        chartDatasets.push({
+            label: band,
+            data: scaledData,
+            borderColor: color,
+            borderWidth: 2,
+            fill: false,
+            tension: 0.1,
+            pointRadius: 3
+        });
+    });
+
+    const chartId = `chart-${title.replace(/\s/g, '-')}-${Date.now()}`;
+    const popupHtml = `
+        <div class="chart-popup-content" style="max-width: 400px;">
+            <div class="satelite-popup-header">
+                <strong>Série Temporal: ${title}</strong>
+            </div>
+            <p>Atributos: ${bands.join(', ')}</p>
+            <hr class="satelite-popup-divider">
+            <canvas id="${chartId}" width="400" height="200"></canvas>
+            <p style="font-size: 0.7em; margin-top: 5px;">Valores reais (escala padrão aplicada). Max Y=1.0.</p>
+        </div>
+    `;
+    
+    selectedMarker.setPopupContent(popupHtml, { 
+        maxHeight: 400, 
+        minWidth: 350,
+        maxWidth: 450
+    }).openPopup();
+    
+    selectedMarker.once('popupopen', () => {
+        const ctx = document.getElementById(chartId);
+        
+        if (typeof Chart === 'undefined') {
+             ctx.parentNode.innerHTML = 'ERRO: Chart.js não carregado. Verifique o index.html.';
+             return;
+        }
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: dates,
+                datasets: chartDatasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        type: 'time',
+                        time: { unit: 'month' },
+                        title: { display: true, text: 'Data' }
+                    },
+                    y: {
+                        title: { display: true, text: 'Valor (Escala aplicada)' },
+                        min: -0.2,
+                        max: 1.05 
+                    }
+                }
+            }
+        });
+    });
+}
+
+// ========================================================
+// EVENTO PRINCIPAL: CLIQUE NO MAPA (Consolidado com Correção)
+// ========================================================
+
 map.on('click', async function(e) {
     const { lat, lng } = e.latlng;
     
-    // Remover marcadores anteriores
+    if (selectedMarker) map.removeLayer(selectedMarker);
+    if (selectedArea) map.removeLayer(selectedArea);
     activeMarkers.forEach(marker => map.removeLayer(marker));
     activeMarkers = [];
 
-    // Fazer a requisição para o back-end
+    selectedMarker = L.circleMarker(e.latlng, {
+        radius: 10, color: "#ff0000", weight: 3, fillColor: "#ff4d4d", fillOpacity: 0.7
+    }).addTo(map);
+
+    selectedArea = L.circle(e.latlng, {
+        radius: 20000, color: "#ff0000", weight: 2, fillColor: "#ff4d4d", fillOpacity: 0.15
+    }).addTo(map);
+
+    let pulse = L.circle(e.latlng, {
+        radius: 5000, color: "#ff0000", fillColor: "#ff4d4d", fillOpacity: 0.25
+    }).addTo(map);
+    setTimeout(() => { map.removeLayer(pulse); }, 600);
+
+    const selectedSateliteIds = selectedTags
+        .map(tag => sateliteIdMap[tag])
+        .filter(id => id); 
+
+    const satelitesQuery = selectedSateliteIds.join(',');
+
+    selectedMarker.bindPopup("<strong>📍 Ponto selecionado</strong><br>Buscando produtos STAC...").openPopup();
+
     try {
-        const response = await fetch(`http://localhost:3000/api/geodata?lat=${lat}&lng=${lng}`);
+        const response = await fetch(`http://localhost:3000/api/geodata?lat=${lat}&lng=${lng}&satelites=${satelitesQuery}`);
         if (!response.ok) {
-            throw new Error(`Erro ao buscar dados geográficos: ${response.status}`);
+            throw new Error(`Erro ao buscar metadados: ${response.status}`);
         }
         const data = await response.json();
 
-        if (data.length > 0) {
-            let popupContent = `<b>Dados para as coordenadas ${lat.toFixed(2)}, ${lng.toFixed(2)}:</b><br><br>`;
-            
-            // Exibir as informações retornadas pela API
-            data.forEach(item => {
-                popupContent += `<b>Produto:</b> ${item.productName}<br>`;
-                popupContent += `<b>Descrição:</b> ${item.description}<br><br>`;
+        let popupContent = `
+            <div class="satelite-popup-header">
+                <strong>Resultados para:</strong> ${lat.toFixed(4)}, ${lng.toFixed(4)}
+            </div>
+            <hr class="satelite-popup-divider">
+        `;
 
-                // Criar um novo marcador no local do clique
-                const newMarker = L.marker([lat, lng]).addTo(map)
-                    .bindPopup(popupContent)
-                    .openPopup();
+        if (data.length > 0) {
+            data.forEach(item => {
+                const popularName = productNameToPopularName[item.productName] || item.productName;
                 
-                activeMarkers.push(newMarker);
+                // 🟢 FIX NO FRONTEND: Lógica para determinar as bandas a solicitar
+                let bandsToRequest = 'NDVI,EVI'; 
+                let buttonLabel = 'Ver Série Temporal (NDVI/EVI)';
+                
+                // Produtos Climáticos/Não-Ópticos (EX: CMIP5 e MERGE)
+                if (item.productName.includes('CMIP5') || item.productName.includes('prec_merge') || item.productName.includes('GOES')) {
+                    bandsToRequest = ''; // O backend irá usar o padrão (as 2 primeiras bandas válidas do DB)
+                    buttonLabel = 'Ver Série Temporal (Variáveis Padrão)';
+                }
+
+                // Botão de Ação: Chama a função que busca a série temporal via WTSS
+                const actionButton = `<button 
+                    onclick="fetchTimeSeriesAndPlot(${lat}, ${lng}, '${item.productName}', '${bandsToRequest}', '${popularName}')"
+                    style="background-color: #4A59FF; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; margin-top: 5px; font-size: 0.9em;"
+                >
+                    ${buttonLabel}
+                </button>`;
+
+                popupContent += `
+                    <div class="product-info-block">
+                        <strong>🛰️ ${popularName} (${item.productName})</strong>
+                        <p>${item.description}</p>
+                        ${actionButton}
+                    </div>
+                `;
             });
-        } else {
-            // Se nenhum dado foi encontrado
-            const notFoundMarker = L.marker([lat, lng]).addTo(map)
-                .bindPopup(`Nenhum dado encontrado para esta área.`);
             
-            activeMarkers.push(notFoundMarker);
+            selectedMarker.setPopupContent(popupContent, { 
+                maxHeight: 300, 
+                minWidth: 250 
+            }).openPopup();
+
+        } else {
+            popupContent += `<p>Nenhum produto encontrado para os filtros ativos nesta área.</p>`;
+            selectedMarker.setPopupContent(popupContent).openPopup();
         }
 
     } catch (error) {
         console.error('Houve um problema com a requisição de geodados:', error);
-        alert(`Erro: ${error.message}`);
+        
+        selectedMarker.setPopupContent(`
+            <div class="satelite-popup-header" style="color: red;">
+                <strong>Erro na Requisição:</strong>
+            </div>
+            <p>Ocorreu um problema ao buscar os dados: ${error.message}</p>
+        `).openPopup();
     }
-});
-
-// ================================
-// MAPA - Clique para selecionar ponto com área
-// ================================
-
-// Grupo para armazenar marcador e área selecionada
-let selectedMarker;
-let selectedArea;
-
-map.on("click", function (e) {
-  // Remove marcador e área anteriores, se existirem
-  if (selectedMarker) map.removeLayer(selectedMarker);
-  if (selectedArea) map.removeLayer(selectedArea);
-
-  // Adiciona marcador central
-  selectedMarker = L.circleMarker(e.latlng, {
-    radius: 10,
-    color: "#ff0000",
-    weight: 3,
-    fillColor: "#ff4d4d",
-    fillOpacity: 0.7
-  }).addTo(map);
-
-  // Área transparente em volta do ponto (raio em metros)
-  selectedArea = L.circle(e.latlng, {
-    radius: 20000,        // raio em metros (ex: 20 km)
-    color: "#ff0000",
-    weight: 2,
-    fillColor: "#ff4d4d",
-    fillOpacity: 0.15     // bem transparente
-  }).addTo(map);
-
-  // Pulso de destaque (efeito temporário)
-  let pulse = L.circle(e.latlng, {
-    radius: 5000,
-    color: "#ff0000",
-    fillColor: "#ff4d4d",
-    fillOpacity: 0.25
-  }).addTo(map);
-
-  setTimeout(() => {
-    map.removeLayer(pulse);
-  }, 600);
-
-  // Popup no ponto
-  selectedMarker.bindPopup("📍 Ponto selecionado").openPopup();
-});
-
-// Use este objeto para converter o que vem do banco de volta para o nome que o usuário conhece.
-const productNameToPopularName = {
-    // Nome técnico: Nome popular
-    'mosaic-cbers4a-paraiba-3m-1': 'CBERS-4A', 
-    'mosaic-cbers4-paraiba-3m-1': 'CBERS-4',
-    'AMZ1-WFI-L4-SR-1': 'Amazônia-1',
-    'LCC_L8_30_16D_STK_Cerrado-1': 'Landsat-8',
-    'myd13q1-6.1': 'MODIS Terra/Aqua',
-    'mosaic-s2-yanomami_territory-6m-1': 'Sentinel-2',
-    'GOES16-C01-ABI-L2-CM-N': 'GOES-19',
-    'prec_merge_daily-1': 'Precipitação Diária (GPM-Merge)',
-    'CB4-WFI-L4-DN-1': 'CBERS-4 WFI (L4)',
-};
-
-// Adicionar a nova funcionalidade de clique no mapa
-map.on('click', async function(e) {
-    const { lat, lng } = e.latlng;
-    
-    // Remover marcadores anteriores
-    activeMarkers.forEach(marker => map.removeLayer(marker));
-    activeMarkers = [];
-
-    // Lógica para pegar as tags de satélites selecionadas
-    const sateliteIdMap = {
-        "CBERS4A": "cbers4a",
-        "CBERS-4": "cbers4",
-        "Landsat-8": "landsat8",
-        "Sentinel-2": "sentinel2",
-        "MODIS Terra/Aqua": "modis",
-        "GOES-19": "goes", 
-    };
-
-    const selectedSateliteIds = selectedTags
-        .map(tag => sateliteIdMap[tag])
-        .filter(id => id); // Remove valores indefinidos
-
-    const satelitesQuery = selectedSateliteIds.join(',');
-
-    // Fazer a requisição para o back-end, incluindo os satélites selecionados
-    try {
-        const response = await fetch(`http://localhost:3000/api/geodata?lat=${lat}&lng=${lng}&satelites=${satelitesQuery}`);
-        if (!response.ok) {
-            throw new Error(`Erro ao buscar dados geográficos: ${response.status}`);
-        }
-        const data = await response.json();
-
-        // Inicia o conteúdo do popup com as coordenadas
-        let popupContent = `
-            <div class="satelite-popup-header">
-                <strong>Resultados para:</strong> ${lat.toFixed(2)}, ${lng.toFixed(2)}
-            </div>
-            <hr class="satelite-popup-divider">
-        `;
-
-        if (data.length > 0) {
-            // Itera sobre os resultados para criar uma lista filtrada e limpa
-            data.forEach(item => {
-                // Tenta buscar o nome popular no mapeamento
-                const popularName = productNameToPopularName[item.productName];
-                
-                // Define o título a ser exibido: usa o popularName se existir, senão usa o productName
-                const displayTitle = popularName || item.productName;
-                
-                // Adiciona um bloco para cada produto encontrado
-                popupContent += `
-                    <div class="product-info-block">
-                        <strong>🛰️ ${displayTitle}</strong>
-                        <p>${item.description}</p>
-                    </div>
-                `;
-            });
-
-            // Cria e abre o novo marcador no local do clique
-            const newMarker = L.marker([lat, lng]).addTo(map)
-                .bindPopup(popupContent, { 
-                    maxHeight: 300, 
-                    minWidth: 250 
-                }) // Define altura máxima para rolagem
-                .openPopup();
-            
-            activeMarkers.push(newMarker);
-
-        } else {
-            popupContent += `<p>Nenhum produto encontrado para os filtros ativos nesta área.</p>`;
-            
-            const notFoundMarker = L.marker([lat, lng]).addTo(map)
-                .bindPopup(popupContent)
-                .openPopup();
-            
-            activeMarkers.push(notFoundMarker);
-        }
-
-    } catch (error) {
-        console.error('Houve um problema com a requisição de geodados:', error);
-        
-        const errorMarker = L.marker([lat, lng]).addTo(map)
-            .bindPopup(`
-                <div class="satelite-popup-header" style="color: red;">
-                    <strong>Erro na Requisição:</strong>
-                </div>
-                <p>Ocorreu um problema ao buscar os dados: ${error.message}</p>
-            `)
-            .openPopup();
-        
-        activeMarkers.push(errorMarker);
-    }
 });

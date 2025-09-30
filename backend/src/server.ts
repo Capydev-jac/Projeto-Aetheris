@@ -66,19 +66,14 @@ app.get('/api/geodata', async (req: Request, res: Response) => {
         // Filtro B (Essencial): Garante que a coleção encontrada na STAC está no DB
         query.productName = { $in: availableCollections };
         
-        // 🟢 CORREÇÃO DO FILTRO MONGODB: Aplica o filtro de tags de satélite apenas se houver tags selecionadas.
         if (sateliteIds.length > 0) {
-            // Usamos $and para combinar o filtro de produto (STAC) com o filtro de tags (Usuário)
             query = {
                 $and: [
-                    { productName: { $in: availableCollections } }, // Produtos disponíveis no ponto (STAC)
-                    { platformId: { $in: sateliteIds } }            // Produtos que correspondem à tag selecionada
+                    { productName: { $in: availableCollections } }, 
+                    { platformId: { $in: sateliteIds } }            
                 ]
             };
-            // Se o usuário filtrou por satélites (e.g., Landsat), ele NÃO verá produtos de Clima (e.g., CMIP5)
-            // porque o CMIP5 não tem o platformId do Landsat, resolvendo o problema anterior.
         }
-        // Se sateliteIds.length === 0, a query é apenas: { productName: { $in: availableCollections } }
 
         const productDetails = await productsCollection.find(query).toArray();
 
@@ -109,7 +104,6 @@ app.get('/api/timeseries', async (req: Request, res: Response) => {
         const lng = parseFloat(req.query.lng as string);
         const coverage = req.query.coverage as string;     
         
-        // Query params que podem vir do frontend
         let start_date = req.query.start_date as string | undefined; 
         let end_date = req.query.end_date as string | undefined;     
 
@@ -120,7 +114,6 @@ app.get('/api/timeseries', async (req: Request, res: Response) => {
         const db = getDb();
         const productsCollection = db.collection('stac');
         
-        // 1. Encontra os detalhes do produto/coverage no DB para obter as bandas válidas
         const productDetail = await productsCollection.findOne({ productName: coverage });
 
         if (!productDetail || !productDetail.variables || productDetail.variables.length === 0) {
@@ -130,7 +123,6 @@ app.get('/api/timeseries', async (req: Request, res: Response) => {
              });
         }
         
-        // 2. Determina a(s) banda(s) a ser(em) solicitada(s)
         const validBandNames: string[] = productDetail.variables
             .map((v: any) => v.name || v.id)
             .filter((name: string): name is string => typeof name === 'string' && name.trim().length > 0);
@@ -143,28 +135,23 @@ app.get('/api/timeseries', async (req: Request, res: Response) => {
              });
         }
 
-        // 🟢 CORREÇÃO DO FALLBACK WTSS: Define o array de bandas padrão com APENAS a primeira banda válida do DB.
         let requestedBandsArray: string[] = validBandNames.slice(0, 1);
 
-        // Se o frontend solicitou bandas específicas (req.query.bands), valida e usa-as.
         const bandsQuery = req.query.bands as string;
         if (bandsQuery) {
             const bandsArray = bandsQuery.split(',').map(b => b.trim()).filter(b => b); 
             
-            // Se o array de bandas do usuário não for vazio
             if (bandsArray.length > 0) {
-                // Se todas as bandas solicitadas são válidas, usa-as.
                 if (bandsArray.every(b => validBandNames.includes(b))) {
                     requestedBandsArray = bandsArray;
                 }
             }
         }
         
-        // 3. Cálculo de Datas Padrão (se não vierem do frontend)
         if (!start_date || !end_date) {
             const today = new Date();
             const oneYearAgo = new Date();
-            oneYearAgo.setDate(today.getDate() - 365); // Últimos 12 meses como padrão
+            oneYearAgo.setDate(today.getDate() - 365);
 
             const formatDate = (date: Date) => date.toISOString().split('T')[0];
 
@@ -177,17 +164,22 @@ app.get('/api/timeseries', async (req: Request, res: Response) => {
         console.log(`[WTSS] Buscando série temporal para Coverage: ${coverage}, Lat: ${lat}, Lng: ${lng}`);
         console.log(`[WTSS] Usando atributos: ${requestedBandsArray.join(',')}`);
 
-
         const wtssApiUrl = 'https://data.inpe.br/bdc/wtss/v4/time_series';
 
+        // =========================================================================
+        // INÍCIO DA CORREÇÃO: Transforma o array de bandas em uma string
+        // =========================================================================
         const params = {
             'coverage': coverage,
             'latitude': lat,
             'longitude': lng,
-            'attributes': requestedBandsArray, 
+            'attributes': requestedBandsArray.join(','), // Converte o array em "banda1,banda2"
             'start_date': start_date, 
             'end_date': end_date,     
         };
+        // =========================================================================
+        // FIM DA CORREÇÃO
+        // =========================================================================
 
         const wtssResponse = await axios.get(wtssApiUrl, { params });
 

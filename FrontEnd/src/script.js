@@ -198,7 +198,6 @@ window.fetchTimeSeriesAndPlot = async function(lat, lng, coverage, band, friendl
     
     selectedMarker.bindPopup(tempPopupContent, { minWidth: 300 }).openPopup();
 
-    // 🟢 FIX NO FRONTEND: Adiciona o parâmetro 'bands' apenas se ele não for vazio
     const bandQuery = band ? `&bands=${band}` : '';
 
     try {
@@ -206,7 +205,6 @@ window.fetchTimeSeriesAndPlot = async function(lat, lng, coverage, band, friendl
         
         if (!response.ok) {
             const errorData = await response.json();
-            // Melhora a mensagem de erro usando o campo 'details.description' retornado pelo backend
             throw new Error(errorData.details?.description || `Erro ${response.status}: Falha ao extrair série temporal.`);
         }
         
@@ -218,7 +216,6 @@ window.fetchTimeSeriesAndPlot = async function(lat, lng, coverage, band, friendl
     } catch (error) {
         console.error('Erro ao plotar série temporal:', error);
         
-        // Atualiza o marcador com a mensagem de erro
         selectedMarker.setPopupContent(`
             <div style="color: red;"><strong>Erro ao buscar dados:</strong></div>
             <p>${error.message}</p>
@@ -228,6 +225,15 @@ window.fetchTimeSeriesAndPlot = async function(lat, lng, coverage, band, friendl
 
 
 function createChartPopup(lat, lng, title, timeSeriesData) {
+    // Adiciona verificação para o caso de a API retornar um objeto vazio
+    if (!timeSeriesData || !timeSeriesData.timeline || timeSeriesData.timeline.length === 0) {
+        selectedMarker.setPopupContent(`
+            <div class="satelite-popup-header"><strong>Série Temporal: ${title}</strong></div>
+            <p>Nenhum dado encontrado para o período e local selecionados.</p>
+        `).openPopup();
+        return;
+    }
+
     const dates = timeSeriesData.timeline;
     const chartDatasets = [];
     const bands = timeSeriesData.attributes;
@@ -235,7 +241,6 @@ function createChartPopup(lat, lng, title, timeSeriesData) {
     bands.forEach((band, index) => {
         const rawValues = timeSeriesData.values.map(v => v[band]);
         
-        // Aplica o fator de escala (conversão de inteiro para float)
         const scaledData = rawValues.map(rawValue => rawValue !== undefined && rawValue !== null ? applyScale(rawValue) : null);
 
         let color;
@@ -360,28 +365,37 @@ map.on('click', async function(e) {
             data.forEach(item => {
                 const popularName = productNameToPopularName[item.productName] || item.productName;
                 
-                // 🟢 FIX NO FRONTEND: Lógica para determinar as bandas a solicitar
-                let bandsToRequest = 'NDVI,EVI'; 
-                let buttonLabel = 'Ver Série Temporal (NDVI/EVI)';
-                
-                // Produtos Climáticos/Não-Ópticos (EX: CMIP5 e MERGE)
-                if (item.productName.includes('CMIP5') || item.productName.includes('prec_merge') || item.productName.includes('GOES')) {
-                    bandsToRequest = ''; // O backend irá usar o padrão (as 2 primeiras bandas válidas do DB)
-                    buttonLabel = 'Ver Série Temporal (Variáveis Padrão)';
-                }
+                // =========================================================================
+                // INÍCIO DA CORREÇÃO: LÓGICA DINÂMICA PARA SELEÇÃO DE BANDAS
+                // =========================================================================
+                const availableBands = (item.variables || []).map(v => v.name || v.id).filter(Boolean);
 
-                // Botão de Ação: Chama a função que busca a série temporal via WTSS
+                let bandsToRequest = '';
+                let buttonLabel = 'Ver Série Temporal';
+
+                if (availableBands.length > 0) {
+                    bandsToRequest = availableBands.slice(0, 2).join(',');
+                    buttonLabel += ` (${bandsToRequest})`;
+                } else {
+                    bandsToRequest = '';
+                    buttonLabel += ' (Padrão)';
+                }
+                
                 const actionButton = `<button 
                     onclick="fetchTimeSeriesAndPlot(${lat}, ${lng}, '${item.productName}', '${bandsToRequest}', '${popularName}')"
                     style="background-color: #4A59FF; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; margin-top: 5px; font-size: 0.9em;"
                 >
                     ${buttonLabel}
                 </button>`;
+                // =========================================================================
+                // FIM DA CORREÇÃO
+                // =========================================================================
 
                 popupContent += `
                     <div class="product-info-block">
                         <strong>🛰️ ${popularName} (${item.productName})</strong>
                         <p>${item.description}</p>
+                        <p><small>Bandas: ${availableBands.join(', ') || 'N/A'}</small></p>
                         ${actionButton}
                     </div>
                 `;

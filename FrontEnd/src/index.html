@@ -6,10 +6,13 @@
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+  
 </head>
 <body>
 
-  <!-- Painel lateral com aba -->
   <div id="sidebar">
     <div id="aba" onclick="toggleMenu()">➤</div>
 
@@ -23,16 +26,7 @@
     </div>
   </div>
 
-  <!-- Mapa -->
   <div id="map"></div>
-
-  <!-- Script -->
-  <script>
-    function toggleMenu() {
-      const sidebar = document.getElementById('sidebar');
-      sidebar.classList.toggle('ativo');
-    }
-  </script>
 
   <script src="script.js"></script>
 </body>

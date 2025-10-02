@@ -1,21 +1,21 @@
 // Coordenadas aproximadas da caixa que engloba o Brasil
 const brasilBounds = [
-  [-34.0, -74.0], // Ponto sudoeste (latitude, longitude)
-  [5.3, -34.0]    // Ponto nordeste (latitude, longitude)
+    [-34.0, -74.0], // Ponto sudoeste (latitude, longitude)
+    [5.3, -34.0]    // Ponto nordeste (latitude, longitude)
 ];
 
 // Inicializa o mapa na div com id "map"
 const map = L.map('map', {
-  maxBounds: brasilBounds,
-  maxBoundsViscosity: 2.0,
-  minZoom: 5,
-  maxZoom: 15
+    maxBounds: brasilBounds,
+    maxBoundsViscosity: 2.0,
+    minZoom: 5,
+    maxZoom: 15
 }).setView([-14.2, -51.9], 4);
 
 // Adiciona a camada base do mapa (tiles) usando OpenStreetMap
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  maxZoom: 19,
-  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    maxZoom: 19,
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 }).addTo(map);
 
 // ========================================================
@@ -32,15 +32,15 @@ const selectedTagsContainer = document.getElementById("selected-tags");
 
 // Lista de sugestões disponíveis
 const allSuggestions = [
-  "CBERS4A", "Landsat-8", "CBERS-2B", "GOES-19", "Sentinel-2", 
-  "MODIS Terra/Aqua", "Landsat series", "MODIS Aqua", "Sentinel-3 OLCI", 
-  "CBERS-4", "Estações meteorológicas / satélite", "CBERS WFI"
+    "CBERS4A", "Landsat-8", "CBERS-2B", "GOES-19", "Sentinel-2", 
+    "MODIS Terra/Aqua", "Landsat series", "MODIS Aqua", "Sentinel-3 OLCI", 
+    "CBERS-4", "Estações meteorológicas / satélite", "CBERS WFI"
 ];
 let selectedTags = [];
 
 // Variáveis para Marcadores do Mapa
 let selectedMarker; // Marcador do ponto clicado (círculo vermelho)
-let selectedArea;   // Área de 20km (círculo transparente)
+let selectedArea;   // Área de 20km (círculo transparente)
 let activeMarkers = []; // Usado para armazenar o popup de metadados ou gráfico.
 
 // Objeto para mapear o nome popular do frontend para o ID da plataforma no DB/Backend (usado no filtro do /api/geodata)
@@ -56,15 +56,15 @@ const sateliteIdMap = {
 
 // Objeto para converter o nome técnico do produto (DB/WTSS) para o nome popular (usado na exibição)
 const productNameToPopularName = {
-    'mosaic-cbers4a-paraiba-3m-1': 'CBERS-4A (Paraíba)', 
-    'mosaic-cbers4-paraiba-3m-1': 'CBERS-4 (Paraíba)',
-    'AMZ1-WFI-L4-SR-1': 'Amazônia-1 (WFI)',
-    'LCC_L8_30_16D_STK_Cerrado-1': 'Landsat-8 (Cerrado 16D)',
-    'myd13q1-6.1': 'MODIS (NDVI/EVI 16D)',
-    'mosaic-s2-yanomami_territory-6m-1': 'Sentinel-2 (Yanomami 6M)',
+    'mosaic-cbers4a-paraiba-3m-1': 'CBERS-4A (Paraíba)', 
+    'mosaic-cbers4-paraiba-3m-1': 'CBERS-4 (Paraíba)',
+    'AMZ1-WFI-L4-SR-1': 'Amazônia-1 (WFI)',
+    'LCC_L8_30_16D_STK_Cerrado-1': 'Landsat-8 (Cerrado 16D)',
+    'myd13q1-6.1': 'MODIS (NDVI/EVI 16D)',
+    'mosaic-s2-yanomami_territory-6m-1': 'Sentinel-2 (Yanomami 6M)',
     'LANDSAT-16D-1': 'Landsat (Data Cube 16D)',
     'S2-16D-2': 'Sentinel-2 (Data Cube 16D)',
-    'prec_merge_daily-1': 'Precipitação Diária',
+    'prec_merge_daily-1': 'Precipitação Diária',
     'EtaCCDay_CMIP5-1': 'Modelo Climático (CMIP5)',
 };
 
@@ -75,8 +75,8 @@ const productNameToPopularName = {
 /**
  * Alterna a visibilidade do menu lateral.
  */
-function toggleMenu() {
-  sidebar.classList.toggle('ativo');
+window.toggleMenu = function() { // Exposto globalmente
+    sidebar.classList.toggle('ativo');
 }
 
 // ========================================================
@@ -84,77 +84,78 @@ function toggleMenu() {
 // ========================================================
 
 input.addEventListener("focus", () => {
-  showSuggestions("");
+    showSuggestions("");
 });
 
 input.addEventListener("input", () => {
-  const value = input.value.toLowerCase();
-  showSuggestions(value);
+    const value = input.value.toLowerCase();
+    showSuggestions(value);
 });
 
 input.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") {
-    e.preventDefault();
-    const value = input.value.trim();
-    const match = allSuggestions.find(item => item.toLowerCase() === value.toLowerCase());
-    if (match && !selectedTags.includes(match)) {
-      selectTag(match);
+    if (e.key === "Enter") {
+        e.preventDefault();
+        const value = input.value.trim();
+        const match = allSuggestions.find(item => item.toLowerCase() === value.toLowerCase());
+        if (match && !selectedTags.includes(match)) {
+            selectTag(match);
+        }
     }
-  }
 });
 
 function showSuggestions(filter) {
-  suggestionsBox.innerHTML = "";
-  const filtered = allSuggestions.filter(item =>
-    item.toLowerCase().includes(filter.toLowerCase()) &&
-    !selectedTags.includes(item)
-  );
-  filtered.forEach(item => {
-    const li = document.createElement("li");
-    li.textContent = item;
-    li.addEventListener("click", () => selectTag(item));
-    suggestionsBox.appendChild(li);
-  });
-  suggestionsBox.style.display = filtered.length ? "block" : "none";
+    suggestionsBox.innerHTML = "";
+    const filtered = allSuggestions.filter(item =>
+        item.toLowerCase().includes(filter.toLowerCase()) &&
+        !selectedTags.includes(item)
+    );
+    filtered.forEach(item => {
+        const li = document.createElement("li");
+        li.textContent = item;
+        li.addEventListener("click", () => selectTag(item));
+        suggestionsBox.appendChild(li);
+    });
+    suggestionsBox.style.display = filtered.length ? "block" : "none";
 }
 
 function selectTag(tag) {
-  selectedTags.push(tag);
-  input.value = "";
-  suggestionsBox.innerHTML = "";
-  renderSelectedTags();
-  input.focus();
+    selectedTags.push(tag);
+    input.value = "";
+    suggestionsBox.innerHTML = "";
+    renderSelectedTags();
+    input.focus();
 }
 
 window.removeTag = function(tag) {
-  selectedTags = selectedTags.filter(t => t !== tag);
-  renderSelectedTags();
-  showSuggestions(input.value);
+    selectedTags = selectedTags.filter(t => t !== tag);
+    renderSelectedTags();
+    showSuggestions(input.value);
 };
 
 function renderSelectedTags() {
-  selectedTagsContainer.innerHTML = "";
-  selectedTags.forEach(tag => {
-    const tagEl = document.createElement("div");
-    tagEl.classList.add("tag");
-    tagEl.innerHTML = `
-      ${tag} <span class="remove" onclick="removeTag('${tag}')">&times;</span>
-    `;
-    selectedTagsContainer.appendChild(tagEl);
-  });
+    selectedTagsContainer.innerHTML = "";
+    selectedTags.forEach(tag => {
+        const tagEl = document.createElement("div");
+        tagEl.classList.add("tag");
+        // Nota: removeTag está globalmente disponível graças ao 'window.'
+        tagEl.innerHTML = `
+            ${tag} <span class="remove" onclick="removeTag('${tag}')">&times;</span>
+        `;
+        selectedTagsContainer.appendChild(tagEl);
+    });
 }
 
 document.addEventListener("click", function (e) {
-  const target = e.target;
-  const wrapper = document.querySelector(".tag-selector");
-  if (wrapper && !wrapper.contains(target)) {
-    suggestionsBox.innerHTML = "";
-  }
+    const target = e.target;
+    const wrapper = document.querySelector(".tag-selector");
+    if (wrapper && !wrapper.contains(target)) {
+        suggestionsBox.innerHTML = "";
+    }
 });
 
 
 // ========================================================
-// FUNÇÕES WTSS E GRÁFICOS (Novas Funções de Extração e Plotagem)
+// FUNÇÕES WTSS E GRÁFICOS
 // ========================================================
 
 function applyScale(rawValue) {
@@ -252,7 +253,7 @@ function createChartPopup(lat, lng, title, timeSeriesData) {
         
         chartDatasets.push({
             label: band,
-            data: scaledData,
+            data: dates.map((date, i) => ({ x: date, y: scaledData[i] })), // Dados formatados para Chart.js
             borderColor: color,
             borderWidth: 2,
             fill: false,
@@ -262,15 +263,16 @@ function createChartPopup(lat, lng, title, timeSeriesData) {
     });
 
     const chartId = `chart-${title.replace(/\s/g, '-')}-${Date.now()}`;
+    // Estilos inline removidos e movidos para 'style.css' (classe .chart-popup-content)
     const popupHtml = `
-        <div class="chart-popup-content" style="max-width: 400px;">
+        <div class="chart-popup-content">
             <div class="satelite-popup-header">
                 <strong>Série Temporal: ${title}</strong>
             </div>
             <p>Atributos: ${bands.join(', ')}</p>
             <hr class="satelite-popup-divider">
             <canvas id="${chartId}" width="400" height="200"></canvas>
-            <p style="font-size: 0.7em; margin-top: 5px;">Valores reais (escala padrão aplicada). Max Y=1.0.</p>
+            <p class="chart-footer">Valores reais (escala padrão aplicada). Max Y=1.0.</p>
         </div>
     `;
     
@@ -284,23 +286,27 @@ function createChartPopup(lat, lng, title, timeSeriesData) {
         const ctx = document.getElementById(chartId);
         
         if (typeof Chart === 'undefined') {
-             ctx.parentNode.innerHTML = 'ERRO: Chart.js não carregado. Verifique o index.html.';
-             return;
+            ctx.parentNode.innerHTML = 'ERRO: Chart.js não carregado. Verifique o index.html.';
+            return;
         }
 
         new Chart(ctx, {
             type: 'line',
             data: {
-                labels: dates,
+                // Não usamos 'labels' aqui, pois os dados já contêm os objetos {x: date, y: value}
                 datasets: chartDatasets
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                parsing: false, // Desabilitar o parsing padrão, pois os dados já estão no formato {x, y}
                 scales: {
                     x: {
                         type: 'time',
-                        time: { unit: 'month' },
+                        time: { 
+                            unit: 'month',
+                            tooltipFormat: 'dd MMM yyyy' // Formato do tooltip
+                        },
                         title: { display: true, text: 'Data' }
                     },
                     y: {
@@ -315,7 +321,7 @@ function createChartPopup(lat, lng, title, timeSeriesData) {
 }
 
 // ========================================================
-// EVENTO PRINCIPAL: CLIQUE NO MAPA (Consolidado com Correção)
+// EVENTO PRINCIPAL: CLIQUE NO MAPA (Consolidado)
 // ========================================================
 
 map.on('click', async function(e) {
@@ -365,9 +371,6 @@ map.on('click', async function(e) {
             data.forEach(item => {
                 const popularName = productNameToPopularName[item.productName] || item.productName;
                 
-                // =========================================================================
-                // INÍCIO DA CORREÇÃO: LÓGICA DINÂMICA PARA SELEÇÃO DE BANDAS
-                // =========================================================================
                 const availableBands = (item.variables || []).map(v => v.name || v.id).filter(Boolean);
 
                 let bandsToRequest = '';
@@ -381,20 +384,18 @@ map.on('click', async function(e) {
                     buttonLabel += ' (Padrão)';
                 }
                 
+                // Estilos inline removidos e substituídos pela classe 'action-button'
                 const actionButton = `<button 
                     onclick="fetchTimeSeriesAndPlot(${lat}, ${lng}, '${item.productName}', '${bandsToRequest}', '${popularName}')"
-                    style="background-color: #4A59FF; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; margin-top: 5px; font-size: 0.9em;"
+                    class="action-button"
                 >
                     ${buttonLabel}
                 </button>`;
-                // =========================================================================
-                // FIM DA CORREÇÃO
-                // =========================================================================
 
                 popupContent += `
                     <div class="product-info-block">
                         <strong>🛰️ ${popularName} (${item.productName})</strong>
-                        <p>${item.description}</p>
+                        <p class="text-xs text-gray-600">${item.description || 'Sem descrição.'}</p>
                         <p><small>Bandas: ${availableBands.join(', ') || 'N/A'}</small></p>
                         ${actionButton}
                     </div>

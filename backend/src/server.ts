@@ -10,9 +10,10 @@ const PORT = 3000;
 app.use(cors());
 app.use(express.json());
 
+// ATENÇÃO: CSP ATUALIZADA para permitir cdn.jsdelivr.net e corrigir erros de estilo/script.
 app.use((req, res, next) => {
     // Atenção: Esta política é para desenvolvimento. Ajuste para produção!
-    res.setHeader('Content-Security-Policy', "default-src 'self'; connect-src 'self' http://localhost:3000 https://unpkg.com https://data.inpe.br; script-src 'self' https://unpkg.com 'unsafe-inline'; style-src 'self' https://unpkg.com; img-src 'self' data: https://*.tile.openstreetmap.org;");
+    res.setHeader('Content-Security-Policy', "default-src 'self'; connect-src 'self' http://localhost:3000 https://unpkg.com https://data.inpe.br; script-src 'self' https://unpkg.com https://cdn.jsdelivr.net 'unsafe-inline'; style-src 'self' https://unpkg.com 'unsafe-inline'; img-src 'self' data: https://*.tile.openstreetmap.org;");
     next();
 });
 
@@ -70,7 +71,7 @@ app.get('/api/geodata', async (req: Request, res: Response) => {
             query = {
                 $and: [
                     { productName: { $in: availableCollections } }, 
-                    { platformId: { $in: sateliteIds } }            
+                    { platformId: { $in: sateliteIds } }            
                 ]
             };
         }
@@ -102,10 +103,10 @@ app.get('/api/timeseries', async (req: Request, res: Response) => {
     try {
         const lat = parseFloat(req.query.lat as string);
         const lng = parseFloat(req.query.lng as string);
-        const coverage = req.query.coverage as string;     
+        const coverage = req.query.coverage as string;     
         
         let start_date = req.query.start_date as string | undefined; 
-        let end_date = req.query.end_date as string | undefined;     
+        let end_date = req.query.end_date as string | undefined;     
 
         if (isNaN(lat) || isNaN(lng) || !coverage) {
             return res.status(400).json({ error: 'Latitude, Longitude e Coverage são parâmetros obrigatórios.' });
@@ -124,8 +125,8 @@ app.get('/api/timeseries', async (req: Request, res: Response) => {
         }
         
         const validBandNames: string[] = productDetail.variables
-            .map((v: any) => v.name || v.id)
-            .filter((name: string): name is string => typeof name === 'string' && name.trim().length > 0);
+             .map((v: any) => v.name || v.id)
+             .filter((name: string): name is string => typeof name === 'string' && name.trim().length > 0);
         
         console.log('[WTSS DEBUG] Todas as bandas válidas encontradas no DB:', validBandNames); 
 
@@ -166,20 +167,15 @@ app.get('/api/timeseries', async (req: Request, res: Response) => {
 
         const wtssApiUrl = 'https://data.inpe.br/bdc/wtss/v4/time_series';
 
-        // =========================================================================
-        // INÍCIO DA CORREÇÃO: Transforma o array de bandas em uma string
-        // =========================================================================
+        // Transforma o array de bandas em uma string
         const params = {
             'coverage': coverage,
             'latitude': lat,
             'longitude': lng,
             'attributes': requestedBandsArray.join(','), // Converte o array em "banda1,banda2"
             'start_date': start_date, 
-            'end_date': end_date,     
+            'end_date': end_date,    
         };
-        // =========================================================================
-        // FIM DA CORREÇÃO
-        // =========================================================================
 
         const wtssResponse = await axios.get(wtssApiUrl, { params });
 

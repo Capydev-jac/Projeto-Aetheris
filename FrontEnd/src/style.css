@@ -1,8 +1,6 @@
 /* ========================================================
    RESET & CONFIGURAÇÕES GERAIS
    ======================================================== */
-
-/* Resetando margens, preenchimentos e altura total */
 body, html {
   margin: 0;
   padding: 0;
@@ -12,24 +10,8 @@ body, html {
 }
 
 /* ========================================================
-   ÍCONE DO MENU (botão de hambúrguer)
-   ======================================================== */
-#menu-icon {
-  font-size: 30px;
-  padding: 20px;
-  cursor: pointer;
-  user-select: none;
-  position: fixed;
-  top: 20px;
-  left: 20px;
-  z-index: 1001; /* Acima do mapa */
-}
-
-/* ========================================================
    MAPA (Leaflet.js)
    ======================================================== */
-
-/* Ocupa toda a tela */
 #map {
   height: 100%;
   width: 100%;
@@ -42,11 +24,10 @@ body, html {
 /* ========================================================
    SIDEBAR (Painel lateral retrátil)
    ======================================================== */
-
 #sidebar {
   position: fixed;
   top: 0;
-  left: -260px; /* Inicialmente escondido */
+  left: -260px;
   width: 220px;
   height: 100%;
   border-top-right-radius: 20px;
@@ -59,12 +40,10 @@ body, html {
   z-index: 1001;
 }
 
-/* Quando a sidebar está ativa */
 #sidebar.ativo {
   left: 0;
 }
 
-/* Aba que fica visível quando a sidebar está fechada */
 #aba {
   position: absolute;
   top: 50%;
@@ -79,29 +58,18 @@ body, html {
   align-items: center;
   justify-content: center;
   text-orientation: mixed;
+  writing-mode: vertical-rl;
   border-top-right-radius: 8px;
   border-bottom-right-radius: 8px;
   font-size: 20px;
 }
 
-/* Botões dentro do sidebar */
-#sidebar button {
-  background: none;
-  border: none;
-  color: white;
-  font-size: 20px;
-  margin-bottom: 20px;
-  cursor: pointer;
-}
-
-/* Título do painel */
 #sidebar h1 {
   font-size: 22px;
   margin: 0 0 10px;
   text-align: center;
 }
 
-/* Logo (imagem) centralizada */
 .logo {
   display: block;
   margin: 0 auto 15px;
@@ -110,41 +78,13 @@ body, html {
 }
 
 /* ========================================================
-   LISTA DE OPÇÕES (checkboxes) NO SIDEBAR
-   ======================================================== */
-
-#sidebar ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: block; /* Corrigido: faltava ponto e vírgula */
-  /* grid-template-columns: 1fr 1fr; - Não tem efeito com display: block */
-  gap: 10px; /* Sem efeito com display: block, válido se usar grid/flex */
-}
-
-/* Estilo de cada item da lista */
-#sidebar li {
-  display: flex;
-  margin-top: 6%;
-  align-items: center;
-}
-
-/* Estilo dos checkboxes */
-#sidebar input[type="checkbox"] {
-  margin-right: 8px;
-  accent-color: #4CAF50;
-}
-
-/* ========================================================
    SELETOR DE TAGS (Tag Input)
    ======================================================== */
-
 .tag-selector {
   max-width: 400px;
   position: relative;
 }
 
-/* Container das tags selecionadas */
 .selected-tags {
   display: flex;
   flex-wrap: wrap;
@@ -152,7 +92,6 @@ body, html {
   margin-bottom: 8px;
 }
 
-/* Estilo de cada tag */
 .selected-tags .tag {
   background-color: #007BFF;
   color: white;
@@ -161,17 +100,22 @@ body, html {
   display: flex;
   align-items: center;
   gap: 5px;
+  font-size: 0.9em;
 }
 
-/* Ícone de remover tag */
 .selected-tags .tag .remove {
   cursor: pointer;
   font-weight: bold;
 }
 
-/* ========================================================
-   SUGESTÕES (Dropdown)
-   ======================================================== */
+#tag-input {
+  width: 100%;
+  padding: 10px 12px;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+}
 
 .suggestions {
   position: absolute;
@@ -194,93 +138,6 @@ body, html {
 .suggestions li:hover {
   background-color: #1c4cb3;
 }
-
-/* ========================================================
-   INPUT DE TAG
-   ======================================================== */
-
-#tag-input {
-  width: 100%;
-  padding: 10px 12px;
-  box-sizing: border-box;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-size: 14px;
-  transition: border-color 0.2s, box-shadow 0.2s;
-  outline: none;
-}
-
-#tag-input:focus {
-  border-color: #007BFF;
-  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
-}
-
-/* Estilos para o conteúdo do Popup do Leaflet */
-
-/* Estilo geral do conteúdo para garantir espaçamento interno */
-.leaflet-popup-content {
-    padding: 10px;
-    font-family: Arial, sans-serif;
-    font-size: 14px;
-}
-
-/* Estilo para o cabeçalho/coordenadas do popup */
-.satelite-popup-header {
-    font-size: 1.1em;
-    margin-bottom: 5px;
-    color: #0056b3;
-}
-
-.satelite-popup-header strong {
-    font-weight: bold;
-}
-
-/* Linha divisória fina */
-.satelite-popup-divider {
-    border: 0;
-    height: 1px;
-    background-color: #ccc;
-    margin: 10px 0;
-}
-
-/* Bloco individual de informação do produto */
-.product-info-block {
-    margin-bottom: 15px;
-    padding: 8px;
-    border-left: 3px solid #007bff;
-    background-color: #f7f7f7;
-}
-
-.product-info-block strong {
-    display: block;
-    margin-bottom: 3px;
-    color: #333;
-}
-
-.product-info-block p {
-    margin: 0;
-    font-size: 0.9em;
-    color: #444;
-    white-space: pre-wrap;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 /* ========================================================
    PAINEL DE INFORMAÇÕES (DIREITA)
@@ -308,8 +165,8 @@ body, html {
 
 .info-panel-close {
   position: absolute;
-  top: 2px;
-  right: 1px;
+  top: 5px;
+  right: 10px;
   width: 30px;
   height: 30px;
   border: none;
@@ -317,7 +174,6 @@ body, html {
   font-size: 24px;
   font-weight: bold;
   cursor: pointer;
-  line-height: 1;
   color: #fff;
   opacity: 0.7;
 }
@@ -327,22 +183,77 @@ body, html {
 }
 
 #info-panel-right .satelite-popup-header {
-  color: #a9c7ff; 
-}
-
-#info-panel-right .product-info-block {
-  background-color: rgba(0, 0, 0, 0.25);
-  border-left-color: #6d7aff;
-}
-
-#info-panel-right .product-info-block strong {
-  color: #ffffff;
-}
-
-#info-panel-right .product-info-block p {
-  color: #dddddd;
+  color: #a9c7ff;
+  font-size: 1.2em;
+  margin-bottom: 5px;
 }
 
 #info-panel-right .satelite-popup-divider {
+  border: 0;
+  height: 1px;
   background-color: rgba(255, 255, 255, 0.2);
+  margin: 10px 0;
+}
+
+/* ===== NOVOS ESTILOS PARA ORGANIZAÇÃO ===== */
+#info-panel-right .product-info-block {
+  background-color: rgba(0, 0, 0, 0.25);
+  border-left: 4px solid #6d7aff;
+  padding: 12px;
+  margin-bottom: 15px;
+  border-radius: 4px;
+}
+
+#info-panel-right .product-title {
+  font-size: 1.1em;
+  color: #ffffff;
+  display: block;
+  margin-bottom: 8px;
+}
+
+#info-panel-right .product-details {
+  margin-bottom: 12px;
+}
+
+#info-panel-right .product-name {
+  font-style: italic;
+  color: #c0c0c0;
+  font-size: 0.85em;
+  margin-bottom: 8px;
+}
+
+#info-panel-right .product-description {
+  font-size: 0.9em;
+  color: #dddddd;
+  line-height: 1.4;
+  margin-bottom: 10px;
+}
+
+#info-panel-right .product-bands {
+  font-size: 0.9em;
+  color: #dddddd;
+}
+
+#info-panel-right .product-bands strong {
+   color: #a9c7ff;
+}
+/* =============================================== */
+
+.action-button {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  background-color: #4A59FF;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  text-align: center;
+  font-size: 0.9em;
+  font-weight: bold;
+  transition: background-color 0.3s;
+}
+
+.action-button:hover {
+  background-color: #6d7aff;
 }

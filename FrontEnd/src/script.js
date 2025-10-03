@@ -19,7 +19,7 @@ const sidebar = document.getElementById('sidebar');
 const input = document.getElementById("tag-input");
 const suggestionsBox = document.getElementById("suggestions");
 const selectedTagsContainer = document.getElementById("selected-tags");
-const infoPanel = document.getElementById("info-panel-right"); // NOVO: Referência ao painel direito
+const infoPanel = document.getElementById("info-panel-right");
 
 // Estado da aplicação
 let selectedTags = [];
@@ -32,7 +32,7 @@ const sateliteIdMap = {"CBERS4A": "cbers4a", "CBERS-4": "cbers4", "Landsat-8": "
 const productNameToPopularName = {'mosaic-cbers4a-paraiba-3m-1': 'CBERS-4A (Paraíba)', 'mosaic-cbers4-paraiba-3m-1': 'CBERS-4 (Paraíba)', 'AMZ1-WFI-L4-SR-1': 'Amazônia-1 (WFI)', 'LCC_L8_30_16D_STK_Cerrado-1': 'Landsat-8 (Cerrado 16D)', 'myd13q1-6.1': 'MODIS (NDVI/EVI 16D)', 'mosaic-s2-yanomami_territory-6m-1': 'Sentinel-2 (Yanomami 6M)', 'LANDSAT-16D-1': 'Landsat (Data Cube 16D)', 'S2-16D-2': 'Sentinel-2 (Data Cube 16D)', 'prec_merge_daily-1': 'Precipitação Diária', 'EtaCCDay_CMIP5-1': 'Modelo Climático (CMIP5)'};
 
 // ========================================================
-// NOVO: FUNÇÕES DO PAINEL DE INFORMAÇÕES
+// FUNÇÕES DO PAINEL DE INFORMAÇÕES
 // ========================================================
 
 function showInfoPanel(htmlContent) {
@@ -111,7 +111,6 @@ function applyScale(rawValue) {
 }
 
 window.fetchTimeSeriesAndPlot = async function(lat, lng, coverage, band, friendlyName) {
-    // ALTERADO: Usa o painel em vez do popup
     const tempContent = `<div class="satelite-popup-header"><strong>Carregando Série Temporal...</strong></div><p>Produto: ${friendlyName}</p><p>Aguarde...</p>`;
     showInfoPanel(tempContent);
     
@@ -123,7 +122,7 @@ window.fetchTimeSeriesAndPlot = async function(lat, lng, coverage, band, friendl
             throw new Error(errorData.details?.description || `Erro ${response.status}`);
         }
         const data = await response.json();
-        createChart(lat, lng, friendlyName, data); // Renomeado para evitar confusão
+        createChart(lat, lng, friendlyName, data);
     } catch (error) {
         console.error('Erro ao plotar série temporal:', error);
         showInfoPanel(`<div class="satelite-popup-header" style="color: red;"><strong>Erro ao buscar dados:</strong></div><p>${error.message}</p>`);
@@ -131,7 +130,6 @@ window.fetchTimeSeriesAndPlot = async function(lat, lng, coverage, band, friendl
 }
 
 function createChart(lat, lng, title, timeSeriesData) {
-    // ALTERADO: Usa o painel em vez do popup
     if (!timeSeriesData || !timeSeriesData.timeline || timeSeriesData.timeline.length === 0) {
         showInfoPanel(`<div class="satelite-popup-header"><strong>Série Temporal: ${title}</strong></div><p>Nenhum dado encontrado.</p>`);
         return;
@@ -169,7 +167,6 @@ function createChart(lat, lng, title, timeSeriesData) {
     
     showInfoPanel(panelHtml);
 
-    // Adiciona um pequeno delay para garantir que o canvas está no DOM antes de renderizar o gráfico
     setTimeout(() => {
         const ctx = document.getElementById(chartId);
         if (!ctx) return;
@@ -202,7 +199,6 @@ map.on('click', async function(e) {
     let pulse = L.circle(e.latlng, { radius: 5000, color: "#ff0000", fillColor: "#ff4d4d", fillOpacity: 0.25 }).addTo(map);
     setTimeout(() => { map.removeLayer(pulse); }, 600);
 
-    // ALTERADO: Mostra o estado de "carregando" no painel
     showInfoPanel("<strong>📍 Ponto selecionado</strong><br>Buscando produtos STAC...");
 
     try {
@@ -222,28 +218,30 @@ map.on('click', async function(e) {
                 
                 const actionButton = `<button onclick="fetchTimeSeriesAndPlot(${lat}, ${lng}, '${item.productName}', '${bandsToRequest}', '${popularName}')" class="action-button">${buttonLabel}</button>`;
 
+                // ===== ALTERAÇÃO PRINCIPAL AQUI =====
                 panelContent += `
                     <div class="product-info-block">
-                        <strong>🛰️ ${popularName} (${item.productName})</strong>
-                        <p class="text-xs text-gray-600">${item.description || 'Sem descrição.'}</p>
-                        <p><small>Bandas: ${availableBands.join(', ') || 'N/A'}</small></p>
+                        <strong class="product-title">🛰️ ${popularName}</strong>
+                        <div class="product-details">
+                            <p class="product-name">(${item.productName})</p>
+                            <p class="product-description">${item.description || 'Sem descrição disponível.'}</p>
+                            <p class="product-bands"><strong>Bandas:</strong> ${availableBands.join(', ') || 'N/A'}</p>
+                        </div>
                         ${actionButton}
                     </div>`;
+                // ===================================
             });
         } else {
             panelContent += `<p>Nenhum produto encontrado para os filtros ativos nesta área.</p>`;
         }
         
-        // ALTERADO: Atualiza o painel com o resultado final
         showInfoPanel(panelContent);
 
     } catch (error) {
         console.error('Houve um problema com a requisição de geodados:', error);
-        // ALTERADO: Mostra o erro no painel
         showInfoPanel(`<div class="satelite-popup-header" style="color: red;"><strong>Erro na Requisição:</strong></div><p>${error.message}</p>`);
     }
 });
-
 
 // ========================================================
 // INICIALIZAÇÃO DOS EVENT LISTENERS

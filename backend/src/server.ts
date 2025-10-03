@@ -12,8 +12,7 @@ app.use(express.json());
 
 // ATENÇÃO: CSP ATUALIZADA para permitir cdn.jsdelivr.net e corrigir erros de estilo/script.
 app.use((req, res, next) => {
-    // Atenção: Esta política é para desenvolvimento. Ajuste para produção!
-    res.setHeader('Content-Security-Policy', "default-src 'self'; connect-src 'self' http://localhost:3000 https://unpkg.com https://data.inpe.br; script-src 'self' https://unpkg.com https://cdn.jsdelivr.net 'unsafe-inline'; style-src 'self' https://unpkg.com 'unsafe-inline'; img-src 'self' data: https://*.tile.openstreetmap.org;");
+    res.setHeader('Content-Security-Policy', "default-src 'self'; connect-src 'self' http://localhost:3000 https://unpkg.com https://data.inpe.br https://cdn.jsdelivr.net; script-src 'self' https://unpkg.com https://cdn.jsdelivr.net 'unsafe-inline'; style-src 'self' https://unpkg.com; img-src 'self' data: https://*.tile.openstreetmap.org;");
     next();
 });
 

@@ -43,7 +43,8 @@ app.get('/api/geodata', async (req: Request, res: Response) => {
             "intersects": {
                 "type": "Point",
                 "coordinates": [lng, lat]
-            }
+            },
+            "limit": 500
         });
 
         const features = stacResponse.data.features;

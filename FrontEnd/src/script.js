@@ -318,21 +318,35 @@ async function getWTSSData(lat, lon) {
 }
 
 function createWTSSPopup(lat, lon, result) {
+    // Gera um id seguro para o canvas (timestamp) para evitar caracteres inválidos
+    const chartId = `wtss-chart-${Date.now()}`;
+
     const popupContent = `
-        <div style="width: 300px;">
-            <h4>${result.title}</h4>
-            <p><b>Período:</b> ${result.start_date} → ${result.end_date}</p>
-            <canvas id="chart-${result.title}" width="280" height="150"></canvas>
-            <p><b>NDVI (valores):</b></p>
-            <p style="font-size: 0.8em; word-wrap: break-word;">${result.ndviValues.join(', ')}</p>
+        <div class="wtss-popup">
+            <h4 class="wtss-title">${result.title}</h4>
+            <p class="wtss-period"><b>Período:</b> ${result.start_date} → ${result.end_date}</p>
+            <div class="wtss-chart-wrap">
+                <canvas id="${chartId}" width="280" height="150"></canvas>
+            </div>
+            <p class="wtss-vals"><b>NDVI (valores):</b></p>
+            <p class="wtss-vals-list">${result.ndviValues.join(', ')}</p>
         </div>
     `;
 
-    const marker = L.marker([lat, lon]).addTo(map);
-    marker.bindPopup(popupContent).openPopup();
+    // Cria popup diretamente (SEM criar um marcador)
+    L.popup({
+        closeButton: true,
+        autoClose: true,
+        className: 'wtss-popup-container',
+        maxWidth: 360
+    })
+    .setLatLng([lat, lon])
+    .setContent(popupContent)
+    .openOn(map);
 
+    // Aguarda o popup ser renderizado e cria o gráfico no canvas
     setTimeout(() => {
-        const ctx = document.getElementById(`chart-${result.title}`);
+        const ctx = document.getElementById(chartId);
         if (ctx) {
             new Chart(ctx, {
                 type: 'line',
@@ -347,6 +361,8 @@ function createWTSSPopup(lat, lon, result) {
                     }]
                 },
                 options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
                     scales: {
                         y: { beginAtZero: true }
                     },
@@ -356,7 +372,7 @@ function createWTSSPopup(lat, lon, result) {
                 }
             });
         }
-    }, 500);
+    }, 300);
 }
 
 // ========================================================

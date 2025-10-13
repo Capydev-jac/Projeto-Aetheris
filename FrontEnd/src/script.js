@@ -396,6 +396,7 @@ document.addEventListener("click", function (e) {
     }
 });
 
+
 // ========================================================
 // TUTORIAL INTERATIVO AO INICIAR O SITE
 // ========================================================
@@ -444,4 +445,3 @@ function updateTutorialStep() {
   box.querySelector("p").innerHTML = tutorialSteps[currentStep].text;
   tutorialNextBtn.textContent = currentStep === tutorialSteps.length - 1 ? "Concluir ✅" : "Próximo ➤";
 }
-

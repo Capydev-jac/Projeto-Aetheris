@@ -27,7 +27,7 @@ body, html {
 #sidebar {
   position: fixed;
   top: 0;
-  left: -260px;
+  left: 0;
   width: 220px;
   height: 100%;
   border-top-right-radius: 20px;
@@ -40,28 +40,6 @@ body, html {
   z-index: 1001;
 }
 
-#sidebar.ativo {
-  left: 0;
-}
-
-#aba {
-  position: absolute;
-  top: 50%;
-  right: -40px;
-  transform: translateY(-50%);
-  width: 40px;
-  height: 100px;
-  background-color: #262e89;
-  color: white;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-orientation: mixed;
-  border-top-right-radius: 8px;
-  border-bottom-right-radius: 8px;
-  font-size: 20px;
-}
 
 #sidebar h1 {
   font-size: 22px;
@@ -256,6 +234,7 @@ body, html {
 .action-button:hover {
   background-color: #6d7aff;
 }
+
 
 /* ========================================================
    POPUPS DE TUTORIAL (Onboarding)

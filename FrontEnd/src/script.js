@@ -395,3 +395,53 @@ document.addEventListener("click", function (e) {
         suggestionsBox.innerHTML = "";
     }
 });
+
+// ========================================================
+// TUTORIAL INTERATIVO AO INICIAR O SITE
+// ========================================================
+const tutorialOverlay = document.getElementById('tutorial-overlay');
+const tutorialNextBtn = document.getElementById('tutorial-next');
+
+// Passos do tutorial
+const tutorialSteps = [
+  {
+    text: "🌍 Este é o mapa interativo do Aetheris. Clique em qualquer ponto para explorar dados de satélites.",
+  },
+  {
+    text: "🔍 Use o campo de busca na lateral para selecionar os satélites ou produtos que deseja visualizar.",
+  },
+  {
+    text: "📊 Após clicar no mapa, o painel à direita mostrará os produtos disponíveis e séries temporais.",
+  },
+  {
+    text: "✅ Dica: Clique nas bandas para ver gráficos de NDVI e EVI ao longo do tempo.",
+  },
+  {
+    text: "✨ Pronto! Agora explore o mapa livremente. Divirta-se com o Aetheris!",
+  }
+];
+
+let currentStep = 0;
+
+// Mostra o tutorial só na primeira visita
+if (!localStorage.getItem("tutorialCompleted")) {
+  tutorialOverlay.classList.remove("hidden");
+  updateTutorialStep();
+}
+
+tutorialNextBtn.addEventListener("click", () => {
+  currentStep++;
+  if (currentStep < tutorialSteps.length) {
+    updateTutorialStep();
+  } else {
+    tutorialOverlay.classList.add("hidden");
+    localStorage.setItem("tutorialCompleted", "true"); // não mostrar de novo
+  }
+});
+
+function updateTutorialStep() {
+  const box = tutorialOverlay.querySelector(".tutorial-box");
+  box.querySelector("p").innerHTML = tutorialSteps[currentStep].text;
+  tutorialNextBtn.textContent = currentStep === tutorialSteps.length - 1 ? "Concluir ✅" : "Próximo ➤";
+}
+

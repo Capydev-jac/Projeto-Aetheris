@@ -58,7 +58,6 @@ body, html {
   align-items: center;
   justify-content: center;
   text-orientation: mixed;
-  writing-mode: vertical-rl;
   border-top-right-radius: 8px;
   border-bottom-right-radius: 8px;
   font-size: 20px;
@@ -256,4 +255,67 @@ body, html {
 
 .action-button:hover {
   background-color: #6d7aff;
+}
+
+/* ========================================================
+   POPUPS DE TUTORIAL (Onboarding)
+   ======================================================== */
+.tutorial-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background-color: rgba(0,0,0,0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  transition: opacity 0.4s ease;
+}
+
+.tutorial-overlay.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.tutorial-box {
+  background: #fff;
+  color: #333;
+  padding: 25px 30px;
+  border-radius: 12px;
+  max-width: 420px;
+  text-align: center;
+  box-shadow: 0 5px 25px rgba(0,0,0,0.3);
+  animation: fadeInUp 0.4s ease;
+}
+
+.tutorial-box h2 {
+  margin-top: 0;
+  font-size: 22px;
+}
+
+.tutorial-box p {
+  font-size: 15px;
+  line-height: 1.4;
+  margin-bottom: 20px;
+}
+
+.tutorial-box button {
+  background-color: #4A59FF;
+  border: none;
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.tutorial-box button:hover {
+  background-color: #6d7aff;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }

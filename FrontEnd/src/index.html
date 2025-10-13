@@ -5,11 +5,13 @@
   <title>Aetheris</title>
 
   <!-- Content-Security-Policy: permite estilos inline (necessário para Leaflet popups),permite imagens de tiles.openstreetmap e recursos do unpkg/cdn.jsdelivr -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self';
-                 img-src 'self' data: https://*.tile.openstreetmap.org https://unpkg.com https://cdn.jsdelivr.net;
-                 style-src 'self' 'unsafe-inline' https://unpkg.com https://cdn.jsdelivr.net;
-                 script-src 'self' https://unpkg.com https://cdn.jsdelivr.net;
-                 connect-src 'self' http://localhost:3000 https://data.inpe.br https://*.tile.openstreetmap.org https://seu-endpoint-wtss https://seu-endpoint-stac;">
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    img-src 'self' data: https://*.tile.openstreetmap.org https://unpkg.com https://cdn.jsdelivr.net;
+    style-src 'self' 'unsafe-inline' https://unpkg.com https://cdn.jsdelivr.net;
+    script-src 'self' 'unsafe-inline' https://unpkg.com https://cdn.jsdelivr.net;
+    connect-src 'self' http://localhost:3000 https://data.inpe.br https://*.tile.openstreetmap.org https://seu-endpoint-wtss https://seu-endpoint-stac;
+  ">
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
@@ -33,7 +35,7 @@
     .wtss-vals { margin: 4px 0 2px 0; font-weight: 600; font-size: 12px; }
     .wtss-vals-list { font-size: 11px; word-wrap: break-word; max-height: 80px; overflow-y: auto; }
     .wtss-popup-container .leaflet-popup-content-wrapper { box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
-    /* Ajustes básicos para o mapa e layout (se já estiverem em style.css, mantenha) */
+    /* Ajustes básicos para o mapa e layout*/
     html, body, #map { height: 100%; margin: 0; padding: 0; }
   </style>
 </head>

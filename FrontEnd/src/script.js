@@ -394,6 +394,7 @@ input.addEventListener("keydown", (e) => {
 
 document.addEventListener("click", function (e) {
   const wrapper = document.querySelector(".tag-selector");
+  
   if (wrapper && !wrapper.contains(e.target)) {
     suggestionsBox.innerHTML = "";
   }

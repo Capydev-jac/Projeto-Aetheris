@@ -143,7 +143,7 @@ html {
   position: absolute;
   top: 0;
   right: 0;
-  width: 330px;
+  width: 480px;
   height: 100%;
   padding: 20px;
   box-sizing: border-box;
@@ -324,4 +324,38 @@ html {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* ========================================================
+   ABAS DO PAINEL DIREITO (STAC / WTSS)
+   ======================================================== */
+.tab-buttons {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 10px;
+}
+
+.tab-button {
+  flex: 1;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  border-bottom: 2px solid transparent;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.tab-button.active {
+  background: rgba(255, 255, 255, 0.2);
+  border-bottom: 2px solid #6d7aff;
+}
+
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
 }

@@ -1,7 +1,8 @@
 /* ========================================================
    RESET & CONFIGURAÇÕES GERAIS
    ======================================================== */
-body, html {
+body,
+html {
   margin: 0;
   padding: 0;
   height: 100%;
@@ -29,17 +30,35 @@ body, html {
   top: 0;
   left: 0;
   width: 220px;
-  height: 100%;
+  height: 70vh;
   border-top-right-radius: 20px;
   border-bottom-right-radius: 1000px;
-  background: linear-gradient(145deg, #1a1a1a 20%, #4A59FF);
+  background: linear-gradient(145deg, #1a1a1a 20%, #4a59ff);
   color: white;
   padding: 20px;
-  box-shadow: 2px 0 5px rgba(0,0,0,0.5);
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.5);
   transition: left 0.3s ease;
   z-index: 1001;
 }
 
+/* Para telas com altura menor ou igual a 800px */
+@media screen and (max-height: 800px) {
+  #sidebar {
+    height: 95vh;
+  }
+}
+
+/* Para telas com altura maior que 800px */
+@media screen and (min-height: 801px) {
+  #sidebar {
+    height: 65vh;
+  }
+}
+
+/* Opcional: Ajuste a transição para incluir a altura, caso não esteja se aplicando suavemente */
+#sidebar {
+  transition: left 0.3s ease, height 0.3s ease;
+}
 
 #sidebar h1 {
   font-size: 22px;
@@ -67,10 +86,11 @@ body, html {
   flex-wrap: wrap;
   gap: 5px;
   margin-bottom: 8px;
+  margin-top: 8px;
 }
 
 .selected-tags .tag {
-  background-color: #007BFF;
+  background-color: #007bff;
   color: white;
   padding: 5px 10px;
   border-radius: 20px;
@@ -127,9 +147,9 @@ body, html {
   height: 100%;
   padding: 20px;
   box-sizing: border-box;
-  background: linear-gradient(145deg, #1a1a1a 20%, #4A59FF);
+  background: linear-gradient(145deg, #1a1a1a 20%, #4a59ff);
   color: white;
-  box-shadow: -2px 0 5px rgba(0,0,0,0.5);
+  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.5);
   z-index: 1000;
   overflow-y: auto;
   transform: translateX(100%);
@@ -212,7 +232,7 @@ body, html {
 }
 
 #info-panel-right .product-bands strong {
-   color: #a9c7ff;
+  color: #a9c7ff;
 }
 /* =============================================== */
 
@@ -220,7 +240,7 @@ body, html {
   display: block;
   width: 100%;
   padding: 10px;
-  background-color: #4A59FF;
+  background-color: #4a59ff;
   color: white;
   border: none;
   border-radius: 5px;
@@ -235,15 +255,16 @@ body, html {
   background-color: #6d7aff;
 }
 
-
 /* ========================================================
    POPUPS DE TUTORIAL (Onboarding)
    ======================================================== */
 .tutorial-overlay {
   position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background-color: rgba(0,0,0,0.7);
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -264,7 +285,7 @@ body, html {
   border-radius: 12px;
   max-width: 420px;
   text-align: center;
-  box-shadow: 0 5px 25px rgba(0,0,0,0.3);
+  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.3);
   animation: fadeInUp 0.4s ease;
 }
 
@@ -280,7 +301,7 @@ body, html {
 }
 
 .tutorial-box button {
-  background-color: #4A59FF;
+  background-color: #4a59ff;
   border: none;
   color: #fff;
   padding: 10px 20px;
@@ -295,6 +316,12 @@ body, html {
 }
 
 @keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

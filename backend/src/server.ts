@@ -16,7 +16,7 @@ app.use((req, res, next) => {
     next();
 });
 
-app.use(express.static(path.join(__dirname, '../../frontend/src')));
+app.use(express.static(path.join(__dirname, '../../frontend')));
 
 // ----------------------------------------------------------------------
 // ROTA 1: STAC - Busca por Metadados e Detalhes do Produto

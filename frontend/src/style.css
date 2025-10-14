@@ -359,3 +359,6 @@ html {
 .tab-content.active {
   display: block;
 }
+.aetheris-highlight {
+    color: #4a59ff; /* A cor desejada */
+}

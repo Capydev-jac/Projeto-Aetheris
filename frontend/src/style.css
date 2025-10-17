@@ -150,7 +150,8 @@ html {
   right: 0;
   width: 480px;
   height: 100%;
-  padding: 20px;
+  padding: 25px;
+  padding-bottom: 20px;
   box-sizing: border-box;
   background: linear-gradient(145deg, #1a1a1a 20%, #4a59ff);
   color: white;
@@ -551,4 +552,5 @@ html {
 .product-selectable:hover {
     background-color: rgba(74, 89, 255, 0.2); /* Cor de hover suave */
 }
+
 

@@ -5,16 +5,17 @@
     <title>Aetheris</title>
     <link rel="icon" type="image/png" href="./src/assets/logo.png" />
 
-    <meta
-      http-equiv="Content-Security-Policy"
-      content="
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="
         default-src 'self';
         img-src 'self' data: https://*.tile.openstreetmap.org https://unpkg.com https://cdn.jsdelivr.net;
         style-src 'self' 'unsafe-inline' https://unpkg.com https://cdn.jsdelivr.net;
         script-src 'self' 'unsafe-inline' https://unpkg.com https://cdn.jsdelivr.net;
-        connect-src 'self' http://localhost:3000 https://data.inpe.br https://*.tile.openstreetmap.org https://seu-endpoint-wtss https://seu-endpoint-stac;
-      "
-    />
+        connect-src 'self' http://localhost:3000 https://data.inpe.br https://*.tile.openstreetmap.org https://seu-endpoint-wtss https://seu-endpoint-stac https://cdn.jsdelivr.net https://unpkg.com;
+       
+    "
+/>
     <link rel="stylesheet" href="./src/style.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>

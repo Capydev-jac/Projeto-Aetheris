@@ -25,53 +25,58 @@ html {
 /* ========================================================
    SIDEBAR (Painel lateral retrátil)
    ======================================================== */
-#sidebar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 220px;
-  height: 70vh;
-  border-top-right-radius: 20px;
-  border-bottom-right-radius: 1000px;
-  background: linear-gradient(145deg, #1a1a1a 20%, #4a59ff);
-  color: white;
-  padding: 20px;
-  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.5);
-  transition: left 0.3s ease;
-  z-index: 1001;
-}
-
-/* Para telas com altura menor ou igual a 800px */
-@media screen and (max-height: 800px) {
-  #sidebar {
-    height: 95vh;
+   #sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 220px;
+    height: 70vh;
+    border-top-right-radius: 20px;
+    border-bottom-right-radius: 1000px;
+    background: linear-gradient(145deg, #1a1a1a 20%, #4a59ff);
+    color: #f5f5f5;
+    padding: 20px;
+    box-shadow: 4px 0 12px rgba(0, 0, 0, 0.3);
+    transition: left 0.3s ease, height 0.3s ease, box-shadow 0.2s ease;
+    z-index: 1001;
+    font-family: "Inter", "Segoe UI", Arial, sans-serif;
+    backdrop-filter: blur(4px);
   }
-}
-
-/* Para telas com altura maior que 800px */
-@media screen and (min-height: 801px) {
-  #sidebar {
-    height: 65vh;
+  
+  /* Responsividade por altura */
+  @media screen and (max-height: 800px) {
+    #sidebar {
+      height: 95vh;
+    }
   }
-}
-
-/* Opcional: Ajuste a transição para incluir a altura, caso não esteja se aplicando suavemente */
-#sidebar {
-  transition: left 0.3s ease, height 0.3s ease;
-}
-
-#sidebar h1 {
-  font-size: 22px;
-  margin: 0 0 10px;
-  text-align: center;
-}
-
-.logo {
-  display: block;
-  margin: 0 auto 15px;
-  width: 70%;
-  opacity: 0.9;
-}
+  @media screen and (min-height: 801px) {
+    #sidebar {
+      height: 65vh;
+    }
+  }
+  
+  /* Título */
+  #sidebar h1 {
+    font-size: 1.35rem;
+    margin: 0 0 12px;
+    text-align: center;
+    color: #ffffff;
+    letter-spacing: 0.5px;
+    text-shadow: 0 0 6px rgba(74, 89, 255, 0.4);
+  }
+  
+  /* Logo */
+  .logo {
+    display: block;
+    margin: 0 auto 15px;
+    width: 70%;
+    opacity: 0.95;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+  .logo:hover {
+    opacity: 1;
+    transform: scale(1.05);
+  }
 
 /* ========================================================
    SELETOR DE TAGS (Tag Input)
@@ -546,3 +551,4 @@ html {
 .product-selectable:hover {
     background-color: rgba(74, 89, 255, 0.2); /* Cor de hover suave */
 }
+

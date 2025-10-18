@@ -382,21 +382,25 @@ function createChart(lat, lng, title, timeSeriesData) {
                     x: {
                         type: 'time',
                         time: { unit: 'month', tooltipFormat: 'dd MMM yyyy' },
-                        title: { display: true, text: 'Data' }
+                        title: {display: true, text: 'Data', color:'#ccc' },
+                        ticks: {color:'#ccc'},
+                        grid: {color: 'rgba(255, 255, 255, 0.2)' }
                     },
                     y: {
-                        title: { display: true, text: 'Valor (Escala aplicada)' },
+                        title: { display: true, text: 'Valor (Escala aplicada)', color:'#ccc' },
                         min: minValue - 0.05 * Math.abs(minValue),
-                        max: maxValue + 0.05 * Math.abs(maxValue)
+                        max: maxValue + 0.05 * Math.abs(maxValue),
+                        ticks: {color:'#ccc'},
+                        grid: {color: 'rgba(255, 255, 255, 0.2)' },
                     }
                 }
             }
         });
     }, 150);
 }
-// ========================================================
+
 // WTSS - LÓGICA MULTI-ESTÁGIO E COMPARAÇÃO
-// ========================================================
+
 
 /**
  * ESTÁGIO 0: Busca e armazena em cache todas as coleções WTSS com atributos válidos.
@@ -702,12 +706,22 @@ function createWTSSTimeSeriesChart(title, values, timeline, attribute, coverage)
             options: { 
                 responsive: true, 
                 maintainAspectRatio: false,
+                color:'#fff',
                 scales: {
-                    x: { type: 'time', time: { unit: 'month', tooltipFormat: 'dd MMM yyyy' }, title: { display: true, color:'#ccc', text: 'Data' } },
-                    y: { title: { display: true, color:'#ccc', text: 'Valor (Escala aplicada)' }, min: -0.10, max: 1.20 } 
+                    x: { type: 'time', 
+                         time: { unit: 'month', 
+                         tooltipFormat: 'dd MMM yyyy' },    
+                         title: { display: true, color:'#ccc', text: 'Data'},
+                         ticks: {color:'#fff'}, 
+                         grid: {color: 'rgba(255, 255, 255, 0.2)'}},
+                    
+                         y: { title: { display: true, color:'#ccc', text: 'Valor (Escala aplicada)'}, 
+                         ticks: {color:'#ccc'}, 
+                         grid: {color: 'rgba(0, 0, 0, 0.2)'}, 
+                         min: -0.10, max: 1.20 }
                 }
             }
-        });
+    });
         
     }, 500);
 }
@@ -791,5 +805,3 @@ document.addEventListener("click", function (e) {
         suggestionsBox.innerHTML = "";
     }
 });
-
-

@@ -25,7 +25,7 @@ html {
 /* ========================================================
    SIDEBAR (Painel lateral retrátil)
    ======================================================== */
-   #sidebar {
+#sidebar {
     position: fixed;
     top: 0;
     left: 0;
@@ -42,8 +42,8 @@ html {
     font-family: "Inter", "Segoe UI", Arial, sans-serif;
     backdrop-filter: blur(4px);
   }
-  
-  /* Responsividade por altura */
+
+ /* Responsividade por altura */
   @media screen and (max-height: 800px) {
     #sidebar {
       height: 95vh;
@@ -553,4 +553,188 @@ html {
     background-color: rgba(74, 89, 255, 0.2); /* Cor de hover suave */
 }
 
+.text-error {
+    color: #ff4d4d !important; /* Um vermelho vibrante */
+    font-weight: bold;
+    padding: 5px;
+    border: 1px solid #ff4d4d;
+    margin: 5px 0;
+    background-color: rgba(255, 77, 77, 0.1); /* Fundo leve para destaque */
+}
+.wtss-error-message {
+    color: red !important;
+    font-weight: bold;
+    padding: 10px;
+    border: 1px solid red;
+    margin: 10px 0;
+    background-color: rgba(255, 0, 0, 0.1);
+}
+
+/* Optional: Style for the multiple selection list items */
+.wtss-select-list-item {
+    font-size: 0.8em;
+    margin-top: 5px;
+}
+/* Adicione esta seção ao seu ./src/style.css */
+
+.wtss-controls-sticky {
+    position: sticky;
+    top: 0;
+    background: #333; /* Cor de fundo deve ser consistente com o painel */
+    z-index: 10;
+    padding: 10px;
+    border-bottom: 1px solid #555;
+}
+/* Estilos auxiliares para o conteúdo do painel */
+.wtss-full-width-button {
+    width: 100%;
+}
+.wtss-divider {
+    margin-top: 10px;
+}
+
+/* Estilos para o painel de controle WTSS fixo */
+.wtss-controls-sticky {
+    position: sticky;
+    top: 0;
+    background: #333; 
+    z-index: 10;
+    padding: 10px;
+    border-bottom: 1px solid #555;
+}
+
+/* Estilos para o alinhamento de 100% de largura */
+.wtss-full-width-select {
+    width: 100%;
+    /* Adicione outros estilos de select aqui, como padding/margin */
+    padding: 8px; /* Mantendo o estilo que estava no JS */
+}
+
+.wtss-full-width-button {
+    width: 100%;
+}
+
+/* Espaçamento entre os botões */
+.plot-button-spacing {
+    margin-bottom: 5px;
+}
+
+/* Linha horizontal */
+.wtss-divider {
+    margin-top: 10px;
+}
+/* Adicione estas classes ao seu ./src/style.css */
+
+/* Container que dá o espaçamento e a linha divisória superior */
+.wtss-chart-container-border {
+    border-top: 1px solid #666;
+    margin-top: 15px;
+    padding-top: 15px;
+}
+
+/* Header que alinha título e botão de fechar */
+.wtss-chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Contêiner que define a altura do canvas */
+.wtss-canvas-wrapper {
+    position: relative;
+    height: 300px;
+    width: 100%;
+}
+
+/* Botão de fechar/remover gráfico */
+.remove-chart-btn {
+    cursor: pointer;
+    color: red;
+    font-size: 1.2em;
+    font-weight: bold;
+}
+/* Adicione estas classes ao seu arquivo ./src/style.css */
+
+/* Estilo para o contêiner do canvas STAC (equivalente a height: 300px) */
+.stac-canvas-wrapper {
+    position: relative;
+    height: 300px;
+    width: 100%;
+}
+
+/* Estilo para o rodapé do gráfico STAC (equivalente a font-size: 0.7em) */
+.stac-chart-footer {
+    font-size: 0.7em;
+}
+/* Adicione estas classes ao seu arquivo ./src/style.css */
+
+/* Estilo para o contêiner do canvas STAC (equivalente a height: 300px) */
+.stac-canvas-wrapper {
+    position: relative;
+    height: 300px;
+    width: 100%;
+}
+
+/* Estilo para o rodapé do gráfico STAC */
+.stac-chart-footer {
+    font-size: 0.7em;
+}
+
+/* Estilos de erro (para garantir que a cor vermelha não seja bloqueada) */
+.text-error {
+    color: #ff4d4d !important;
+    font-weight: bold;
+    /* ... outros estilos de borda/fundo ... */
+}
+/* Classes essenciais para o empilhamento e visualização */
+
+/* 1. ESTILO DO CONTÊINER DE GRÁFICO EMPILHADO */
+.wtss-chart-container-border {
+    border-top: 1px solid #666; /* Substitui 'border-top: 1px solid #666;' */
+    margin-top: 15px;           /* Substitui 'margin-top: 15px;' */
+    padding-top: 15px;          /* Substitui 'padding-top: 15px;' */
+}
+
+/* 2. CONTÊINER DO CANVAS (Altura fixa) */
+.wtss-canvas-wrapper {
+    position: relative;
+    height: 300px;
+    width: 100%;
+}
+
+/* 3. ESTILOS DE ERRO E STICKY (para garantir que nada mais esteja inline) */
+.wtss-controls-sticky {
+    position: sticky;
+    top: 0;
+    background: #333; 
+    z-index: 10;
+    padding: 10px;
+    border-bottom: 1px solid #555;
+}
+/* Classes essenciais para resolver o erro de CSP na linha 397/513/517 */
+
+/* 1. Estilo para o bloco de erro (substitui style="margin-top: 10px;") */
+.wtss-error-margin {
+    margin-top: 10px;
+}
+
+/* 2. Botão de fechar gráfico (substitui o estilo inline para cursor/cor) */
+.remove-chart-btn {
+    cursor: pointer;
+    color: red;
+    font-size: 1.2em;
+    font-weight: bold;
+}
+/* Adicione esta classe ao seu ./src/style.css */
+
+.product-selectable {
+    /* Torna o item clicável visualmente */
+    cursor: pointer;
+    /* Adicione um efeito visual ao passar o mouse */
+    transition: background-color 0.2s;
+}
+
+.product-selectable:hover {
+    background-color: rgba(74, 89, 255, 0.2); /* Cor de hover suave */
+}
 

@@ -75,36 +75,48 @@ const productNameToPopularName = {
 // ========================================================
 const FALLBACK_ATTRIBUTES_MAP = {
     'CBERS4-MUX-2M-1': [
-        'NDVI', 'EVI', 'blue', 'green', 'red', 'nir08', 'swir16', 'swir22', 
-        'coastal', 'qa_pixel', 'CLEAROB', 'TOTALOB', 'PROVENANCE', 'DATASOURCE'
+        'NDVI', 'EVI', 'BAND5', 'BAND6', 'BAND7', 'BAND8', 'CMASK', 
+         'CLEAROB', 'TOTALOB', 'PROVENANCE', 'DATASOURCE'
     ],
     'CBERS4-WFI-16D-2': [
-        'NDVI', 'EVI', 'blue', 'green', 'red', 'nir08', 'swir16', 'swir22', 
-        'coastal', 'qa_pixel', 'CLEAROB', 'TOTALOB', 'PROVENANCE', 'DATASOURCE'
+        'NDVI', 'EVI', 'BAND13', 'BAND14', 'BAND15', 'BAND16',  
+        'CMASK', 'CLEAROB', 'TOTALOB', 'PROVENANCE', 'DATASOURCE'
     ],
     'CBERS-WFI-8D-1': [
-        'NDVI', 'EVI', 'blue', 'green', 'red', 'nir08', 'swir16', 'swir22', 
-        'coastal', 'qa_pixel', 'CLEAROB', 'TOTALOB', 'PROVENANCE', 'DATASOURCE' 
+        'NDVI', 'EVI', 'BAND13', 'BAND14', 'BAND15', 'BAND16',   
+        'CMASK', 'CLEAROB', 'TOTALOB', 'PROVENANCE', 'DATASOURCE' 
     ],
     'LANDSAT-16D-1': [
         'NDVI', 'EVI', 'blue', 'green', 'red', 'nir08', 'swir16', 'swir22', 
         'coastal', 'qa_pixel', 'CLEAROB', 'TOTALOB', 'PROVENANCE', 'DATASOURCE'
     ],
     'mod11a2-6.1': [ 
-        'LST_Day_1km', 'LST_Night_1km', 'QC_Day', 'QC_Night'
+        'LST_Day_1km', 'QC_Day', 'Day_view_time', 'Day_view_angl', "Clear_sky_days",
+        "LST_Night_1km", "QC_Night", "Night_view_time", "Night_view_angl", "Emis_31",
+        "Clear_sky_nights", "Emis_32"
     ],
     'mod13q1-6.1': [
-        'NDVI', 'EVI', 'blue', 'green', 'red', 'nir08', 'swir16', 'swir22', 
-        'pixel_reliability', 'VI_Quality', 'DetailedQA'
+        'NDVI', 'EVI', 'VI_Quality', 'composite_day_of_the_year', 'pixel_reliability', 'blue_reflectance', 'red_reflectance', 'NIR_reflectance', 
+        'MIR_reflectance', 'view_zenith_angle', 'sun_zenith_angle', "relative_azimuth_angle"
     ],
+
+    'myd11a2-6.1': [
+        'LST_Day_1km', 'QC_Day', 'Day_view_time', 'Day_view_angl', 'LST_Night_1km', 'QC_Night', 'Night_view_time', 'Night_view_angl', 
+        'Emis_31', 'Emis_32', 'Clear_sky_days', 'Clear_sky_nights'
+    ],
+
     'myd13q1-6.1': [ // MODIS Aqua NDVI/EVI 16D
-        'NDVI', 'EVI', 'blue', 'green', 'red', 'nir08', 'swir16', 'swir22', 
-        'pixel_reliability', 'VI_Quality', 'DetailedQA'
+        'LST_Day_1km', 'EVQC_DayI', 'Day_view_time', 'Day_view_angl', 'LST_Night_1km', 'QC_Night', 'Night_view_time', 'Night_view_angl', 
+        'Emis_31', 'Emis_32', 'Clear_sky_days', "Clear_sky_nights"
     ],
+
     'S2-16D-2': [
-        'NDVI', 'EVI', 'blue', 'green', 'red', 'nir08', 'swir16', 'swir22', 
-        'qa_pixel', 'cloud_mask', 'snow_mask', 'water_mask'
+        'CLEAROB', 'TOTALOB', 'PROVENANCE', 'SCL', 'B01', 'B02', 'B04', 'B08', 'B8A', 'B09',
+        'B03', 'B11', 'B12', 'EVI', 'NDVI', 'NBR', 'B05', 'B06', 'B07'
+
     ]
+
+
 };
 
 
@@ -294,7 +306,7 @@ window.fetchTimeSeriesAndPlot = async function (lat, lng, coverage, band, friend
 
 function createChart(lat, lng, title, timeSeriesData) {
     if (!timeSeriesData || !timeSeriesData.timeline || timeSeriesData.timeline.length === 0) {
-        showInfoPanelSTAC(`<div class="satelite-popup-header"><strong>Série Temporal STAC: ${title}</strong></div><p>Nenhum dado encontrado.</p>`);
+        showInfoPanel(`<div class="satelite-popup-header"><strong>Série Temporal: ${title}</strong></div><p>Nenhum dado encontrado.</p>`);
         return;
     }
 
@@ -306,49 +318,83 @@ function createChart(lat, lng, title, timeSeriesData) {
         let color = `hsl(${index * 60}, 70%, 50%)`;
         if (band.toUpperCase().includes('NDVI')) color = 'rgba(0, 128, 0, 1)';
         else if (band.toUpperCase().includes('EVI')) color = 'rgba(0, 0, 255, 1)';
+        else if (band.toUpperCase().includes('LST')) color = 'rgba(255, 99, 71, 1)';
         return {
             label: band,
             data: timeSeriesData.timeline.map((date, i) => ({ x: date, y: scaledData[i] })),
             borderColor: color,
             borderWidth: 2,
             fill: false,
-            tension: 0.1,
+            tension: 0.2,
             pointRadius: 3
         };
     });
 
-
     const panelHtml = `
-        <div class="chart-popup-content">
-            <div class="satelite-popup-header"><strong>Série Temporal STAC: ${title}</strong></div>
-            <p>Atributos: ${bands.join(', ')}</p>
+        <div class="chart-popup-content" style="height: calc(100% - 40px);">
+            <div class="satelite-popup-header"><strong>Série Temporal: ${title}</strong></div>
+            <p><strong>Atributos disponíveis:</strong> ${bands.join(', ')}</p>
             <hr class="satelite-popup-divider">
-            <div class="stac-canvas-wrapper"> <canvas id="${chartId}"></canvas>
+            <div style="position: relative; height: 70%; width: 100%;">
+                <canvas id="${chartId}"></canvas>
             </div>
-            <p class="chart-footer stac-chart-footer">Valores reais (escala padrão aplicada).</p>
+            <p class="chart-footer" style="font-size: 0.7em; margin-top: 5px;">
+                Clique nos nomes na legenda para ativar/desativar atributos.
+            </p>
         </div>`;
-
-    showInfoPanelSTAC(panelHtml);
+    
+    showInfoPanel(panelHtml);
 
     setTimeout(() => {
         const ctx = document.getElementById(chartId);
         if (!ctx) return;
-        new Chart(ctx, {
+
+        if (window.meuGraficoWTSS) {
+            window.meuGraficoWTSS.destroy();
+        }
+
+        window.meuGraficoWTSS = new Chart(ctx, {
             type: 'line',
             data: { datasets: chartDatasets },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 parsing: false,
+                interaction: { mode: 'index', intersect: false },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: { usePointStyle: true },
+                        // 👇 AQUI está o recurso interativo
+                        onClick: (e, legendItem, legend) => {
+                            const index = legendItem.datasetIndex;
+                            const ci = legend.chart;
+                            const meta = ci.getDatasetMeta(index);
+                            meta.hidden = meta.hidden === null ? !ci.data.datasets[index].hidden : null;
+                            ci.update();
+                        }
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false
+                    }
+                },
                 scales: {
-                    x: { type: 'time', time: { unit: 'month', tooltipFormat: 'dd MMM yyyy' }, title: { display: true, text: 'Data' } },
-                    y: { title: { display: true, text: 'Valor (Escala aplicada)' }, min: -0.2, max: 1.05 }
+                    x: {
+                        type: 'time',
+                        time: { unit: 'month', tooltipFormat: 'dd MMM yyyy' },
+                        title: { display: true, text: 'Data' }
+                    },
+                    y: {
+                        title: { display: true, text: 'Valor (Escala aplicada)' },
+                        min: -0.2,
+                        max: 1.05
+                    }
                 }
             }
         });
-    }, 500);
+    }, 150);
 }
-
 // ========================================================
 // WTSS - LÓGICA MULTI-ESTÁGIO E COMPARAÇÃO
 // ========================================================

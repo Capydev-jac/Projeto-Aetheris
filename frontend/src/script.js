@@ -704,7 +704,7 @@ function createWTSSTimeSeriesChart(title, values, timeline, attribute, coverage)
                 maintainAspectRatio: false,
                 scales: {
                     x: { type: 'time', time: { unit: 'month', tooltipFormat: 'dd MMM yyyy' }, title: { display: true, color:'#ccc', text: 'Data' } },
-                    y: { title: { display: true, color:'#ccc', text: 'Valor (Escala aplicada)' }, min: -0.10, max: 1.20 } 
+                    y: { title: { display: true, color:'#ccc', text: 'Valor (Escala aplicada)' }, min: minValue, max: maxValue } 
                 }
             }
         });
@@ -791,3 +791,4 @@ document.addEventListener("click", function (e) {
         suggestionsBox.innerHTML = "";
     }
 });
+

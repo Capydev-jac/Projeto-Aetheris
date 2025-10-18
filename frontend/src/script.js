@@ -5,7 +5,7 @@ const BR_BOUNDS = [[-34.0, -74.0], [5.3, -34.0]];
 const map = L.map('map', {
     maxBounds: BR_BOUNDS,
     maxBoundsViscosity: 2.0,
-    minZoom: 1,
+    minZoom: 3,
     maxZoom: 15
 }).setView([-14.2, -51.9], 4);
 
@@ -69,14 +69,14 @@ const productNameToPopularName = {
     'EtaCCDay_CMIP5-1': 'Modelo Climático (CMIP5)'
 };
 
-// Substitua o seu bloco WTSS Config & Fallback por este:
+
 // ========================================================
 // WTSS Config & Fallback Centralizado
 // ========================================================
 const FALLBACK_ATTRIBUTES_MAP = {
     'CBERS4-MUX-2M-1': [
         'NDVI', 'EVI', 'BAND5', 'BAND6', 'BAND7', 'BAND8', 'CMASK', 
-         'CLEAROB', 'TOTALOB', 'PROVENANCE', 'DATASOURCE'
+         'CLEAROB', 'TOTALOB', 'PROVENANCE',
     ],
     'CBERS4-WFI-16D-2': [
         'NDVI', 'EVI', 'BAND13', 'BAND14', 'BAND15', 'BAND16',  
@@ -105,9 +105,9 @@ const FALLBACK_ATTRIBUTES_MAP = {
         'Emis_31', 'Emis_32', 'Clear_sky_days', 'Clear_sky_nights'
     ],
 
-    'myd13q1-6.1': [ // MODIS Aqua NDVI/EVI 16D
-        'LST_Day_1km', 'EVQC_DayI', 'Day_view_time', 'Day_view_angl', 'LST_Night_1km', 'QC_Night', 'Night_view_time', 'Night_view_angl', 
-        'Emis_31', 'Emis_32', 'Clear_sky_days', "Clear_sky_nights"
+    'myd13q1-6.1': [ 
+        'NDVI', 'EVI', 'blue_reflectance', 'red_reflectance', 'NIR_reflectance', 'VI_Quality', 'view_zenith_angle', 'composite_day_of_the_year', 
+        'pixel_reliability', 'MIR_reflectance', 'sun_zenith_angle', "relative_azimuth_angle"
     ],
 
     'S2-16D-2': [
@@ -120,16 +120,16 @@ const FALLBACK_ATTRIBUTES_MAP = {
 };
 
 
-// ========================================================
+
 // CONTROLE DO SIDEBAR
-// ========================================================
+
 window.toggleMenu = function () {
     sidebar.classList.toggle('ativo');
 };
 
-// ========================================================
+
 // FUNÇÕES DE SELEÇÃO NO MAPA
-// ========================================================
+
 function createSelectionVisuals(latlng) {
     if (selectedMarker) map.removeLayer(selectedMarker);
     if (selectedArea) map.removeLayer(selectedArea);
@@ -142,13 +142,13 @@ function createSelectionVisuals(latlng) {
         radius: 20000, color: "#ff0000", weight: 2, fillColor: "#ff4d4d", fillOpacity: 0.15
     }).addTo(map);
 }
-// ========================================================
+
 // TUTORIAL INTERATIVO AO INICIAR O SITE
-// ========================================================
+
 const tutorialOverlay = document.getElementById('tutorial-overlay');
 const tutorialNextBtn = document.getElementById('tutorial-next');
 
-// Passos do tutorial
+
 const tutorialSteps = [
   {
     text: "🌍 Este é o mapa interativo do Aetheris. Clique em qualquer ponto para explorar dados de satélites.",
@@ -181,7 +181,7 @@ tutorialNextBtn.addEventListener("click", () => {
     updateTutorialStep();
   } else {
     tutorialOverlay.classList.add("hidden");
-    localStorage.setItem("tutorialCompleted", "true"); // não mostrar de novo
+    localStorage.setItem("tutorialCompleted", "true");
 }})
 function updateTutorialStep() {
     const box = tutorialOverlay.querySelector(".tutorial-box");
@@ -189,9 +189,8 @@ function updateTutorialStep() {
     tutorialNextBtn.textContent = currentStep === tutorialSteps.length - 1 ? "Concluir ✅" : "Próximo ➤";
   }
 
-// ========================================================
 // TAG SELECTOR (filtros de satélite)
-// ========================================================
+
 function showSuggestions(filter) {
     suggestionsBox.innerHTML = "";
     const filtered = allSuggestions.filter(item =>
@@ -230,9 +229,8 @@ function renderSelectedTags() {
     });
 }
 
-// ========================================================
 // ABAS DO PAINEL DIREITO (STAC / WTSS)
-// ========================================================
+
 function showTab(tabId) {
     document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
     document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
@@ -267,9 +265,9 @@ function hideInfoPanel() {
     document.getElementById('info-panel-right').classList.remove('visible');
 }
 
-// ========================================================
+
 // FUNÇÕES DE CHART E API (STAC)
-// ========================================================
+
 function applyScale(rawValue) {
     return rawValue * 0.0001;
 }
@@ -360,6 +358,7 @@ function createChart(lat, lng, title, timeSeriesData) {
                 responsive: true,
                 maintainAspectRatio: false,
                 parsing: false,
+                color: '#fff',
                 interaction: { mode: 'index', intersect: false },
                 plugins: {
                     legend: {
@@ -387,8 +386,8 @@ function createChart(lat, lng, title, timeSeriesData) {
                     },
                     y: {
                         title: { display: true, text: 'Valor (Escala aplicada)' },
-                        min: -0.2,
-                        max: 1.05
+                        min: minValue - 0.05 * Math.abs(minValue),
+                        max: maxValue + 0.05 * Math.abs(maxValue)
                     }
                 }
             }
@@ -692,6 +691,11 @@ function createWTSSTimeSeriesChart(title, values, timeline, attribute, coverage)
             pointRadius: 3
         }];
 
+        // Calcula min e max reais dos dados
+        const allValues = chartDatasets.flatMap(ds => ds.data.map(p => p.y).filter(v => v !== null));
+        const minValue = Math.min(...allValues);
+        const maxValue = Math.max(...allValues);
+
         new Chart(ctx, {
             type: 'line',
             data: { labels: timeline, datasets: chartDatasets },
@@ -699,8 +703,8 @@ function createWTSSTimeSeriesChart(title, values, timeline, attribute, coverage)
                 responsive: true, 
                 maintainAspectRatio: false,
                 scales: {
-                    x: { type: 'time', time: { unit: 'month', tooltipFormat: 'dd MMM yyyy' }, title: { display: true, text: 'Data' } },
-                    y: { title: { display: true, text: 'Valor (Escala aplicada)' }, min: -0.2, max: 1.05 } 
+                    x: { type: 'time', time: { unit: 'month', tooltipFormat: 'dd MMM yyyy' }, title: { display: true, color:'#ccc', text: 'Data' } },
+                    y: { title: { display: true, color:'#ccc', text: 'Valor (Escala aplicada)' }, min: -0.10, max: 1.20 } 
                 }
             }
         });

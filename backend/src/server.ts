@@ -10,10 +10,20 @@ const PORT = 3000;
 app.use(cors());
 app.use(express.json());
 
-// ATENÇÃO: CSP ATUALIZADA para permitir cdn.jsdelivr.net e corrigir erros de estilo/script.
+// ATENÇÃO: CSP ajustada para permitir estilos inline do Leaflet e execução local
 app.use((req, res, next) => {
-    res.setHeader('Content-Security-Policy', "default-src 'self'; connect-src 'self' http://localhost:3000 https://unpkg.com https://data.inpe.br https://cdn.jsdelivr.net; script-src 'self' https://unpkg.com https://cdn.jsdelivr.net 'unsafe-inline'; style-src 'self' https://unpkg.com; img-src 'self' data: https://*.tile.openstreetmap.org;");
-    next();
+  res.setHeader(
+    'Content-Security-Policy',
+    [
+      "default-src 'self'",
+      "connect-src 'self' http://localhost:3000 https://unpkg.com https://data.inpe.br https://cdn.jsdelivr.net",
+      "script-src 'self' https://unpkg.com https://cdn.jsdelivr.net 'unsafe-inline'",
+      "style-src 'self' 'unsafe-inline' https://unpkg.com https://cdn.jsdelivr.net",
+      "img-src 'self' data: blob: https://*.tile.openstreetmap.org",
+      "font-src 'self' https://fonts.gstatic.com https://unpkg.com https://cdn.jsdelivr.net",
+    ].join('; ')
+  );
+  next();
 });
 
 app.use(express.static(path.join(__dirname, '../../frontend')));

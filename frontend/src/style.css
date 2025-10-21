@@ -11,7 +11,7 @@ html {
 }
 
 /* ========================================================
-   MAPA (Leaflet.js)
+   MAPA
    ======================================================== */
 #map {
   height: 100%;
@@ -22,81 +22,69 @@ html {
   z-index: 0;
 }
 /* ========================================================
-   ESTILOS ADICIONAIS PARA O SIDEBAR ESQUERDO
+   SIDEBAR
    ======================================================== */
 
-/* Estilo para a nova descrição do site */
 #sidebar .site-description {
     font-size: 0.85rem;
-    /* Puxa para mais perto do título e adiciona margem inferior */
     margin-top: -10px; 
     margin-bottom: 20px;
     color: #e9edf3; 
-    /* Adiciona uma linha sutil para separar a descrição dos filtros */
     padding-bottom: 10px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1); 
 }
 
-
-
-/* ========================================================
-   SIDEBAR (Painel lateral retrátil)
-   ======================================================== */
 #sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 220px;
-    height: 70vh;
-    border-top-right-radius: 20px;
-    border-bottom-right-radius: 1000px;
-    background: linear-gradient(145deg, #1a1a1a 20%, #4a59ff);
-    color: #f5f5f5;
-    padding: 20px;
-    box-shadow: 4px 0 12px rgba(0, 0, 0, 0.3);
-    transition: left 0.3s ease, height 0.3s ease, box-shadow 0.2s ease;
-    z-index: 1001;
-    font-family: "Inter", "Segoe UI", Arial, sans-serif;
-    backdrop-filter: blur(4px);
-  }
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 220px;
+  border-top-right-radius: 20px;
+  border-bottom-right-radius: 1000px;
+  background: linear-gradient(145deg, #1a1a1a 20%, #4a59ff);
+  color: #f5f5f5;
+  padding: 20px;
+  box-shadow: 4px 0 12px rgba(0, 0, 0, 0.3);
+  transition: left 0.3s ease, height 0.3s ease, box-shadow 0.2s ease;
+  z-index: 1001;
+  font-family: "Inter", "Segoe UI", Arial, sans-serif;
+}
 
- /* Responsividade por altura */
-  @media screen and (max-height: 800px) {
-    #sidebar {
-      height: 95vh;
-    }
+/* Responsividade por altura do monitor */
+@media screen and (max-height: 800px) {
+  #sidebar {
+    height: 95vh;
   }
-  @media screen and (min-height: 801px) {
-    #sidebar {
-      height: 65vh;
-    }
+}
+@media screen and (min-height: 801px) {
+  #sidebar {
+    height: 65vh;
   }
-  
-  /* Título */
-  #sidebar h1 {
-    font-size: 1.35rem;
-    margin: 0 0 12px;
-    text-align: center;
-    color: #ffffff;
-    letter-spacing: 0.5px;
-    text-shadow: 0 0 6px rgba(74, 89, 255, 0.4);
-  }
-  
-  /* Logo */
-  .logo {
-    display: block;
-    margin: 0 auto 15px;
-    width: 70%;
-    opacity: 0.95;
-    transition: opacity 0.3s ease, transform 0.3s ease;
-  }
-  .logo:hover {
-    opacity: 1;
-    transform: scale(1.05);
-  }
+}
+
+#sidebar h1 {
+  font-size: 1.35rem;
+  margin: 0 0 12px;
+  text-align: center;
+  color: #ffffff;
+  letter-spacing: 0.5px;
+  text-shadow: 0 0 6px rgba(74, 89, 255, 0.4);
+}
+
+.logo {
+  display: block;
+  margin: 0 auto 15px;
+  width: 70%;
+  opacity: 0.95;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.logo:hover {
+  opacity: 1;
+  transform: scale(1.05);
+}
 
 /* ========================================================
-   SELETOR DE TAGS (Tag Input)
+   SELETOR DE TAGS
    ======================================================== */
 .tag-selector {
   max-width: 400px;
@@ -130,10 +118,13 @@ html {
 #tag-input {
   width: 100%;
   padding: 10px 12px;
-  box-sizing: border-box;
-  border: 1px solid #ccc;
+  box-sizing: border-box; 
   border-radius: 6px;
   font-size: 14px;
+}
+  
+#tag-input::placeholder {
+  color: #aaa;
 }
 
 .suggestions {
@@ -215,51 +206,47 @@ html {
   margin: 10px 0;
 }
 
-/* ===== CONTROLE DE ESTILOS STAC ===== */
-
-/* 1. CONTAINER PRINCIPAL: Reduz o padding e a margem externa */
 #info-panel-right .product-info-block {
   background-color: rgba(0, 0, 0, 0.25);
   border-left: 4px solid #6d7aff;
-  padding: 5px; /* CHAVE: Reduz de 12px para 5px */
-  margin-bottom: 8px; /* CHAVE: Reduz de 15px para 8px */
+  padding: 12px;
+  margin-bottom: 15px;
   border-radius: 4px;
 }
 
-/* 2. TÍTULO: Reduz margens */
 #info-panel-right .product-title {
-  font-size: 1em; /* Tamanho OK, mas reduz o espaço abaixo */
+  font-size: 1.1em;
   color: #ffffff;
   display: block;
-  margin-bottom: 3px; 
+  margin-bottom: 8px;
 }
 
-/* 3. BLOCOS DE TEXTO INTERNOS: Elimina margens verticais */
 #info-panel-right .product-details {
-  margin-bottom: 5px; /* Reduzido */
+  margin-bottom: 12px;
 }
 
 #info-panel-right .product-name {
   font-style: italic;
   color: #c0c0c0;
-  font-size: 0.8em; 
-  margin-bottom: 3px; /* Espaço mínimo */
+  font-size: 0.85em;
+  margin-bottom: 8px;
 }
 
 #info-panel-right .product-description {
-  font-size: 0.8em; 
+  font-size: 0.9em;
   color: #dddddd;
-  line-height: 1.2; /* Compacta o texto */
-  margin-bottom: 3px; /* Espaço mínimo */
+  line-height: 1.4;
+  margin-bottom: 10px;
 }
 
 #info-panel-right .product-bands {
-  font-size: 0.8em; 
+  font-size: 0.9em;
   color: #dddddd;
-  margin-top: 5px; /* Adiciona um pequeno espaço acima se for o último item */
 }
-/* =============================================== */
 
+#info-panel-right .product-bands strong {
+  color: #a9c7ff;
+}
 
 .action-button {
   display: block;
@@ -276,12 +263,8 @@ html {
   transition: background-color 0.3s;
 }
 
-.action-button:hover {
-  background-color: #6d7aff;
-}
-
 /* ========================================================
-   POPUPS DE TUTORIAL (Onboarding)
+   POPUPS DE TUTORIAL 
    ======================================================== */
 .tutorial-overlay {
   position: fixed;
@@ -336,6 +319,7 @@ html {
   transition: background-color 0.3s;
 }
 
+.action-button:hover,
 .tutorial-box button:hover {
   background-color: #6d7aff;
 }
@@ -385,403 +369,117 @@ html {
   display: block;
 }
 .aetheris-highlight {
-    color: #4a59ff; /* A cor desejada */
+    color: #4a59ff;
 }
-.text-error {
-    color: #ff4d4d !important; /* Um vermelho vibrante */
-    font-weight: bold;
-    padding: 5px;
-    border: 1px solid #ff4d4d;
-    margin: 5px 0;
-    background-color: rgba(255, 77, 77, 0.1); /* Fundo leve para destaque */
-}
+.text-error,
 .wtss-error-message {
-    color: red !important;
-    font-weight: bold;
-    padding: 10px;
-    border: 1px solid red;
-    margin: 10px 0;
-    background-color: rgba(255, 0, 0, 0.1);
+  color: #ff4d4d !important;
+  font-weight: bold;
+  padding: 5px;
+  border: 1px solid #ff4d4d;
+  margin: 5px 0;
+  background-color: rgba(255, 77, 77, 0.1);
 }
 
-/* Optional: Style for the multiple selection list items */
 .wtss-select-list-item {
-    font-size: 0.8em;
-    margin-top: 5px;
+  font-size: 0.8em;
+  margin-top: 5px;
 }
-/* Adicione esta seção ao seu ./src/style.css */
 
 .wtss-controls-sticky {
-    position: sticky;
-    top: 0;
-    background: #333; /* Cor de fundo deve ser consistente com o painel */
-    z-index: 10;
-    padding: 10px;
-    border-bottom: 1px solid #555;
+  position: sticky;
+  top: 0;
+  background: #333;
+  z-index: 10;
+  padding: 10px;
+  border-bottom: 1px solid #555;
 }
-/* Estilos auxiliares para o conteúdo do painel */
+
 .wtss-full-width-button {
-    width: 100%;
+  width: 100%;
 }
 .wtss-divider {
-    margin-top: 10px;
+  margin-top: 10px;
 }
 
-/* Estilos para o painel de controle WTSS fixo */
-.wtss-controls-sticky {
-    position: sticky;
-    top: 0;
-    background: #333; 
-    z-index: 10;
-    padding: 10px;
-    border-bottom: 1px solid #555;
-}
-
-/* Estilos para o alinhamento de 100% de largura */
 .wtss-full-width-select {
-    width: 100%;
-    /* Adicione outros estilos de select aqui, como padding/margin */
-    padding: 8px; /* Mantendo o estilo que estava no JS */
+  width: 100%;
+  padding: 8px;
 }
 
-.wtss-full-width-button {
-    width: 100%;
-}
-
-/* Espaçamento entre os botões */
 .plot-button-spacing {
-    margin-bottom: 5px;
+  margin-bottom: 5px;
 }
-
-/* Linha horizontal */
-.wtss-divider {
-    margin-top: 10px;
-}
-/* Adicione estas classes ao seu ./src/style.css */
 
 /* Container que dá o espaçamento e a linha divisória superior */
 .wtss-chart-container-border {
-    border-top: 1px solid #666;
-    margin-top: 15px;
-    padding-top: 15px;
+  border-top: 1px solid #666;
+  margin-top: 15px;
+  padding-top: 15px;
 }
 
 /* Header que alinha título e botão de fechar */
 .wtss-chart-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 /* Contêiner que define a altura do canvas */
-.wtss-canvas-wrapper {
-    position: relative;
-    height: 300px;
-    width: 100%;
+.wtss-canvas-wrapper,
+.stac-canvas-wrapper {
+  position: relative;
+  height: 300px;
+  width: 100%;
 }
 
 /* Botão de fechar/remover gráfico */
 .remove-chart-btn {
-    cursor: pointer;
-    color: red;
-    font-size: 1.2em;
-    font-weight: bold;
-}
-/* Adicione estas classes ao seu arquivo ./src/style.css */
-
-/* Estilo para o contêiner do canvas STAC (equivalente a height: 300px) */
-.stac-canvas-wrapper {
-    position: relative;
-    height: 300px;
-    width: 100%;
+  cursor: pointer;
+  color: red;
+  font-size: 1.2em;
+  font-weight: bold;
 }
 
-/* Estilo para o rodapé do gráfico STAC (equivalente a font-size: 0.7em) */
+/* Rodapé do gráfico STAC */
 .stac-chart-footer {
-    font-size: 0.7em;
-}
-/* Adicione estas classes ao seu arquivo ./src/style.css */
-
-/* Estilo para o contêiner do canvas STAC (equivalente a height: 300px) */
-.stac-canvas-wrapper {
-    position: relative;
-    height: 300px;
-    width: 100%;
+  font-size: 0.7em;
 }
 
-/* Estilo para o rodapé do gráfico STAC */
-.stac-chart-footer {
-    font-size: 0.7em;
-}
-
-/* Estilos de erro (para garantir que a cor vermelha não seja bloqueada) */
-.text-error {
-    color: #ff4d4d !important;
-    font-weight: bold;
-    /* ... outros estilos de borda/fundo ... */
-}
-/* Classes essenciais para o empilhamento e visualização */
-
-/* 1. ESTILO DO CONTÊINER DE GRÁFICO EMPILHADO */
-.wtss-chart-container-border {
-    border-top: 1px solid #666; /* Substitui 'border-top: 1px solid #666;' */
-    margin-top: 15px;           /* Substitui 'margin-top: 15px;' */
-    padding-top: 15px;          /* Substitui 'padding-top: 15px;' */
-}
-
-/* 2. CONTÊINER DO CANVAS (Altura fixa) */
-.wtss-canvas-wrapper {
-    position: relative;
-    height: 300px;
-    width: 100%;
-}
-
-/* 3. ESTILOS DE ERRO E STICKY (para garantir que nada mais esteja inline) */
-.wtss-controls-sticky {
-    position: sticky;
-    top: 0;
-    background: #333; 
-    z-index: 10;
-    padding: 10px;
-    border-bottom: 1px solid #555;
-}
-/* Classes essenciais para resolver o erro de CSP na linha 397/513/517 */
-
-/* 1. Estilo para o bloco de erro (substitui style="margin-top: 10px;") */
+/* Bloco de erro */
 .wtss-error-margin {
-    margin-top: 10px;
+  margin-top: 10px;
 }
-
-/* 2. Botão de fechar gráfico (substitui o estilo inline para cursor/cor) */
-.remove-chart-btn {
-    cursor: pointer;
-    color: red;
-    font-size: 1.2em;
-    font-weight: bold;
-}
-/* Adicione esta classe ao seu ./src/style.css */
 
 .product-selectable {
-    /* Torna o item clicável visualmente */
-    cursor: pointer;
-    /* Adicione um efeito visual ao passar o mouse */
-    transition: background-color 0.2s;
+  cursor: pointer;
+  transition: background-color 0.2s;
 }
 
 .product-selectable:hover {
-    background-color: rgba(74, 89, 255, 0.2); /* Cor de hover suave */
+  background-color: rgba(74, 89, 255, 0.2);
 }
-
-.text-error {
-    color: #ff4d4d !important; /* Um vermelho vibrante */
-    font-weight: bold;
-    padding: 5px;
-    border: 1px solid #ff4d4d;
-    margin: 5px 0;
-    background-color: rgba(255, 77, 77, 0.1); /* Fundo leve para destaque */
-}
-.wtss-error-message {
-    color: red !important;
-    font-weight: bold;
-    padding: 10px;
-    border: 1px solid red;
-    margin: 10px 0;
-    background-color: rgba(255, 0, 0, 0.1);
-}
-
-/* Optional: Style for the multiple selection list items */
-.wtss-select-list-item {
-    font-size: 0.8em;
-    margin-top: 5px;
-}
-/* Adicione esta seção ao seu ./src/style.css */
-
-.wtss-controls-sticky {
-    position: sticky;
-    top: 0;
-    background: #333; /* Cor de fundo deve ser consistente com o painel */
-    z-index: 10;
-    padding: 10px;
-    border-bottom: 1px solid #555;
-}
-/* Estilos auxiliares para o conteúdo do painel */
-.wtss-full-width-button {
-    width: 100%;
-}
-.wtss-divider {
-    margin-top: 10px;
-}
-
-/* Estilos para o painel de controle WTSS fixo */
-.wtss-controls-sticky {
-    position: sticky;
-    top: 0;
-    background: #333; 
-    z-index: 10;
-    padding: 10px;
-    border-bottom: 1px solid #555;
-}
-
-/* Estilos para o alinhamento de 100% de largura */
-.wtss-full-width-select {
-    width: 100%;
-    /* Adicione outros estilos de select aqui, como padding/margin */
-    padding: 8px; /* Mantendo o estilo que estava no JS */
-}
-
-.wtss-full-width-button {
-    width: 100%;
-}
-
-/* Espaçamento entre os botões */
-.plot-button-spacing {
-    margin-bottom: 5px;
-}
-
-/* Linha horizontal */
-.wtss-divider {
-    margin-top: 10px;
-}
-/* Adicione estas classes ao seu ./src/style.css */
-
-/* Container que dá o espaçamento e a linha divisória superior */
-.wtss-chart-container-border {
-    border-top: 1px solid #666;
-    margin-top: 15px;
-    padding-top: 15px;
-}
-
-/* Header que alinha título e botão de fechar */
-.wtss-chart-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-/* Contêiner que define a altura do canvas */
-.wtss-canvas-wrapper {
-    position: relative;
-    height: 300px;
-    width: 100%;
-}
-
-/* Botão de fechar/remover gráfico */
-.remove-chart-btn {
-    cursor: pointer;
-    color: red;
-    font-size: 1.2em;
-    font-weight: bold;
-}
-/* Adicione estas classes ao seu arquivo ./src/style.css */
-
-/* Estilo para o contêiner do canvas STAC (equivalente a height: 300px) */
-.stac-canvas-wrapper {
-    position: relative;
-    height: 300px;
-    width: 100%;
-}
-
-/* Estilo para o rodapé do gráfico STAC (equivalente a font-size: 0.7em) */
-.stac-chart-footer {
-    font-size: 0.7em;
-}
-/* Adicione estas classes ao seu arquivo ./src/style.css */
-
-/* Estilo para o contêiner do canvas STAC (equivalente a height: 300px) */
-.stac-canvas-wrapper {
-    position: relative;
-    height: 300px;
-    width: 100%;
-}
-
-/* Estilo para o rodapé do gráfico STAC */
-.stac-chart-footer {
-    font-size: 0.7em;
-}
-
-/* Estilos de erro (para garantir que a cor vermelha não seja bloqueada) */
-.text-error {
-    color: #ff4d4d !important;
-    font-weight: bold;
-    /* ... outros estilos de borda/fundo ... */
-}
-/* Classes essenciais para o empilhamento e visualização */
-
-/* 1. ESTILO DO CONTÊINER DE GRÁFICO EMPILHADO */
-.wtss-chart-container-border {
-    border-top: 1px solid #666; /* Substitui 'border-top: 1px solid #666;' */
-    margin-top: 15px;           /* Substitui 'margin-top: 15px;' */
-    padding-top: 15px;          /* Substitui 'padding-top: 15px;' */
-}
-
-/* 2. CONTÊINER DO CANVAS (Altura fixa) */
-.wtss-canvas-wrapper {
-    position: relative;
-    height: 300px;
-    width: 100%;
-}
-
-/* 3. ESTILOS DE ERRO E STICKY (para garantir que nada mais esteja inline) */
-.wtss-controls-sticky {
-    position: sticky;
-    top: 0;
-    background: #333; 
-    z-index: 10;
-    padding: 10px;
-    border-bottom: 1px solid #555;
-}
-/* Classes essenciais para resolver o erro de CSP na linha 397/513/517 */
-
-/* 1. Estilo para o bloco de erro (substitui style="margin-top: 10px;") */
-.wtss-error-margin {
-    margin-top: 10px;
-}
-
-/* 2. Botão de fechar gráfico (substitui o estilo inline para cursor/cor) */
-.remove-chart-btn {
-    cursor: pointer;
-    color: red;
-    font-size: 1.2em;
-    font-weight: bold;
-}
-/* Adicione esta classe ao seu ./src/style.css */
-
-.product-selectable {
-    /* Torna o item clicável visualmente */
-    cursor: pointer;
-    /* Adicione um efeito visual ao passar o mouse */
-    transition: background-color 0.2s;
-}
-
-.product-selectable:hover {
-    background-color: rgba(74, 89, 255, 0.2); /* Cor de hover suave */
-}
-/* Adicione esta seção ao seu ./src/style.css */
 
 .wtss-details-container {
-    /* Garante que o acordeão se destaque e se alinhe */
-    background-color: rgba(0, 0, 0, 0.25);
-    border-left: 4px solid #6d7aff;
-    padding: 0; /* Remove padding desnecessário */
-    margin-bottom: 15px;
-    border-radius: 4px;
-    overflow: hidden; /* Para o conteúdo interno */
+  background-color: rgba(0, 0, 0, 0.25);
+  border-left: 4px solid #6d7aff;
+  padding: 0;
+  margin-bottom: 15px;
+  border-radius: 4px;
+  overflow: hidden;
 }
 
 .wtss-summary-header {
-    /* Estilo do cabeçalho clicável */
-    padding: 12px;
-    font-weight: bold;
-    cursor: pointer;
-    background-color: rgba(0, 0, 0, 0.4);
-    color: #a9c7ff;
-    list-style: none; /* Remove o marcador padrão */
+  padding: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  background-color: rgba(0, 0, 0, 0.4);
+  color: #a9c7ff;
+  list-style: none;
 }
 
-/* Garante que o painel interno do gráfico tenha o padding correto */
 .wtss-details-container .wtss-panel {
-    padding: 15px;
-    border-top: none;
-    margin-top: 0;
+  padding: 15px;
+  border-top: none;
+  margin-top: 0;
 }
-

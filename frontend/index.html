@@ -1,64 +1,78 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Aetheris</title>
-    <link rel="icon" type="image/png" href="./src/assets/logo.png" />
 
-  <meta
-    http-equiv="Content-Security-Policy"
-    content="
+<head>
+  <meta charset="UTF-8" />
+  <title>Aetheris</title>
+  <link rel="icon" type="image/png" href="./src/assets/logo.png" />
+
+  <meta http-equiv="Content-Security-Policy" content="
         default-src 'self';
         img-src 'self' data: https://*.tile.openstreetmap.org https://unpkg.com https://cdn.jsdelivr.net;
         style-src 'self' 'unsafe-inline' https://unpkg.com https://cdn.jsdelivr.net;
         script-src 'self' 'unsafe-inline' https://unpkg.com https://cdn.jsdelivr.net;
         connect-src 'self' http://localhost:3000 https://data.inpe.br https://*.tile.openstreetmap.org https://seu-endpoint-wtss https://seu-endpoint-stac https://cdn.jsdelivr.net https://unpkg.com;
        
-    "
-/>
-    <link rel="stylesheet" href="./src/style.css" />
-    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
-  </head>
+    " />
+  <link rel="stylesheet" href="./src/style.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <script
+    src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+</head>
 
-  <body>
-    <!-- POPUP DE TUTORIAL -->
-    <div id="tutorial-overlay" class="tutorial-overlay hidden">
-      <div class="tutorial-box">
-<h2>Bem-vindo ao <span class="aetheris-highlight">Aetheris</span>!</h2>
-        <p>🌍 Explore dados de satélite e séries temporais.</p>
-        <button id="tutorial-next">Próximo ➤</button>
-      </div>
+<body>
+  <!-- POPUP DE TUTORIAL -->
+  <div id="tutorial-overlay" class="tutorial-overlay hidden">
+    <div class="tutorial-box">
+      <h2>Bem-vindo ao <span class="aetheris-highlight">Aetheris</span>!</h2>
+      <p>🌍 Explore dados de satélite e séries temporais.</p>
+      <button id="tutorial-next">Próximo ➤</button>
+    </div>
+  </div>
+
+  <div id="sidebar">
+    <h1>Aetheris</h1>
+
+    <img src="./src/assets/logo.png" alt="Logo" class="logo" />
+
+    <p class="site-description">
+      Plataforma de visualização de séries temporais de dados abertos do Brazil Data Cube.
+      Analise a evolução de índices de satélite em qualquer ponto do território brasileiro.
+    </p>
+
+    <div class="tag-selector">
+      <input type="text" id="tag-input" placeholder="Buscar ou selecionar..." autocomplete="off" />
+      <ul id="suggestions" class="suggestions"></ul>
+      <div id="selected-tags" class="selected-tags"></div>
+
+
+    </div>
+  <button id="show-tutorial" class="action-button secondary-button mt-2 mb-2">
+      ❓ Ver Instruções
+    </button>
+  </div>
+
+
+
+
+  <div id="map"></div>
+
+  <!-- ✅ Painel lateral direito com abas -->
+  <div id="info-panel-right">
+    <div class="tab-buttons">
+      <button class="tab-button active" data-tab="stac-tab">🛰️ Catálogo STAC</button>
+      <button class="tab-button" data-tab="wtss-tab">📈Série Temporal WTSS</button>
     </div>
 
-    <div id="sidebar">
-      <h1>Aetheris</h1>
-      <img src="./src/assets/logo.png" alt="Logo" class="logo" />
+    <div id="stac-tab" class="tab-content active"></div>
+    <div id="wtss-tab" class="tab-content"></div>
 
-      <div class="tag-selector">
-        <input type="text" id="tag-input" placeholder="Buscar ou selecionar..." autocomplete="off" />
-        <ul id="suggestions" class="suggestions"></ul>
-        <div id="selected-tags" class="selected-tags"></div>
-      </div>
-    </div>
+    <button class="info-panel-close" onclick="hideInfoPanel()">&times;</button>
+  </div>
 
-    <div id="map"></div>
+  <script src="./src/script.js"></script>
+</body>
 
-    <!-- ✅ Painel lateral direito com abas -->
-    <div id="info-panel-right">
-      <div class="tab-buttons">
-        <button class="tab-button active" data-tab="stac-tab">🛰️  Catálogo STAC</button>
-        <button class="tab-button" data-tab="wtss-tab">📈Série Temporal WTSS</button>
-      </div>
-
-      <div id="stac-tab" class="tab-content active"></div>
-      <div id="wtss-tab" class="tab-content"></div>
-
-      <button class="info-panel-close" onclick="hideInfoPanel()">&times;</button>
-    </div>
-
-    <script src="./src/script.js"></script>
-  </body>
 </html>

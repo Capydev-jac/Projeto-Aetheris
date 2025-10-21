@@ -21,6 +21,23 @@ html {
   left: 0;
   z-index: 0;
 }
+/* ========================================================
+   ESTILOS ADICIONAIS PARA O SIDEBAR ESQUERDO
+   ======================================================== */
+
+/* Estilo para a nova descrição do site */
+#sidebar .site-description {
+    font-size: 0.85rem;
+    /* Puxa para mais perto do título e adiciona margem inferior */
+    margin-top: -10px; 
+    margin-bottom: 20px;
+    color: #e9edf3; 
+    /* Adiciona uma linha sutil para separar a descrição dos filtros */
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1); 
+}
+
+
 
 /* ========================================================
    SIDEBAR (Painel lateral retrátil)
@@ -244,7 +261,7 @@ html {
 
 .action-button {
   display: block;
-  width: 100%;
+  width: 80%;
   padding: 10px;
   background-color: #4a59ff;
   color: white;
@@ -737,4 +754,31 @@ html {
 .product-selectable:hover {
     background-color: rgba(74, 89, 255, 0.2); /* Cor de hover suave */
 }
+/* Adicione esta seção ao seu ./src/style.css */
 
+.wtss-details-container {
+    /* Garante que o acordeão se destaque e se alinhe */
+    background-color: rgba(0, 0, 0, 0.25);
+    border-left: 4px solid #6d7aff;
+    padding: 0; /* Remove padding desnecessário */
+    margin-bottom: 15px;
+    border-radius: 4px;
+    overflow: hidden; /* Para o conteúdo interno */
+}
+
+.wtss-summary-header {
+    /* Estilo do cabeçalho clicável */
+    padding: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    background-color: rgba(0, 0, 0, 0.4);
+    color: #a9c7ff;
+    list-style: none; /* Remove o marcador padrão */
+}
+
+/* Garante que o painel interno do gráfico tenha o padding correto */
+.wtss-details-container .wtss-panel {
+    padding: 15px;
+    border-top: none;
+    margin-top: 0;
+}

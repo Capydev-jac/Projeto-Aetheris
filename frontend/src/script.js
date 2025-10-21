@@ -1,6 +1,4 @@
-// ========================================================
-// CONFIGURAÇÃO INICIAL E VARIÁVEIS GLOBAIS
-// ========================================================
+
 const BR_BOUNDS = [[-34.0, -74.0], [5.3, -34.0]];
 const map = L.map('map', {
     maxBounds: BR_BOUNDS,

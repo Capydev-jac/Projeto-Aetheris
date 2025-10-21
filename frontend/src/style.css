@@ -215,49 +215,51 @@ html {
   margin: 10px 0;
 }
 
-/* ===== NOVOS ESTILOS PARA ORGANIZAÇÃO ===== */
+/* ===== CONTROLE DE ESTILOS STAC ===== */
+
+/* 1. CONTAINER PRINCIPAL: Reduz o padding e a margem externa */
 #info-panel-right .product-info-block {
   background-color: rgba(0, 0, 0, 0.25);
   border-left: 4px solid #6d7aff;
-  padding: 12px;
-  margin-bottom: 15px;
+  padding: 5px; /* CHAVE: Reduz de 12px para 5px */
+  margin-bottom: 8px; /* CHAVE: Reduz de 15px para 8px */
   border-radius: 4px;
 }
 
+/* 2. TÍTULO: Reduz margens */
 #info-panel-right .product-title {
-  font-size: 1.1em;
+  font-size: 1em; /* Tamanho OK, mas reduz o espaço abaixo */
   color: #ffffff;
   display: block;
-  margin-bottom: 8px;
+  margin-bottom: 3px; 
 }
 
+/* 3. BLOCOS DE TEXTO INTERNOS: Elimina margens verticais */
 #info-panel-right .product-details {
-  margin-bottom: 12px;
+  margin-bottom: 5px; /* Reduzido */
 }
 
 #info-panel-right .product-name {
   font-style: italic;
   color: #c0c0c0;
-  font-size: 0.85em;
-  margin-bottom: 8px;
+  font-size: 0.8em; 
+  margin-bottom: 3px; /* Espaço mínimo */
 }
 
 #info-panel-right .product-description {
-  font-size: 0.9em;
+  font-size: 0.8em; 
   color: #dddddd;
-  line-height: 1.4;
-  margin-bottom: 10px;
+  line-height: 1.2; /* Compacta o texto */
+  margin-bottom: 3px; /* Espaço mínimo */
 }
 
 #info-panel-right .product-bands {
-  font-size: 0.9em;
+  font-size: 0.8em; 
   color: #dddddd;
-}
-
-#info-panel-right .product-bands strong {
-  color: #a9c7ff;
+  margin-top: 5px; /* Adiciona um pequeno espaço acima se for o último item */
 }
 /* =============================================== */
+
 
 .action-button {
   display: block;
@@ -782,3 +784,4 @@ html {
     border-top: none;
     margin-top: 0;
 }
+

@@ -794,9 +794,3 @@ tutorialNextBtn.addEventListener("click", () => {
  
 });
 
-function updateTutorialStep() {
-  const box = tutorialOverlay.querySelector(".tutorial-box");
-  box.querySelector("p").innerHTML = tutorialSteps[currentStep].text;
-  tutorialNextBtn.textContent = currentStep === tutorialSteps.length - 1 ? "Concluir ✅" : "Próximo ➤";
-}
-

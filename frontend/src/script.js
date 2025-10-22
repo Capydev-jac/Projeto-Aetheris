@@ -641,7 +641,7 @@ function createWTSSTimeSeriesChart(title, values, timeline, attribute, coverage)
                             title: { display: true, text: 'Valor (Escala aplicada)', color: '#FFFFFF' }, 
                             ticks: { color: '#FFFFFF' },
                             grid: { color: 'rgba(255, 255, 255, 0.2)' },
-                            min: -2.5, max: 1.50
+                            min: -2.5, max: 2.50
                         }
                     }
                 }
@@ -678,16 +678,17 @@ map.on('click', async function (e) {
                 const popularName = productNameToPopularName[item.productName] || item.productName;
                 const availableBands = (item.variables || []).map(v => v.name || v.id).filter(Boolean);
 
-                // === STAC: APENAS METADADOS, SEM BOTÃO ===
+                // === STAC: APENAS METADADOS ===
+               
                 panelContent += `
-                    <div class="product-info-block">
+                  <div class="product-info-block">
                         <strong class="product-title">🛰️ ${popularName}</strong>
-                        <div class="product-details">
-                            <p class="product-name">(${item.productName})</p>
-                            <p class="product-description">${item.title || 'Sem descrição disponível.'}</p>
+                            <p class="product-description">${item.description || item.title || 'Sem descrição disponível.'}</p>
                             <p class="product-bands"><strong>Bandas:</strong> ${availableBands.join(', ') || 'N/A'}</p>
                         </div>
-                    </div>`;
+    </div>`;
+
+
             });
         } else {
             panelContent += `<p>Nenhum produto STAC encontrado para os filtros ativos.</p>`;
@@ -706,7 +707,6 @@ map.on('click', async function (e) {
         await showWTSSElectionPanel(lat, lng);
     }
 });
-
 // ========================================================
 // EVENTOS DE INPUT
 // ========================================================

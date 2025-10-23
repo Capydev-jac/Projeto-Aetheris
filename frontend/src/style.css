@@ -11,43 +11,100 @@ html {
 }
 
 /* ========================================================
+    HEADER 
+   ======================================================== */
+#main-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 50px;
+  background: #1a1a1a;
+  color: #f5f5f5;
+  display: flex;
+  align-items: center;
+  padding: 0 15px;
+  box-sizing: border-box;
+  z-index: 1002;
+}
+
+.header-menu-btn {
+  background: transparent;
+  border: none;
+  color: #f5f5f5;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 5px;
+  margin-right: 15px;
+  transition: color 0.2s ease;
+}
+
+.header-menu-btn:hover {
+  color: #a9c7ff;
+}
+
+.header-title {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-left: 2%;
+}
+
+.capy-link {
+  text-decoration: none;
+  font-size: 1.2rem;
+  color: #fff;
+  margin-right: 5px;
+  margin-left: auto;
+  transition: transforme 0.3s ease, transform 0.3s ease;
+}
+
+.capy-link:hover {
+  text-decoration: underline;
+  transform: scale(1.02);
+}
+
+/* ========================================================
    MAPA
    ======================================================== */
 #map {
-  height: 100%;
+  height: calc(100% - 50px);
   width: 100%;
   position: absolute;
-  top: 0;
+  top: 50px;
   left: 0;
   z-index: 0;
 }
 /* ========================================================
    SIDEBAR
-   ===================================================== */
+   ======================================================== */
 
 #sidebar .site-description {
-    font-size: 0.85rem;
-    margin-top: -10px; 
-    margin-bottom: 20px;
-    color: #e9edf3; 
-    padding-bottom: 10px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1); 
+  font-size: 0.85rem;
+  margin-top: -10px;
+  margin-bottom: 20px;
+  color: #e9edf3;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 #sidebar {
   position: fixed;
-  top: 0;
+  top: 50px;
   left: 0;
+  transform: translateX(-100%);
   width: 220px;
-  border-top-right-radius: 20px;
   border-bottom-right-radius: 1000px;
   background: linear-gradient(145deg, #1a1a1a 20%, #4a59ff);
   color: #f5f5f5;
   padding: 20px;
   box-shadow: 4px 0 12px rgba(0, 0, 0, 0.3);
-  transition: left 0.3s ease, height 0.3s ease, box-shadow 0.2s ease;
+  transition: transform 0.3s ease, height 0.3s ease, box-shadow 0.2s ease;
   z-index: 1001;
   font-family: "Inter", "Segoe UI", Arial, sans-serif;
+}
+
+#sidebar.ativo {
+  transform: translateX(0);
 }
 
 /* Responsividade por altura do monitor */
@@ -118,11 +175,11 @@ html {
 #tag-input {
   width: 100%;
   padding: 10px 12px;
-  box-sizing: border-box; 
+  box-sizing: border-box;
   border-radius: 6px;
   font-size: 14px;
 }
-  
+
 #tag-input::placeholder {
   color: #aaa;
 }
@@ -130,7 +187,6 @@ html {
 .suggestions {
   position: absolute;
   width: 100%;
-  border: 1px solid #ccc;
   max-height: 150px;
   overflow-y: auto;
   background: rgb(24, 48, 120);
@@ -154,10 +210,10 @@ html {
    ======================================================== */
 #info-panel-right {
   position: absolute;
-  top: 0;
+  top: 50px;
   right: 0;
   width: 480px;
-  height: 100%;
+  height: calc(100% - 50px);
   padding: 25px;
   padding-bottom: 20px;
   box-sizing: border-box;
@@ -369,7 +425,7 @@ html {
   display: block;
 }
 .aetheris-highlight {
-    color: #4a59ff;
+  color: #4a59ff;
 }
 
 .wtss-full-width-select {
@@ -403,8 +459,4 @@ html {
 /* Bloco de erro */
 .wtss-error-margin {
   margin-top: 10px;
-}
-
-.export-button-spacing {
-    margin-top: 8px;
 }

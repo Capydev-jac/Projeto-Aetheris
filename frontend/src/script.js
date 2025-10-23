@@ -421,10 +421,15 @@ window.showWTSSElectionPanel = async function (lat, lng) {
                     </div>
                 `).join('')}
             </div>
+            <button onclick="exportAllWTSSCharts()" class="action-button secondary-button wtss-full-width-button">
+        </button>
+        <hr class="satelite-popup-divider wtss-divider">
+
             <hr class="satelite-popup-divider wtss-divider">
             <button onclick="clearWTSSEmpilhados(window.currentWtssResult)" class="action-button secondary-button wtss-full-width-button">
                 Limpar Todos os Gráficos
             </button>
+            <br>
         </div>
         <div id="wtss-graph-area"></div>
     `;
@@ -481,6 +486,7 @@ window.showWTSSAttributeSelection = function (collectionTitle, lat, lng) {
             <button onclick="clearWTSSEmpilhados(window.currentWtssResult)" class="action-button secondary-button wtss-full-width-button">
                 Limpar Todos os Gráficos
             </button>
+            <br>
             <hr class="satelite-popup-divider wtss-divider">
         </div>
     `;
@@ -794,3 +800,149 @@ tutorialNextBtn.addEventListener("click", () => {
  
 });
 
+// ========================================================
+// FUNÇÃO DE EXPORTAÇÃO DE GRÁFICOS WTSS
+// ========================================================
+async function exportAllWTSSCharts() {
+    const canvases = document.querySelectorAll('#wtss-tab canvas');
+    if (canvases.length === 0) {
+        alert("Nenhum gráfico WTSS para exportar.");
+        return;
+    }
+
+    // Carrega a biblioteca JSZip dinamicamente (caso ainda não esteja no projeto)
+    if (typeof JSZip === "undefined") {
+        await loadJSZip();
+    }
+
+    const zip = new JSZip();
+    let index = 1;
+
+    canvases.forEach(canvas => {
+        const imgData = canvas.toDataURL("image/png");
+        const base64 = imgData.split(',')[1];
+        zip.file(`grafico_wtss_${index}.png`, base64, { base64: true });
+        index++;
+    });
+
+    const blob = await zip.generateAsync({ type: "blob" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "graficos_wtss.zip";
+    link.click();
+    URL.revokeObjectURL(link.href);
+}
+
+async function loadJSZip() {
+    return new Promise((resolve, reject) => {
+        const script = document.createElement("script");
+        script.src = "https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js";
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+    });
+}
+
+
+// ========================================================
+// Ajustes na função showWTSSElectionPanel
+// ========================================================
+window.showWTSSElectionPanel = async function (lat, lng) {
+    const result = await listWTSSTitleAndAttributes(lat, lng);
+    window.currentWtssResult = { ...result, lat, lon: lng };
+
+    if (result.error || result.collections.length === 0) {
+        showInfoPanelWTSS(`
+            <h3>📈 Catálogos WTSS</h3>
+            <div class="wtss-error-message">
+                <strong>Falha ao buscar catálogos.</strong>
+                <p>Detalhes: ${result.error || 'Nenhuma coleção funcional encontrada.'}</p>
+            </div>
+        `);
+        return;
+    }
+
+    let panelContent = `
+        <div id="wtss-controls-panel" class="wtss-panel wtss-controls-sticky">
+            <h3>1. Escolha a Coleção</h3>
+            <p>Selecione um catálogo para plotar:</p>
+            <hr class="satelite-popup-divider">
+            <div class="wtss-collection-list">
+                ${result.collections.map(col => `
+                    <div class="product-info-block product-selectable" 
+                        onclick="showWTSSAttributeSelection('${col.title}', ${lat}, ${lng})">
+                        <strong class="product-title">🛰️ ${col.title}</strong>
+                        <p style="font-size: 0.8em;">Atributos: ${col.availableAttributes.slice(0, 3).join(', ')}${col.availableAttributes.length > 3 ? '...' : ''}</p>
+                    </div>
+                `).join('')}
+            </div>
+            <hr class="satelite-popup-divider wtss-divider">
+
+            <button onclick="exportAllWTSSCharts()" class="action-button secondary-button wtss-full-width-button export-button-spacing">
+                ⬇️ Exportar Gráficos WTSS
+            </button>
+
+            <button onclick="clearWTSSEmpilhados(window.currentWtssResult)" class="action-button secondary-button wtss-full-width-button">
+                Limpar Todos os Gráficos
+            </button>
+            <br>
+        </div>
+        <div id="wtss-graph-area"></div>
+    `;
+
+    document.getElementById('wtss-tab').innerHTML = panelContent;
+    document.getElementById('wtss-tab').style.overflowY = 'auto';
+    showTab('wtss-tab');
+};
+
+// ========================================================
+// Ajustes na função showWTSSAttributeSelection
+// ========================================================
+window.showWTSSAttributeSelection = function (collectionTitle, lat, lng) {
+    const collection = WTSS_COLLECTIONS_CACHE.find(c => c.title === collectionTitle);
+    if (!collection) {
+        window.showWTSSElectionPanel(lat, lng);
+        return;
+    }
+
+    const defaultAttribute = collection.availableAttributes.find(attr => attr.toUpperCase().includes('NDVI')) || collection.availableAttributes[0];
+    const attributeSelector = `
+        <select id="wtss-attribute-select" class="wtss-full-width-select">
+            ${collection.availableAttributes.map(attr =>
+        `<option value="${attr}" ${attr === defaultAttribute ? 'selected' : ''}>${attr}</option>`).join('')}
+        </select>
+    `;
+
+    const now = new Date();
+    const date01YearsAgo = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
+    const calculated_start_date = date01YearsAgo.toISOString().split('T')[0];
+    const calculated_end_date = now.toISOString().split('T')[0];
+
+    const controlsPanelHTML = `
+        <div id="wtss-controls-panel" class="wtss-panel wtss-controls-sticky">
+            <h3>2. Escolha o Atributo</h3>
+            <button onclick="showWTSSElectionPanel(${lat}, ${lng})" class="action-button secondary-button" style="width: 100%; margin-bottom: 10px;">
+                ← Mudar Coleção
+            </button>
+            <p><b>Coleção:</b> ${collectionTitle}</p>
+            <p><b>Período Solicitado:</b> ${calculated_start_date} → ${calculated_end_date}</p>
+            <p><b>Atributo:</b> ${attributeSelector}</p>
+            
+            <button onclick="fetchWTSSTimeSeriesAndPlot(${lat}, ${lng}, '${collectionTitle}', document.getElementById('wtss-attribute-select').value)"
+                class="action-button wtss-full-width-button plot-button-spacing">
+                Plotar Série Temporal
+            </button>
+            <button onclick="clearWTSSEmpilhados(window.currentWtssResult)" class="action-button secondary-button wtss-full-width-button">
+                Limpar Todos os Gráficos
+            </button>
+            <br>
+            <button onclick="exportAllWTSSCharts()" class="action-button secondary-button wtss-full-width-button">
+                Exportar Gráficos WTSS
+            </button>
+            <hr class="satelite-popup-divider wtss-divider">
+        </div>
+    `;
+
+    document.getElementById('wtss-controls-panel').outerHTML = controlsPanelHTML;
+    document.getElementById('wtss-tab').scrollTop = 0;
+};

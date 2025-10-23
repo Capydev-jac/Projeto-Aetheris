@@ -404,3 +404,7 @@ html {
 .wtss-error-margin {
   margin-top: 10px;
 }
+
+.export-button-spacing {
+    margin-top: 8px;
+}

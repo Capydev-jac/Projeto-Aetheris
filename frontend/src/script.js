@@ -325,14 +325,19 @@ function createChart(lat, lng, title, timeSeriesData) {
                     y: {
                         title: { display: true, text: 'Valor (Escala aplicada)', color: '#FFFFFF' },
                         ticks: { color: '#FFFFFF' },
-
+<<<<<<< HEAD
                         grid: { color: 'rgba(255,255,255,0.2)' },
                         min: yMin,
                         max: yMax
-
+=======
+                            grid: { color: 'rgba(0, 0, 0, 1)' }
+                        min: -2.0,
+                        max: 1.50
+>>>>>>> 4f2516bfd12d2ad5b1cc36d7ac0eb0385f0b67c3
+                    }
                 }
             }
-        }});
+        });
     }, 500);
 }
 
@@ -399,6 +404,10 @@ async function listWTSSTitleAndAttributes(lat, lon) {
         return { error: err.message, collections: [], lat, lon };
     }
 }
+
+<<<<<<< HEAD
+// ESTÁGIO 1: Seleção da Coleção
+=======
 
 // ESTÁGIO 1: Seleção da Coleção (Novo Painel de Entrada)
 window.showWTSSElectionPanel = async function (lat, lng) {
@@ -658,7 +667,7 @@ function createWTSSTimeSeriesChart(title, values, timeline, attribute, coverage)
                         y: { 
                             title: { display: true, text: 'Valor (Escala aplicada)', color: '#FFFFFF' }, 
                             ticks: { color: '#FFFFFF' },
-                            grid: { color: 'rgba(0, 0, 0, 1)' },
+                            grid: { color: 'rgba(0, 0, 0, 1)' }
                             min: -2.5, max: 2.50
                         }
                     }
@@ -745,6 +754,72 @@ document.addEventListener("click", function (e) {
         suggestionsBox.innerHTML = "";
     }
 });
+// ========================================================
+// TUTORIAL INTERATIVO AO INICIAR O SITE
+// ========================================================
+
+
+// Passos do tutorial
+const tutorialSteps = [
+  {
+    text: "🌍 Este é o mapa interativo do Aetheris. Clique em qualquer ponto para explorar dados de satélites.",
+  },
+  {
+    text: "🔍 Use o campo de busca na lateral para selecionar os satélites ou produtos que deseja visualizar.",
+  },
+  {
+    text: "📊 Após clicar no mapa, o painel à direita mostrará os produtos disponíveis e séries temporais.",
+  },
+  {
+    text: "✅ Dica: Clique nas bandas para ver gráficos de NDVI e EVI ao longo do tempo.",
+  },
+  {
+    text: "✨ Pronto! Agora explore o mapa livremente. Divirta-se com o Aetheris!",
+  }
+];
+
+
+let currentStep = 0;
+const tutorialOverlay = document.getElementById('tutorial-overlay');
+const tutorialNextBtn = document.getElementById('tutorial-next');
+const showTutorialBtn = document.getElementById('show-tutorial'); // NOVO: Captura o botão da sidebar
+
+// Função para atualizar o conteúdo do passo
+function updateTutorialStep() {
+    if (!tutorialOverlay || currentStep >= tutorialSteps.length) return;
+    const box = tutorialOverlay.querySelector(".tutorial-box");
+    box.querySelector("p").innerHTML = tutorialSteps[currentStep].text;
+    tutorialNextBtn.textContent = currentStep === tutorialSteps.length - 1 ? "Concluir ✅" : "Próximo ➤";
+}
+
+// Mostra o tutorial só na primeira visita
+if (!localStorage.getItem("tutorialCompleted")) {
+  tutorialOverlay.classList.remove("hidden");
+  updateTutorialStep();
+}
+// Função para exibir o tutorial (usada pelo novo botão na sidebar)
+window.showTutorial = function() {
+    if (tutorialOverlay) {
+        tutorialOverlay.classList.remove("hidden");
+        currentStep = 0; 
+        updateTutorialStep();
+    }
+}
+
+tutorialNextBtn.addEventListener("click", () => {
+  currentStep++;
+  if (currentStep < tutorialSteps.length) {
+    updateTutorialStep();
+     // --- Anexar Listener do Botão "Ver Instruções" na Sidebar ---
+        if (showTutorialBtn) {
+            showTutorialBtn.addEventListener("click", window.showTutorial);
+        }
+  } else {
+    tutorialOverlay.classList.add("hidden");
+    localStorage.setItem("tutorialCompleted", "true"); // não mostrar de novo
+  }
+ 
+});
 
 // ========================================================
 // FUNÇÃO DE EXPORTAÇÃO DE GRÁFICOS WTSS
@@ -793,6 +868,7 @@ async function loadJSZip() {
 // ========================================================
 // Ajustes na função showWTSSElectionPanel
 // ========================================================
+>>>>>>> 4f2516bfd12d2ad5b1cc36d7ac0eb0385f0b67c3
 window.showWTSSElectionPanel = async function (lat, lng) {
     const result = await listWTSSTitleAndAttributes(lat, lng);
     window.currentWtssResult = { ...result, lat, lon: lng };
@@ -891,7 +967,7 @@ window.showWTSSAttributeSelection = function (collectionTitle, lat, lng) {
     document.getElementById('wtss-tab').scrollTop = 0;
 };
 
-
+<<<<<<< HEAD
 // Limpa gráficos empilhados
 window.clearWTSSEmpilhados = function () {
     const graphArea = document.getElementById('wtss-graph-area');
@@ -1208,4 +1284,5 @@ async function loadJSZip() {
         document.head.appendChild(script);
     });
 }
-
+=======
+>>>>>>> 4f2516bfd12d2ad5b1cc36d7ac0eb0385f0b67c3

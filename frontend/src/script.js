@@ -30,7 +30,7 @@ let selectedArea;
 
 // ========================================================
 // DADOS BASE
-// ======================================================== 
+// ========================================================
 const allSuggestions = [
     "CBERS4A", "Landsat-2", "CBERS-2B", "GOES-19", "Sentinel-2",
     "Sentinel-1", "MODIS Terra/Aqua", "Landsat series", "MODIS Aqua",
@@ -256,18 +256,6 @@ function createChart(lat, lng, title, timeSeriesData) {
     const chartId = `chart-${Date.now()}`;
     const bands = timeSeriesData.attributes;
     const chartDatasets = bands.map((band, index) => {
-        // === AUTOESCALA Y (STAC) ===
-        const allY = chartDatasets
-            .flatMap(d => (d.data || []).map(p => p?.y).filter(v => v !== null && v !== undefined));
-
-        let yMin = -2.0, yMax = 1.5; // fallback antigo (mantido como padrão)
-        if (allY.length) {
-            const minV = Math.min(...allY);
-            const maxV = Math.max(...allY);
-            const pad = Math.max((maxV - minV) * 0.1, 0.1); // 10% ou 0.1
-            yMin = minV - pad;
-            yMax = maxV + pad;
-        }
         const rawValues = timeSeriesData.values.map(v => v[band]);
         const scaledData = rawValues.map(val => (val !== undefined && val !== null) ? applyScale(val) : null);
         let color = `hsl(${index * 60}, 70%, 50%)`;
@@ -300,7 +288,6 @@ function createChart(lat, lng, title, timeSeriesData) {
     setTimeout(() => {
         const ctx = document.getElementById(chartId);
         if (!ctx) return;
-
         new Chart(ctx, {
             type: 'line',
             data: { datasets: chartDatasets },
@@ -308,25 +295,24 @@ function createChart(lat, lng, title, timeSeriesData) {
                 responsive: true,
                 maintainAspectRatio: false,
                 parsing: false,
-                color: '#0001', // Cor global de texto
+                color: '#FFFFFF', // Cor global de texto
                 scales: {
                     x: {
                         type: 'time',
                         time: { unit: 'month', tooltipFormat: 'dd MMM yyyy' },
-                        title: { display: true, text: 'Data', color: '#0001' },
-                        ticks: { color: '#0001' },
-                        grid: { color: 'rgba(0, 0, 0, 0.1)' }
+                        title: { display: true, text: 'Data', color: '#FFFFFF' },
+                        ticks: { color: '#FFFFFF' },
+                        grid: { color: 'rgba(255, 255, 255, 0.2)' }
                     },
                     // Calcula min e max reais dos dados
-
+     
                     y: {
-                        title: { display: true, text: 'Valor (Escala aplicada)', color: '#0001' },
-                        ticks: { color: '#0001' },
-                        grid: { color: 'rgba(0,0,0,1)' },
-                        min: yMin,
-                        max: yMax
+                        title: { display: true, text: 'Valor (Escala aplicada)', color: '#FFFFFF' },
+                        ticks: { color: '#FFFFFF' },
+                        grid: { color: 'rgba(255, 255, 255, 0.2)' },
+                        min: -2.0,
+                        max: 1.50
                     }
-
                 }
             }
         });
@@ -571,33 +557,65 @@ window.fetchWTSSTimeSeriesAndPlot = async function (lat, lon, coverage, attribut
     }
 };
 
-// Cria o gráfico para o WTSS (PLOTA E EMPILHA EM FORMATO ACORDEÃO)
+// Inicializa controle global (idempotente)
+window.wtss_activeCharts = window.wtss_activeCharts || {};
+
+// Função unificada e completa que substitui as versões anteriores.
 function createWTSSTimeSeriesChart(title, values, timeline, attribute, coverage) {
-    // 1. Gera um ID ÚNICO para o novo bloco e o canvas
-    const uniqueId = `chart-${coverage}-${attribute}-${Date.now()}`;
-
-    const graphArea = document.getElementById('wtss-graph-area');
-    if (!graphArea) return;
-
-    // 2. Remove a mensagem de loading
+    // Remove mensagem de loading IMEDIATAMENTE (se houver)
     const loadingMessage = document.getElementById('wtss-loading-message');
     if (loadingMessage) loadingMessage.remove();
 
-    // 3. Cria o bloco HTML do acordeão
+    // Gera uma chave única (mas estável) para prevenir duplicatas
+    // usamos cobertura + atributo como chave; sanitizamos para evitar chars problemáticos
+    const rawKey = `${coverage}::${attribute}`;
+    const chartKey = rawKey.replace(/[^a-zA-Z0-9\-_:.]/g, '_');
+
+    // Impede recriação de gráfico duplicado
+    if (window.wtss_activeCharts[chartKey]) {
+        console.warn(`Gráfico "${chartKey}" já existe — não será recriado.`);
+        // rola para o gráfico já existente para feedback ao usuário (se estiver presente)
+        const existingId = window.wtss_activeCharts[chartKey];
+        const el = document.getElementById(existingId);
+        if (el) {
+            const container = document.getElementById('wtss-tab');
+            if (container) {
+                container.scrollTop = el.offsetTop;
+                // opcional: abre o detalhe se for <details>
+                const details = el.querySelector('details');
+                if (details && !details.open) details.open = true;
+            }
+        }
+        return;
+    }
+
+    // Cria IDs únicos (timestamp ajuda a evitar colisões se o mesmo coverage/attribute for removido e recriado rapidamente)
+    const uniqueId = `chart-${chartKey}-${Date.now()}`;
+
+    const graphArea = document.getElementById('wtss-graph-area');
+    if (!graphArea) {
+        console.error('Área wtss-graph-area não encontrada — não foi possível criar o gráfico.');
+        return;
+    }
+
+    // Monta bloco do acordeão com botão de remoção
     const chartBlock = document.createElement('div');
     chartBlock.id = uniqueId;
     chartBlock.classList.add('wtss-chart-block');
 
-    // Usamos <details> para criar o acordeão. O gráfico será plotado no evento 'ontoggle'.
     chartBlock.innerHTML = `
-        <details id="details-${uniqueId}" class="wtss-details-container" ontoggle="if(this.open) plotChartInAcordeon('${uniqueId}', '${title}', '${attribute}')">
-            <summary class="wtss-summary-header">
-                🛰️ ${title} (${attribute})
+        <details id="details-${uniqueId}" class="wtss-details-container"
+            ontoggle="if(this.open) plotChartInAcordeon('${uniqueId}', ${JSON.stringify(title)}, ${JSON.stringify(attribute)})">
+            <summary class="wtss-summary-header" style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
+                <span>🛰️ ${title} (${attribute})</span>
+                <div style="display:flex; gap:6px; align-items:center;">
+                    <button class="wtss-remove-btn" title="Remover gráfico" style="background:transparent; border:none; cursor:pointer; font-size:1.0em;">❌</button>
+                </div>
             </summary>
             <div class="wtss-panel wtss-chart-container-border">
                 <p><b>Atributo:</b> ${attribute}</p>
                 <hr class="satelite-popup-divider">
-                <div class="wtss-canvas-wrapper">
+                <div class="wtss-canvas-wrapper" style="height:260px;">
                     <canvas id="canvas-${uniqueId}"></canvas>
                 </div>
                 <p class="chart-footer stac-chart-footer">Valores reais (escala padrão aplicada).</p>
@@ -605,78 +623,109 @@ function createWTSSTimeSeriesChart(title, values, timeline, attribute, coverage)
         </details>
     `;
 
-    // 4. ANEXA o novo bloco à área de gráficos
+    // Botão remover — destrói gráfico, remove nó e limpa registro
+    const removeButton = chartBlock.querySelector('.wtss-remove-btn');
+    removeButton.addEventListener('click', (e) => {
+        e.stopPropagation();
+        // destrói chart se existir
+        const canvas = document.getElementById(`canvas-${uniqueId}`);
+        if (canvas && canvas._chart) {
+            try { canvas._chart.destroy(); } catch (err) { /* ignora */ }
+        }
+        // remove do registro global
+        try { delete window.wtss_activeCharts[chartKey]; } catch (err) { /* ignora */ }
+        // remove dados armazenados
+        try { delete window[`wtss_data_${uniqueId}`]; } catch (err) { /* ignora */ }
+        // remove o bloco do DOM
+        chartBlock.remove();
+        console.log(`Gráfico "${chartKey}" removido.`);
+    });
+
+    // Anexa o bloco e rola para topo dos controles
     graphArea.appendChild(chartBlock);
+    const wtssTab = document.getElementById('wtss-tab');
+    if (wtssTab) wtssTab.scrollTop = 0;
 
-    // 5. Rola a aba para o topo para mostrar o seletor (Controles)
-    document.getElementById('wtss-tab').scrollTop = 0;
-
-    // Armazena os dados do gráfico globalmente para que a função plotChartInAcordeon possa acessá-los
+    // Armazena os dados para plotagem sob demanda
     window[`wtss_data_${uniqueId}`] = { values, timeline, attribute, coverage };
 
+    // Marca como ativo
+    window.wtss_activeCharts[chartKey] = uniqueId;
 
-    // 6. Define a função que plota quando o acordeão é aberto
-    window.plotChartInAcordeon = function (id, title, attribute) {
+    // Define (ou sobrescreve) função global de plotagem do acordeão
+    window.plotChartInAcordeon = function(id, _title, attributeArg) {
         const data = window[`wtss_data_${id}`];
-        if (!data) return;
+        if (!data) {
+            console.warn(`Dados WTSS não encontrados para id ${id}`);
+            return;
+        }
 
-        const ctx = document.getElementById(`canvas-${id}`);
-        // Verifica se o gráfico já foi plotado (o canvas tem um gráfico associado)
-        if (ctx && !ctx._chart) {
+        const canvas = document.getElementById(`canvas-${id}`);
+        if (!canvas) return;
 
-            const chartDatasets = [{
-                label: attribute,
-                data: data.timeline.map((date, i) => ({ x: date, y: (data.values[i] !== undefined && data.values[i] !== null) ? applyScale(data.values[i]) : null })),
-                borderColor: attribute.toUpperCase().includes('NDVI') ? 'green' : 'blue',
-                borderWidth: 2,
-                fill: false,
-                pointRadius: 3
-            }];
+        // se já foi plotado, evita reprojeto
+        if (canvas._chart) return;
 
-            // === AUTOESCALA Y (WTSS) ===
-            const ys = (data?.values || [])
-                .map(v => (v !== undefined && v !== null) ? applyScale(v) : null)
-                .filter(v => v !== null);
+        // monta dataset
+        const dataset = {
+            label: attributeArg,
+            data: data.timeline.map((date, i) => {
+                const raw = data.values[i];
+                const y = (raw !== undefined && raw !== null) ? (typeof applyScale === 'function' ? applyScale(raw) : raw) : null;
+                return { x: date, y };
+            }),
+            borderColor: attributeArg.toUpperCase().includes('NDVI') ? 'green' : (attributeArg.toUpperCase().includes('EVI') ? 'blue' : 'rgba(0,0,0,0.8)'),
+            borderWidth: 2,
+            fill: false,
+            pointRadius: 3,
+            tension: 0.1
+        };
 
-            let ymin = -2.5, ymax = 2.5; // fallback antigo (mantido como padrão)
-            if (ys.length) {
-                const minV = Math.min(...ys);
-                const maxV = Math.max(...ys);
-                const pad = Math.max((maxV - minV) * 0.1, 0.1); // 10% ou 0.1
-                ymin = minV - pad;
-                ymax = maxV + pad;
-            }
+        // calcula auto-escala y com padding
+        const ys = dataset.data.map(d => d.y).filter(v => v !== null && v !== undefined && !Number.isNaN(v));
+        let ymin = -2.5, ymax = 2.5;
+        if (ys.length) {
+            const minV = Math.min(...ys);
+            const maxV = Math.max(...ys);
+            const pad = Math.max((maxV - minV) * 0.1, 0.1);
+            ymin = minV - pad;
+            ymax = maxV + pad;
+        }
 
-
-            new Chart(ctx, {
+        // Cria Chart.js
+        try {
+            const cfg = {
                 type: 'line',
-                data: { labels: data.timeline, datasets: chartDatasets },
+                data: { datasets: [dataset] },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    color: '#0001',
-
+                    parsing: false,
                     scales: {
-
                         x: {
                             type: 'time',
                             time: { unit: 'month', tooltipFormat: 'dd MMM yyyy' },
-                            title: { display: true, text: 'Data', color: '#0001' },
-                            ticks: { color: '#0001' },
-                            grid: { color: 'rgba(0, 0, 0, 1)' }
+                            title: { display: true, text: 'Data' },
                         },
-
                         y: {
-                         title: { display: true, text: 'Valor (Escala aplicada)', color: '#0001' },
-                         ticks: { color: '#0001' },
-                         grid: { color: 'rgba(0,0,0,1)' },
-                         min: ymin,
-                         max: ymax
-}
-
+                            title: { display: true, text: 'Valor (Escala aplicada)' },
+                            min: ymin,
+                            max: ymax
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false }
                     }
                 }
-            });
+            };
+            canvas._chart = new Chart(canvas, cfg);
+        } catch (err) {
+            console.error('Falha ao criar Chart.js para WTSS:', err);
+            // remove possível loading/error UI
+            const loading = document.getElementById('wtss-loading-message');
+            if (loading) loading.remove();
+            // mostra erro na área de gráficos
+            graphArea.insertAdjacentHTML('beforeend', `<div class="wtss-error-message wtss-error-margin"><strong>Erro ao renderizar gráfico:</strong> ${err.message}</div>`);
         }
     };
 }
@@ -710,7 +759,7 @@ map.on('click', async function (e) {
                 const availableBands = (item.variables || []).map(v => v.name || v.id).filter(Boolean);
 
                 // === STAC: APENAS METADADOS ===
-
+               
                 panelContent += `
                   <div class="product-info-block">
                         <strong class="product-title">🛰️ ${popularName}</strong>
@@ -765,21 +814,21 @@ document.addEventListener("click", function (e) {
 
 // Passos do tutorial
 const tutorialSteps = [
-    {
-        text: "🌍 Este é o mapa interativo do Aetheris. Clique em qualquer ponto para explorar dados de satélites.",
-    },
-    {
-        text: "🔍 Use o campo de busca na lateral para selecionar os satélites ou produtos que deseja visualizar.",
-    },
-    {
-        text: "📊 Após clicar no mapa, o painel à direita mostrará os produtos disponíveis e séries temporais.",
-    },
-    {
-        text: "✅ Dica: Clique nas bandas para ver gráficos de NDVI e EVI ao longo do tempo.",
-    },
-    {
-        text: "✨ Pronto! Agora explore o mapa livremente. Divirta-se com o Aetheris!",
-    }
+  {
+    text: "🌍 Este é o mapa interativo do Aetheris. Clique em qualquer ponto para explorar dados de satélites.",
+  },
+  {
+    text: "🔍 Use o campo de busca na lateral para selecionar os satélites ou produtos que deseja visualizar.",
+  },
+  {
+    text: "📊 Após clicar no mapa, o painel à direita mostrará os produtos disponíveis e séries temporais.",
+  },
+  {
+    text: "✅ Dica: Clique nas bandas para ver gráficos de NDVI e EVI ao longo do tempo.",
+  },
+  {
+    text: "✨ Pronto! Agora explore o mapa livremente. Divirta-se com o Aetheris!",
+  }
 ];
 
 
@@ -798,30 +847,30 @@ function updateTutorialStep() {
 
 // Mostra o tutorial só na primeira visita
 if (!localStorage.getItem("tutorialCompleted")) {
-    tutorialOverlay.classList.remove("hidden");
-    updateTutorialStep();
+  tutorialOverlay.classList.remove("hidden");
+  updateTutorialStep();
 }
 // Função para exibir o tutorial (usada pelo novo botão na sidebar)
-window.showTutorial = function () {
+window.showTutorial = function() {
     if (tutorialOverlay) {
         tutorialOverlay.classList.remove("hidden");
-        currentStep = 0;
+        currentStep = 0; 
         updateTutorialStep();
     }
 }
 
 tutorialNextBtn.addEventListener("click", () => {
-    currentStep++;
-    if (currentStep < tutorialSteps.length) {
-        updateTutorialStep();
-        // --- Anexar Listener do Botão "Ver Instruções" na Sidebar ---
+  currentStep++;
+  if (currentStep < tutorialSteps.length) {
+    updateTutorialStep();
+     // --- Anexar Listener do Botão "Ver Instruções" na Sidebar ---
         if (showTutorialBtn) {
             showTutorialBtn.addEventListener("click", window.showTutorial);
         }
-    } else {
-        tutorialOverlay.classList.add("hidden");
-        localStorage.setItem("tutorialCompleted", "true"); // não mostrar de novo
-    }
-
+  } else {
+    tutorialOverlay.classList.add("hidden");
+    localStorage.setItem("tutorialCompleted", "true"); // não mostrar de novo
+  }
+ 
 });
 

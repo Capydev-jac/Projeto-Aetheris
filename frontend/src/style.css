@@ -226,26 +226,6 @@ html {
   transition: transform 0.4s ease-in-out;
 }
 
-.wtss-canvas-wrapper {
-    position: relative;
-    height: 400px;
-    width: 100%;
-    background-color: #FFFFFF; 
-    padding: 15px; 
-    box-sizing: border-box; 
-}
- 
-
-.wtss-chart-container-border {
-    border-top: 1px solid #0f0f0f; 
-    margin-top: 10px; 
-    padding-top: 15px; 
-    padding-bottom: 25px; 
-}
-
-.wtss-panel {
-    padding: 15px 0; 
-
 #info-panel-right.visible {
   transform: translateX(0);
 }
@@ -480,4 +460,3 @@ html {
 .wtss-error-margin {
   margin-top: 10px;
 }
-

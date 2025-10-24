@@ -302,14 +302,14 @@ function createChart(lat, lng, title, timeSeriesData) {
                         time: { unit: 'month', tooltipFormat: 'dd MMM yyyy' },
                         title: { display: true, text: 'Data', color: '#FFFFFF' },
                         ticks: { color: '#FFFFFF' },
-                        grid: { color: 'rgba(255, 255, 255, 0.2)' }
+                            grid: { color: 'rgba(0, 0, 0, 1)' }
                     },
                     // Calcula min e max reais dos dados
      
                     y: {
                         title: { display: true, text: 'Valor (Escala aplicada)', color: '#FFFFFF' },
                         ticks: { color: '#FFFFFF' },
-                        grid: { color: 'rgba(255, 255, 255, 0.2)' },
+                            grid: { color: 'rgba(0, 0, 0, 1)' }
                         min: -2.0,
                         max: 1.50
                     }
@@ -640,13 +640,13 @@ function createWTSSTimeSeriesChart(title, values, timeline, attribute, coverage)
                             time: { unit: 'month', tooltipFormat: 'dd MMM yyyy' }, 
                             title: { display: true, text: 'Data', color: '#FFFFFF' },
                             ticks: { color: '#FFFFFF' },
-                            grid: { color: 'rgba(255, 255, 255, 0.2)' }
+                            grid: { color: 'rgba(0, 0, 0, 1)' }
                         },
                 
                         y: { 
                             title: { display: true, text: 'Valor (Escala aplicada)', color: '#FFFFFF' }, 
                             ticks: { color: '#FFFFFF' },
-                            grid: { color: 'rgba(255, 255, 255, 0.2)' },
+                            grid: { color: 'rgba(0, 0, 0, 1)' }
                             min: -2.5, max: 2.50
                         }
                     }
@@ -946,3 +946,4 @@ window.showWTSSAttributeSelection = function (collectionTitle, lat, lng) {
     document.getElementById('wtss-controls-panel').outerHTML = controlsPanelHTML;
     document.getElementById('wtss-tab').scrollTop = 0;
 };
+

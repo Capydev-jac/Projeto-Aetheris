@@ -627,19 +627,19 @@ function createWTSSTimeSeriesChart(title, values, timeline, attribute, coverage)
                 options: { 
                     responsive: true, 
                     maintainAspectRatio: false,
-                    color: '#0001', 
+                    color: '#111', 
                     scales: {
                         x: { 
                             type: 'time', 
                             time: { unit: 'month', tooltipFormat: 'dd MMM yyyy' }, 
-                            title: { display: true, text: 'Data', color: '#0001' },
-                            ticks: { color: '#0001' },
-                            grid: { color: 'rgba(0, 0, 0, 1)' }
+                            title: { display: true, text: 'Data', color: '#111' },
+                            ticks: { color: '#111' },
+                            grid: { color: 'rgba(1, 1, 1, 1)' }
                         },
                         y: { 
-                            title: { display: true, text: 'Valor (Escala aplicada)', color: '#0001' }, 
-                            ticks: { color: '#0001' },
-                            grid: { color: 'rgba(0, 0, 0, 1)' },
+                            title: { display: true, text: 'Valor (Escala aplicada)', color: '#111' }, 
+                            ticks: { color: '#111' },
+                            grid: { color: 'rgba(1, 1, 1, 1)' },
                             min: ymin, max: ymax
                         }
                     }

@@ -11,100 +11,43 @@ html {
 }
 
 /* ========================================================
-    HEADER 
-   ======================================================== */
-#main-header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 50px;
-  background: #1a1a1a;
-  color: #f5f5f5;
-  display: flex;
-  align-items: center;
-  padding: 0 15px;
-  box-sizing: border-box;
-  z-index: 1002;
-}
-
-.header-menu-btn {
-  background: transparent;
-  border: none;
-  color: #f5f5f5;
-  font-size: 24px;
-  cursor: pointer;
-  padding: 5px;
-  margin-right: 15px;
-  transition: color 0.2s ease;
-}
-
-.header-menu-btn:hover {
-  color: #a9c7ff;
-}
-
-.header-title {
-  font-size: 1.2rem;
-  font-weight: bold;
-  margin-left: 2%;
-}
-
-.capy-link {
-  text-decoration: none;
-  font-size: 1.2rem;
-  color: #fff;
-  margin-right: 5px;
-  margin-left: auto;
-  transition: transforme 0.3s ease, transform 0.3s ease;
-}
-
-.capy-link:hover {
-  text-decoration: underline;
-  transform: scale(1.02);
-}
-
-/* ========================================================
    MAPA
    ======================================================== */
 #map {
-  height: calc(100% - 50px);
+  height: 100%;
   width: 100%;
   position: absolute;
-  top: 50px;
+  top: 0;
   left: 0;
   z-index: 0;
 }
 /* ========================================================
    SIDEBAR
-   ======================================================== */
+   ===================================================== */
 
 #sidebar .site-description {
-  font-size: 0.85rem;
-  margin-top: -10px;
-  margin-bottom: 20px;
-  color: #e9edf3;
-  padding-bottom: 10px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 0.85rem;
+    margin-top: -10px; 
+    margin-bottom: 20px;
+    color: #e9edf3; 
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1); 
 }
 
 #sidebar {
   position: fixed;
-  top: 50px;
+  top: 0;
   left: 0;
-  transform: translateX(-100%);
   width: 220px;
+  border-top-right-radius: 20px;
   border-bottom-right-radius: 1000px;
   background: linear-gradient(145deg, #1a1a1a 20%, #4a59ff);
   color: #f5f5f5;
   padding: 20px;
   box-shadow: 4px 0 12px rgba(0, 0, 0, 0.3);
-  transition: transform 0.3s ease, height 0.3s ease, box-shadow 0.2s ease;
+  transition: left 0.3s ease, height 0.3s ease, box-shadow 0.2s ease;
   z-index: 1001;
   font-family: "Inter", "Segoe UI", Arial, sans-serif;
-}
-
-#sidebar.ativo {
-  transform: translateX(0);
 }
 
 /* Responsividade por altura do monitor */
@@ -175,11 +118,11 @@ html {
 #tag-input {
   width: 100%;
   padding: 10px 12px;
-  box-sizing: border-box;
+  box-sizing: border-box; 
   border-radius: 6px;
   font-size: 14px;
 }
-
+  
 #tag-input::placeholder {
   color: #aaa;
 }
@@ -210,10 +153,10 @@ html {
    ======================================================== */
 #info-panel-right {
   position: absolute;
-  top: 50px;
+  top: 0;
   right: 0;
   width: 480px;
-  height: calc(100% - 50px);
+  height: 100%;
   padding: 25px;
   padding-bottom: 20px;
   box-sizing: border-box;
@@ -224,6 +167,30 @@ html {
   overflow-y: auto;
   transform: translateX(100%);
   transition: transform 0.4s ease-in-out;
+}
+
+/* 1. CONTÊINER DO CANVAS: Aumenta a altura para dar mais espaço de visualização vertical */
+.wtss-canvas-wrapper {
+    position: relative;
+    height: 400px; /* Aumentado de 300px para 400px ou 450px */
+    width: 100%;
+    background-color: #FFFFFF; 
+    padding: 15px; /* Opcional: para dar um pequeno espaçamento interno */
+    box-sizing: border-box; /* Garante que padding não aumente a largura/altura total */
+}
+ 
+
+/* 2. CONTÊINER DO GRÁFICO: Aumenta o espaçamento acima e abaixo do canvas/header */
+.wtss-chart-container-border {
+    border-top: 1px solid #0f0f0f; 
+    margin-top: 10px; /* Aumentado para dar mais respiro em relação ao item de cima */
+    padding-top: 15px; /* Aumentado o padding superior */
+    padding-bottom: 25px; /* Adiciona padding na parte de baixo do gráfico (se não estiver em outra regra) */
+}
+
+/* 3. BLOCO WTSS GERAL: Garante que os elementos de texto tenham espaço */
+.wtss-panel {
+    padding: 15px 0; /* Exemplo: Padding vertical */
 }
 
 #info-panel-right.visible {
@@ -258,7 +225,7 @@ html {
 #info-panel-right .satelite-popup-divider {
   border: 0;
   height: 1px;
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: rgba(10, 10, 10, 0.2);
   margin: 10px 0;
 }
 
@@ -425,7 +392,7 @@ html {
   display: block;
 }
 .aetheris-highlight {
-  color: #4a59ff;
+    color: #4a59ff;
 }
 
 .wtss-full-width-select {
@@ -439,7 +406,7 @@ html {
 
 /* Container que dá o espaçamento e a linha divisória superior */
 .wtss-chart-container-border {
-  border-top: 1px solid #666;
+  border-top: 1px solid #0b0b0b;
   margin-top: 15px;
   padding-top: 15px;
 }

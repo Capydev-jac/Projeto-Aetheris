@@ -1,3 +1,12 @@
+
+// ==============================
+// Aetheris - Script Unificado
+// Mapa + STAC + WTSS (com autoescala e exportação de gráficos)
+// ==============================
+
+// --------------------------------------
+// MAPA (Leaflet)
+// --------------------------------------
 const BR_BOUNDS = [[-34.0, -74.0], [5.3, -34.0]];
 const map = L.map('map', {
     maxBounds: BR_BOUNDS,
@@ -15,9 +24,9 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 window.currentWtssResult = null;
 let WTSS_COLLECTIONS_CACHE = []; // Cache para coleções disponíveis
 
-// ========================================================
+// --------------------------------------
 // ELEMENTOS DE INTERFACE
-// ========================================================
+// --------------------------------------
 const sidebar = document.getElementById('sidebar');
 const input = document.getElementById("tag-input");
 const suggestionsBox = document.getElementById("suggestions");
@@ -28,9 +37,9 @@ let selectedTags = [];
 let selectedMarker;
 let selectedArea;
 
-// ========================================================
+// --------------------------------------
 // DADOS BASE
-// ========================================================
+// --------------------------------------
 const allSuggestions = [
     "CBERS4A", "Landsat-2", "CBERS-2B", "GOES-19", "Sentinel-2",
     "Sentinel-1", "MODIS Terra/Aqua", "Landsat series", "MODIS Aqua",
@@ -108,17 +117,16 @@ const FALLBACK_ATTRIBUTES_MAP = {
 };
 const WTSS_REFERENCE_COVERAGE = 'LANDSAT-16D-1';
 
-
-// ========================================================
+// --------------------------------------
 // CONTROLE DO SIDEBAR
-// ========================================================
+// --------------------------------------
 window.toggleMenu = function () {
     sidebar.classList.toggle('ativo');
 };
 
-// ========================================================
-// FUNÇÕES DE SELEÇÃO NO MAPA
-// ========================================================
+// --------------------------------------
+// SELEÇÃO NO MAPA
+// --------------------------------------
 function createSelectionVisuals(latlng) {
     if (selectedMarker) map.removeLayer(selectedMarker);
     if (selectedArea) map.removeLayer(selectedArea);
@@ -132,9 +140,9 @@ function createSelectionVisuals(latlng) {
     }).addTo(map);
 }
 
-// ========================================================
+// --------------------------------------
 // TAG SELECTOR (filtros de satélite)
-// ========================================================
+// --------------------------------------
 function showSuggestions(filter) {
     suggestionsBox.innerHTML = "";
     const filtered = allSuggestions.filter(item =>
@@ -173,9 +181,9 @@ function renderSelectedTags() {
     });
 }
 
-// ========================================================
+// --------------------------------------
 // ABAS DO PAINEL DIREITO (STAC / WTSS)
-// ========================================================
+// --------------------------------------
 function showTab(tabId) {
     document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
     document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
@@ -210,9 +218,9 @@ function hideInfoPanel() {
     document.getElementById('info-panel-right').classList.remove('visible');
 }
 
-// ========================================================
-// FUNÇÕES DE CHART E API (STAC)
-// ========================================================
+// --------------------------------------
+/* STAC - CHARTS / API */
+// --------------------------------------
 function applyScale(rawValue) {
     return rawValue * 0.0001;
 }
@@ -222,7 +230,6 @@ window.fetchTimeSeriesAndPlot = async function (lat, lng, coverage, band, friend
     showInfoPanelSTAC(tempContent);
 
     try {
-        // 'band' agora deve ser uma lista de bandas separadas por vírgula
         const bandQuery = band ? `&bands=${band}` : '';
         const response = await fetch(`http://localhost:3000/api/timeseries?lat=${lat}&lng=${lng}&coverage=${coverage}${bandQuery}`);
 
@@ -242,7 +249,6 @@ window.fetchTimeSeriesAndPlot = async function (lat, lng, coverage, band, friend
         createChart(lat, lng, friendlyName, data);
     } catch (error) {
         console.error('Erro ao plotar série temporal STAC:', error);
-        // Usando a classe CSS para erros
         showInfoPanelSTAC(`<div class="satelite-popup-header text-error"><strong>Erro ao buscar dados:</strong></div><p>${error.message}</p>`);
     }
 };
@@ -255,6 +261,8 @@ function createChart(lat, lng, title, timeSeriesData) {
 
     const chartId = `chart-${Date.now()}`;
     const bands = timeSeriesData.attributes;
+
+    // 1) Monta os datasets primeiro
     const chartDatasets = bands.map((band, index) => {
         const rawValues = timeSeriesData.values.map(v => v[band]);
         const scaledData = rawValues.map(val => (val !== undefined && val !== null) ? applyScale(val) : null);
@@ -272,14 +280,23 @@ function createChart(lat, lng, title, timeSeriesData) {
         };
     });
 
+    // 2) Autoescala do eixo Y depois dos datasets
+    const allY = chartDatasets.flatMap(d => d.data.map(p => p.y).filter(v => v !== null && v !== undefined));
+    let yMin = -2.0, yMax = 1.5;
+    if (allY.length) {
+        const minV = Math.min(...allY);
+        const maxV = Math.max(...allY);
+        const pad = Math.max((maxV - minV) * 0.1, 0.1);
+        yMin = minV - pad;
+        yMax = maxV + pad;
+    }
 
     const panelHtml = `
         <div class="chart-popup-content">
             <div class="satelite-popup-header"><strong>Série Temporal STAC: ${title}</strong></div>
             <p>Atributos: ${bands.join(', ')}</p>
             <hr class="satelite-popup-divider">
-            <div class="stac-canvas-wrapper"> <canvas id="${chartId}"></canvas>
-            </div>
+            <div class="stac-canvas-wrapper"><canvas id="${chartId}"></canvas></div>
             <p class="chart-footer stac-chart-footer">Valores reais (escala padrão aplicada).</p>
         </div>`;
 
@@ -288,6 +305,7 @@ function createChart(lat, lng, title, timeSeriesData) {
     setTimeout(() => {
         const ctx = document.getElementById(chartId);
         if (!ctx) return;
+
         new Chart(ctx, {
             type: 'line',
             data: { datasets: chartDatasets },
@@ -295,23 +313,21 @@ function createChart(lat, lng, title, timeSeriesData) {
                 responsive: true,
                 maintainAspectRatio: false,
                 parsing: false,
-                color: '#FFFFFF', // Cor global de texto
+                color: '#0001',
                 scales: {
                     x: {
                         type: 'time',
                         time: { unit: 'month', tooltipFormat: 'dd MMM yyyy' },
-                        title: { display: true, text: 'Data', color: '#FFFFFF' },
-                        ticks: { color: '#FFFFFF' },
-                        grid: { color: 'rgba(255, 255, 255, 0.2)' }
+                        title: { display: true, text: 'Data', color: '#0001' },
+                        ticks: { color: '#0001' },
+                        grid: { color: 'rgba(0, 0, 0, 1)' }
                     },
-                    // Calcula min e max reais dos dados
-     
                     y: {
-                        title: { display: true, text: 'Valor (Escala aplicada)', color: '#FFFFFF' },
-                        ticks: { color: '#FFFFFF' },
-                        grid: { color: 'rgba(255, 255, 255, 0.2)' },
-                        min: -2.0,
-                        max: 1.50
+                        title: { display: true, text: 'Valor (Escala aplicada)', color: '#0001' },
+                        ticks: { color: '#0001' },
+                        grid: { color: 'rgba(0,0,0,1)' },
+                        min: yMin,
+                        max: yMax
                     }
                 }
             }
@@ -319,13 +335,9 @@ function createChart(lat, lng, title, timeSeriesData) {
     }, 500);
 }
 
-// ========================================================
+// --------------------------------------
 // WTSS - LÓGICA MULTI-ESTÁGIO E COMPARAÇÃO
-// ========================================================
-
-/**
- * ESTÁGIO 0: Busca e armazena em cache todas as coleções WTSS com atributos válidos.
- */
+// --------------------------------------
 async function listWTSSTitleAndAttributes(lat, lon) {
     const baseUrl = "https://data.inpe.br/bdc/wtss/v4/";
 
@@ -351,7 +363,7 @@ async function listWTSSTitleAndAttributes(lat, lon) {
 
                     let availableAttributes = details.attributes?.map(attr => attr.attribute) ?? [];
 
-                    // CORREÇÃO: Tenta buscar a lista de atributos do mapa de fallback
+                    // Fallback de atributos quando o endpoint não retorna
                     if (availableAttributes.length === 0) {
                         const fallbackList = FALLBACK_ATTRIBUTES_MAP[name];
                         if (fallbackList) {
@@ -362,14 +374,14 @@ async function listWTSSTitleAndAttributes(lat, lon) {
                     if (availableAttributes.length > 0) {
                         collectionDetails.push({
                             title: name,
-                            start_date: details.timeline[0],
-                            end_date: details.timeline[details.timeline.length - 1],
-                            availableAttributes: availableAttributes
+                            start_date: details.timeline?.[0],
+                            end_date: details.timeline?.[details.timeline.length - 1],
+                            availableAttributes
                         });
                     }
                 }
             } catch (e) {
-                // Silenciosamente ignora coleções com falha na requisição de detalhe
+                // Ignora coleções que falharam no detalhe
             }
         }
 
@@ -387,13 +399,9 @@ async function listWTSSTitleAndAttributes(lat, lon) {
     }
 }
 
-
-// ESTÁGIO 1: Seleção da Coleção (Novo Painel de Entrada)
+// ESTÁGIO 1: Seleção da Coleção
 window.showWTSSElectionPanel = async function (lat, lng) {
-    // 1. Busca os metadados (Estágio 0)
     const result = await listWTSSTitleAndAttributes(lat, lng);
-
-    // Armazena o resultado globalmente para o botão de limpeza
     window.currentWtssResult = { ...result, lat, lon: lng };
 
     if (result.error || result.collections.length === 0) {
@@ -422,47 +430,44 @@ window.showWTSSElectionPanel = async function (lat, lng) {
                 `).join('')}
             </div>
             <hr class="satelite-popup-divider wtss-divider">
+
+            <button onclick="exportAllWTSSCharts()" class="action-button secondary-button wtss-full-width-button export-button-spacing">
+                ⬇️ Exportar Gráficos WTSS
+            </button>
+
             <button onclick="clearWTSSEmpilhados(window.currentWtssResult)" class="action-button secondary-button wtss-full-width-button">
                 Limpar Todos os Gráficos
             </button>
+            <br>
         </div>
         <div id="wtss-graph-area"></div>
     `;
 
-    // Sobrescreve o conteúdo da aba
     document.getElementById('wtss-tab').innerHTML = panelContent;
     document.getElementById('wtss-tab').style.overflowY = 'auto';
-
-    // Garante que a aba esteja ativa e visível
     showTab('wtss-tab');
 };
-
 
 // ESTÁGIO 2: Seleção de Atributos
 window.showWTSSAttributeSelection = function (collectionTitle, lat, lng) {
     const collection = WTSS_COLLECTIONS_CACHE.find(c => c.title === collectionTitle);
-
     if (!collection) {
-        window.showWTSSElectionPanel(lat, lng); // Volta para a seleção
+        window.showWTSSElectionPanel(lat, lng);
         return;
     }
 
     const defaultAttribute = collection.availableAttributes.find(attr => attr.toUpperCase().includes('NDVI')) || collection.availableAttributes[0];
-
     const attributeSelector = `
         <select id="wtss-attribute-select" class="wtss-full-width-select">
             ${collection.availableAttributes.map(attr =>
-        `<option value="${attr}" ${attr === defaultAttribute ? 'selected' : ''}>${attr}</option>`
-    ).join('')}
+        `<option value="${attr}" ${attr === defaultAttribute ? 'selected' : ''}>${attr}</option>`).join('')}
         </select>
     `;
 
-    // --- CÁLCULO DE PERÍODO (01 ANOS) PARA EXIBIÇÃO NO PAINEL ---
     const now = new Date();
     const date01YearsAgo = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
     const calculated_start_date = date01YearsAgo.toISOString().split('T')[0];
     const calculated_end_date = now.toISOString().split('T')[0];
-    // -----------------------------------------------------------
 
     const controlsPanelHTML = `
         <div id="wtss-controls-panel" class="wtss-panel wtss-controls-sticky">
@@ -481,26 +486,27 @@ window.showWTSSAttributeSelection = function (collectionTitle, lat, lng) {
             <button onclick="clearWTSSEmpilhados(window.currentWtssResult)" class="action-button secondary-button wtss-full-width-button">
                 Limpar Todos os Gráficos
             </button>
+            <br>
+            <button onclick="exportAllWTSSCharts()" class="action-button secondary-button wtss-full-width-button">
+                Exportar Gráficos WTSS
+            </button>
             <hr class="satelite-popup-divider wtss-divider">
         </div>
     `;
 
-    // Apenas substitui a área de controle no topo (mantendo os gráficos abaixo)
     document.getElementById('wtss-controls-panel').outerHTML = controlsPanelHTML;
     document.getElementById('wtss-tab').scrollTop = 0;
 };
 
-
-// Função de limpeza de gráficos empilhados
+// Limpa gráficos empilhados
 window.clearWTSSEmpilhados = function () {
-    // Apenas limpa a área dos gráficos, mantendo o painel de controle
     const graphArea = document.getElementById('wtss-graph-area');
     if (graphArea) {
         graphArea.innerHTML = '';
     }
 }
 
-// Função que busca a série temporal WTSS e plota o gráfico
+// Busca série temporal WTSS e plota
 window.fetchWTSSTimeSeriesAndPlot = async function (lat, lon, coverage, attribute) {
     const friendlyName = `WTSS - ${coverage} (${attribute})`;
 
@@ -511,19 +517,16 @@ window.fetchWTSSTimeSeriesAndPlot = async function (lat, lon, coverage, attribut
     }
 
     const tempContent = `<div class="satelite-popup-header"><strong>Carregando Série Temporal WTSS...</strong></div><p>Atributo: ${attribute}</p><p>Aguarde...</p>`;
-    // Adiciona a mensagem de carregamento na área de gráficos
     graphArea.insertAdjacentHTML('beforeend', `<div id="wtss-loading-message">${tempContent}</div>`);
     document.getElementById('wtss-tab').scrollTop = 0;
 
     try {
         const baseUrl = "https://data.inpe.br/bdc/wtss/v4/";
 
-        // --- LÓGICA DE CÁLCULO DE PERÍODO (1 ANO) ---
         const now = new Date();
         const date01YearsAgo = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
         const calculated_end_date = now.toISOString().split('T')[0];
         const calculated_start_date = date01YearsAgo.toISOString().split('T')[0];
-        // ---------------------------------------------
 
         const timeSeriesUrl = `${baseUrl}time_series?coverage=${coverage}&attributes=${attribute}&start_date=${calculated_start_date}&end_date=${calculated_end_date}&latitude=${lat}&longitude=${lon}`;
 
@@ -542,80 +545,41 @@ window.fetchWTSSTimeSeriesAndPlot = async function (lat, lon, coverage, attribut
             throw new Error(`Nenhum dado encontrado para o atributo ${attribute} no período ${calculated_start_date} a ${calculated_end_date}.`);
         }
 
-        // Passa a timeline e o dado para a plotagem que empilha
         createWTSSTimeSeriesChart(friendlyName, attrData.values, timeSeriesData.result.timeline, attribute, coverage);
 
     } catch (error) {
         console.error('Erro ao plotar série temporal WTSS:', error);
 
-        // Remove a mensagem de loading e mostra o erro
         const loadingMessage = document.getElementById('wtss-loading-message');
         if (loadingMessage) loadingMessage.remove();
 
-        // Usando a classe CSS para erros
         document.getElementById('wtss-graph-area').insertAdjacentHTML('beforeend', `<div class="wtss-error-message wtss-error-margin"><strong>Erro WTSS:</strong> ${error.message}</div>`);
     }
 };
 
-// Inicializa controle global (idempotente)
-window.wtss_activeCharts = window.wtss_activeCharts || {};
-
-// Função unificada e completa que substitui as versões anteriores.
+// Cria gráfico WTSS (acordeão) com autoescala Y
 function createWTSSTimeSeriesChart(title, values, timeline, attribute, coverage) {
-    // Remove mensagem de loading IMEDIATAMENTE (se houver)
+    const uniqueId = `chart-${coverage}-${attribute}-${Date.now()}`;
+
+    const graphArea = document.getElementById('wtss-graph-area');
+    if (!graphArea) return; 
+
     const loadingMessage = document.getElementById('wtss-loading-message');
     if (loadingMessage) loadingMessage.remove();
 
-    // Gera uma chave única (mas estável) para prevenir duplicatas
-    // usamos cobertura + atributo como chave; sanitizamos para evitar chars problemáticos
-    const rawKey = `${coverage}::${attribute}`;
-    const chartKey = rawKey.replace(/[^a-zA-Z0-9\-_:.]/g, '_');
-
-    // Impede recriação de gráfico duplicado
-    if (window.wtss_activeCharts[chartKey]) {
-        console.warn(`Gráfico "${chartKey}" já existe — não será recriado.`);
-        // rola para o gráfico já existente para feedback ao usuário (se estiver presente)
-        const existingId = window.wtss_activeCharts[chartKey];
-        const el = document.getElementById(existingId);
-        if (el) {
-            const container = document.getElementById('wtss-tab');
-            if (container) {
-                container.scrollTop = el.offsetTop;
-                // opcional: abre o detalhe se for <details>
-                const details = el.querySelector('details');
-                if (details && !details.open) details.open = true;
-            }
-        }
-        return;
-    }
-
-    // Cria IDs únicos (timestamp ajuda a evitar colisões se o mesmo coverage/attribute for removido e recriado rapidamente)
-    const uniqueId = `chart-${chartKey}-${Date.now()}`;
-
-    const graphArea = document.getElementById('wtss-graph-area');
-    if (!graphArea) {
-        console.error('Área wtss-graph-area não encontrada — não foi possível criar o gráfico.');
-        return;
-    }
-
-    // Monta bloco do acordeão com botão de remoção
     const chartBlock = document.createElement('div');
     chartBlock.id = uniqueId;
-    chartBlock.classList.add('wtss-chart-block');
-
+    chartBlock.classList.add('wtss-chart-block'); 
+    
     chartBlock.innerHTML = `
-        <details id="details-${uniqueId}" class="wtss-details-container"
-            ontoggle="if(this.open) plotChartInAcordeon('${uniqueId}', ${JSON.stringify(title)}, ${JSON.stringify(attribute)})">
-            <summary class="wtss-summary-header" style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
-                <span>🛰️ ${title} (${attribute})</span>
-                <div style="display:flex; gap:6px; align-items:center;">
-                    <button class="wtss-remove-btn" title="Remover gráfico" style="background:transparent; border:none; cursor:pointer; font-size:1.0em;">❌</button>
-                </div>
+        <details id="details-${uniqueId}" class="wtss-details-container" ontoggle="if(this.open) plotChartInAcordeon('${uniqueId}', '${title}', '${attribute}')">
+            <summary class="wtss-summary-header">
+                🛰️ ${title} (${attribute})
             </summary>
             <div class="wtss-panel wtss-chart-container-border">
                 <p><b>Atributo:</b> ${attribute}</p>
                 <hr class="satelite-popup-divider">
-                <div class="wtss-canvas-wrapper" style="height:260px;">
+                <div class="wtss-canvas-wrapper">
                     <canvas id="canvas-${uniqueId}"></canvas>
                 </div>
                 <p class="chart-footer stac-chart-footer">Valores reais (escala padrão aplicada).</p>
@@ -623,116 +587,71 @@ function createWTSSTimeSeriesChart(title, values, timeline, attribute, coverage)
         </details>
     `;
 
-    // Botão remover — destrói gráfico, remove nó e limpa registro
-    const removeButton = chartBlock.querySelector('.wtss-remove-btn');
-    removeButton.addEventListener('click', (e) => {
-        e.stopPropagation();
-        // destrói chart se existir
-        const canvas = document.getElementById(`canvas-${uniqueId}`);
-        if (canvas && canvas._chart) {
-            try { canvas._chart.destroy(); } catch (err) { /* ignora */ }
-        }
-        // remove do registro global
-        try { delete window.wtss_activeCharts[chartKey]; } catch (err) { /* ignora */ }
-        // remove dados armazenados
-        try { delete window[`wtss_data_${uniqueId}`]; } catch (err) { /* ignora */ }
-        // remove o bloco do DOM
-        chartBlock.remove();
-        console.log(`Gráfico "${chartKey}" removido.`);
-    });
-
-    // Anexa o bloco e rola para topo dos controles
     graphArea.appendChild(chartBlock);
-    const wtssTab = document.getElementById('wtss-tab');
-    if (wtssTab) wtssTab.scrollTop = 0;
-
-    // Armazena os dados para plotagem sob demanda
+    document.getElementById('wtss-tab').scrollTop = 0; 
+    
     window[`wtss_data_${uniqueId}`] = { values, timeline, attribute, coverage };
 
-    // Marca como ativo
-    window.wtss_activeCharts[chartKey] = uniqueId;
-
-    // Define (ou sobrescreve) função global de plotagem do acordeão
-    window.plotChartInAcordeon = function(id, _title, attributeArg) {
+    window.plotChartInAcordeon = function(id, title, attribute) {
         const data = window[`wtss_data_${id}`];
-        if (!data) {
-            console.warn(`Dados WTSS não encontrados para id ${id}`);
-            return;
-        }
+        if (!data) return;
 
-        const canvas = document.getElementById(`canvas-${id}`);
-        if (!canvas) return;
+        const ctx = document.getElementById(`canvas-${id}`);
+        if (ctx && !ctx._chart) { 
+            const chartDatasets = [{
+                label: attribute,
+                data: data.timeline.map((date, i) => ({ x: date, y: (data.values[i] !== undefined && data.values[i] !== null) ? applyScale(data.values[i]) : null })),
+                borderColor: attribute.toUpperCase().includes('NDVI') ? 'green' : 'blue',
+                borderWidth: 2,
+                fill: false,
+                pointRadius: 3
+            }];
 
-        // se já foi plotado, evita reprojeto
-        if (canvas._chart) return;
+            // Autoescala Y (WTSS)
+            const ys = (data?.values || [])
+                .map(v => (v !== undefined && v !== null) ? applyScale(v) : null)
+                .filter(v => v !== null);
 
-        // monta dataset
-        const dataset = {
-            label: attributeArg,
-            data: data.timeline.map((date, i) => {
-                const raw = data.values[i];
-                const y = (raw !== undefined && raw !== null) ? (typeof applyScale === 'function' ? applyScale(raw) : raw) : null;
-                return { x: date, y };
-            }),
-            borderColor: attributeArg.toUpperCase().includes('NDVI') ? 'green' : (attributeArg.toUpperCase().includes('EVI') ? 'blue' : 'rgba(0,0,0,0.8)'),
-            borderWidth: 2,
-            fill: false,
-            pointRadius: 3,
-            tension: 0.1
-        };
+            let ymin = -2.5, ymax = 2.5;
+            if (ys.length) {
+                const minV = Math.min(...ys);
+                const maxV = Math.max(...ys);
+                const pad = Math.max((maxV - minV) * 0.1, 0.1);
+                ymin = minV - pad;
+                ymax = maxV + pad;
+            }
 
-        // calcula auto-escala y com padding
-        const ys = dataset.data.map(d => d.y).filter(v => v !== null && v !== undefined && !Number.isNaN(v));
-        let ymin = -2.5, ymax = 2.5;
-        if (ys.length) {
-            const minV = Math.min(...ys);
-            const maxV = Math.max(...ys);
-            const pad = Math.max((maxV - minV) * 0.1, 0.1);
-            ymin = minV - pad;
-            ymax = maxV + pad;
-        }
-
-        // Cria Chart.js
-        try {
-            const cfg = {
+            new Chart(ctx, {
                 type: 'line',
-                data: { datasets: [dataset] },
-                options: {
-                    responsive: true,
+                data: { labels: data.timeline, datasets: chartDatasets },
+                options: { 
+                    responsive: true, 
                     maintainAspectRatio: false,
-                    parsing: false,
+                    color: '#0001', 
                     scales: {
-                        x: {
-                            type: 'time',
-                            time: { unit: 'month', tooltipFormat: 'dd MMM yyyy' },
-                            title: { display: true, text: 'Data' },
+                        x: { 
+                            type: 'time', 
+                            time: { unit: 'month', tooltipFormat: 'dd MMM yyyy' }, 
+                            title: { display: true, text: 'Data', color: '#0001' },
+                            ticks: { color: '#0001' },
+                            grid: { color: 'rgba(0, 0, 0, 1)' }
                         },
-                        y: {
-                            title: { display: true, text: 'Valor (Escala aplicada)' },
-                            min: ymin,
-                            max: ymax
+                        y: { 
+                            title: { display: true, text: 'Valor (Escala aplicada)', color: '#0001' }, 
+                            ticks: { color: '#0001' },
+                            grid: { color: 'rgba(0, 0, 0, 1)' },
+                            min: ymin, max: ymax
                         }
-                    },
-                    plugins: {
-                        legend: { display: false }
                     }
                 }
-            };
-            canvas._chart = new Chart(canvas, cfg);
-        } catch (err) {
-            console.error('Falha ao criar Chart.js para WTSS:', err);
-            // remove possível loading/error UI
-            const loading = document.getElementById('wtss-loading-message');
-            if (loading) loading.remove();
-            // mostra erro na área de gráficos
-            graphArea.insertAdjacentHTML('beforeend', `<div class="wtss-error-message wtss-error-margin"><strong>Erro ao renderizar gráfico:</strong> ${err.message}</div>`);
+            });
         }
     };
 }
 
-// ========================================================
-// CLIQUE NO MAPA (STAC + WTSS) - LÓGICA DE INTERAÇÃO
-// ========================================================
+// --------------------------------------
+// CLIQUE NO MAPA (STAC + WTSS)
+// --------------------------------------
 map.on('click', async function (e) {
     const { lat, lng } = e.latlng;
 
@@ -745,7 +664,7 @@ map.on('click', async function (e) {
     showInfoPanelSTAC("<strong>📍 Ponto selecionado</strong><br>Buscando produtos STAC...");
 
     try {
-        // --- LÓGICA STAC: APENAS METADADOS ---
+        // STAC: apenas metadados
         const satelitesQuery = selectedTags.map(tag => sateliteIdMap[tag]).filter(id => id).join(',');
         const response = await fetch(`http://localhost:3000/api/geodata?lat=${lat}&lng=${lng}&satelites=${satelitesQuery}`);
         if (!response.ok) throw new Error(`Erro ao buscar metadados STAC: ${response.status}`);
@@ -758,17 +677,12 @@ map.on('click', async function (e) {
                 const popularName = productNameToPopularName[item.productName] || item.productName;
                 const availableBands = (item.variables || []).map(v => v.name || v.id).filter(Boolean);
 
-                // === STAC: APENAS METADADOS ===
-               
                 panelContent += `
-                  <div class="product-info-block">
-                        <strong class="product-title">🛰️ ${popularName}</strong>
-                            <p class="product-description">${item.description || item.title || 'Sem descrição disponível.'}</p>
-                            <p class="product-bands"><strong>Bandas:</strong> ${availableBands.join(', ') || 'N/A'}</p>
-                        </div>
-    </div>`;
-
-
+                    <div class="product-info-block">
+                        <strong class="product-title">🛰️ ${popularName}</strong>
+                        <p class="product-description">${item.description || item.title || 'Sem descrição disponível.'}</p>
+                        <p class="product-bands"><strong>Bandas:</strong> ${availableBands.join(', ') || 'N/A'}</p>
+                    </div>`;
             });
         } else {
             panelContent += `<p>Nenhum produto STAC encontrado para os filtros ativos.</p>`;
@@ -776,20 +690,21 @@ map.on('click', async function (e) {
 
         showInfoPanelSTAC(panelContent);
 
-        // --- LÓGICA WTSS CORRIGIDA: Inicia a seleção de coleções ---
+        // WTSS: inicia seleção de coleções
         await showWTSSElectionPanel(lat, lng);
 
     } catch (error) {
         console.error('Erro geral no clique do mapa:', error);
         showInfoPanelSTAC(`<div class="text-error"><strong>Erro Geral:</strong> ${error.message}</div>`);
 
-        // Tenta inicializar o painel WTSS mesmo após um erro STAC
+        // Ainda tenta inicializar o painel WTSS
         await showWTSSElectionPanel(lat, lng);
     }
 });
-// ========================================================
+
+// --------------------------------------
 // EVENTOS DE INPUT
-// ========================================================
+// --------------------------------------
 input.addEventListener("focus", () => showSuggestions(""));
 input.addEventListener("input", () => showSuggestions(input.value.toLowerCase()));
 input.addEventListener("keydown", (e) => {
@@ -807,37 +722,23 @@ document.addEventListener("click", function (e) {
         suggestionsBox.innerHTML = "";
     }
 });
-// ========================================================
+
+// --------------------------------------
 // TUTORIAL INTERATIVO AO INICIAR O SITE
-// ========================================================
-
-
-// Passos do tutorial
+// --------------------------------------
 const tutorialSteps = [
-  {
-    text: "🌍 Este é o mapa interativo do Aetheris. Clique em qualquer ponto para explorar dados de satélites.",
-  },
-  {
-    text: "🔍 Use o campo de busca na lateral para selecionar os satélites ou produtos que deseja visualizar.",
-  },
-  {
-    text: "📊 Após clicar no mapa, o painel à direita mostrará os produtos disponíveis e séries temporais.",
-  },
-  {
-    text: "✅ Dica: Clique nas bandas para ver gráficos de NDVI e EVI ao longo do tempo.",
-  },
-  {
-    text: "✨ Pronto! Agora explore o mapa livremente. Divirta-se com o Aetheris!",
-  }
+  { text: "🌍 Este é o mapa interativo do Aetheris. Clique em qualquer ponto para explorar dados de satélites." },
+  { text: "🔍 Use o campo de busca na lateral para selecionar os satélites ou produtos que deseja visualizar." },
+  { text: "📊 Após clicar no mapa, o painel à direita mostrará os produtos disponíveis e séries temporais." },
+  { text: "✅ Dica: Clique nas bandas para ver gráficos de NDVI e EVI ao longo do tempo." },
+  { text: "✨ Pronto! Agora explore o mapa livremente. Divirta-se com o Aetheris!" }
 ];
-
 
 let currentStep = 0;
 const tutorialOverlay = document.getElementById('tutorial-overlay');
 const tutorialNextBtn = document.getElementById('tutorial-next');
-const showTutorialBtn = document.getElementById('show-tutorial'); // NOVO: Captura o botão da sidebar
+const showTutorialBtn = document.getElementById('show-tutorial');
 
-// Função para atualizar o conteúdo do passo
 function updateTutorialStep() {
     if (!tutorialOverlay || currentStep >= tutorialSteps.length) return;
     const box = tutorialOverlay.querySelector(".tutorial-box");
@@ -845,12 +746,11 @@ function updateTutorialStep() {
     tutorialNextBtn.textContent = currentStep === tutorialSteps.length - 1 ? "Concluir ✅" : "Próximo ➤";
 }
 
-// Mostra o tutorial só na primeira visita
 if (!localStorage.getItem("tutorialCompleted")) {
   tutorialOverlay.classList.remove("hidden");
   updateTutorialStep();
 }
-// Função para exibir o tutorial (usada pelo novo botão na sidebar)
+
 window.showTutorial = function() {
     if (tutorialOverlay) {
         tutorialOverlay.classList.remove("hidden");
@@ -863,14 +763,54 @@ tutorialNextBtn.addEventListener("click", () => {
   currentStep++;
   if (currentStep < tutorialSteps.length) {
     updateTutorialStep();
-     // --- Anexar Listener do Botão "Ver Instruções" na Sidebar ---
-        if (showTutorialBtn) {
-            showTutorialBtn.addEventListener("click", window.showTutorial);
-        }
+    if (showTutorialBtn) {
+        showTutorialBtn.addEventListener("click", window.showTutorial);
+    }
   } else {
     tutorialOverlay.classList.add("hidden");
-    localStorage.setItem("tutorialCompleted", "true"); // não mostrar de novo
+    localStorage.setItem("tutorialCompleted", "true");
   }
- 
 });
 
+// --------------------------------------
+// EXPORTAÇÃO DE GRÁFICOS WTSS (ZIP com PNGs)
+// --------------------------------------
+async function exportAllWTSSCharts() {
+    const canvases = document.querySelectorAll('#wtss-tab canvas');
+    if (canvases.length === 0) {
+        alert("Nenhum gráfico WTSS para exportar.");
+        return;
+    }
+
+    // Carrega JSZip dinamicamente se necessário
+    if (typeof JSZip === "undefined") {
+        await loadJSZip();
+    }
+
+    const zip = new JSZip();
+    let index = 1;
+
+    canvases.forEach(canvas => {
+        const imgData = canvas.toDataURL("image/png");
+        const base64 = imgData.split(',')[1];
+        zip.file(`grafico_wtss_${index}.png`, base64, { base64: true });
+        index++;
+    });
+
+    const blob = await zip.generateAsync({ type: "blob" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "graficos_wtss.zip";
+    link.click();
+    URL.revokeObjectURL(link.href);
+}
+
+async function loadJSZip() {
+    return new Promise((resolve, reject) => {
+        const script = document.createElement("script");
+        script.src = "https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js";
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+    });
+}

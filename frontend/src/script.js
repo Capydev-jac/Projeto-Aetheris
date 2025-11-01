@@ -1,4 +1,3 @@
-
 // ==============================
 // Aetheris - Script Unificado
 // Mapa + STAC + WTSS (com autoescala e exportação de gráficos)
@@ -337,6 +336,61 @@ function createChart(lat, lng, title, timeSeriesData) {
 
 // --------------------------------------
 // WTSS - LÓGICA MULTI-ESTÁGIO E COMPARAÇÃO
+
+// === Helper: "NDVI,EVI" -> ["NDVI","EVI"] ===
+function parseAttributesList(value) {
+    if (Array.isArray(value)) return value.filter(Boolean);
+    return String(value || "")
+      .split(",")
+      .map(s => s.trim())
+      .filter(Boolean);
+}
+
+// ==== HELPERS: Fetch por atributo em múltiplas fontes (WTSS -> fallback STAC) ====
+async function fetchWTSSSingleAttr(coverage, lat, lon, startISO, endISO, attribute) {
+  const baseUrl = "https://data.inpe.br/bdc/wtss/v4/";
+  const url = `${baseUrl}time_series?coverage=${encodeURIComponent(coverage)}&attributes=${encodeURIComponent(attribute)}&start_date=${encodeURIComponent(startISO)}&end_date=${encodeURIComponent(endISO)}&latitude=${encodeURIComponent(lat)}&longitude=${encodeURIComponent(lon)}`;
+  try {
+    const r = await fetch(url);
+    if (!r.ok) throw new Error('WTSS status ' + r.status);
+    const j = await r.json();
+    const attrs = (j && j.result && Array.isArray(j.result.attributes)) ? j.result.attributes : [];
+    const found = attrs.find(a => a.attribute === attribute);
+    const values = found && Array.isArray(found.values) ? found.values : [];
+    const timeline = (j && j.result && Array.isArray(j.result.timeline)) ? j.result.timeline : [];
+    return { source: 'WTSS', attribute, values, timeline };
+  } catch (e) {
+    return { source: 'WTSS', attribute, values: [], timeline: [] };
+  }
+}
+
+// Backend STAC: /api/timeseries?lat=..&lng=..&coverage=..&bands=ATTRIBUTE
+async function fetchSTACSingleAttr(coverage, lat, lon, startISO, endISO, attribute) {
+  try {
+    const url = `http://localhost:3000/api/timeseries?lat=${encodeURIComponent(lat)}&lng=${encodeURIComponent(lon)}&coverage=${encodeURIComponent(coverage)}&bands=${encodeURIComponent(attribute)}&start=${encodeURIComponent(startISO)}&end=${encodeURIComponent(endISO)}`;
+    const r = await fetch(url);
+    if (!r.ok) throw new Error('STAC status ' + r.status);
+    const j = await r.json();
+    const attrs = Array.isArray(j.attributes) ? j.attributes : [];
+    const timeline = Array.isArray(j.timeline) ? j.timeline : [];
+    let values = [];
+    if (attrs.includes(attribute) && Array.isArray(j.values)) {
+      values = j.values.map(v => (v && v[attribute] != null) ? v[attribute] : null);
+    }
+    return { source: 'STAC', attribute, values, timeline };
+  } catch (e) {
+    return { source: 'STAC', attribute, values: [], timeline: [] };
+  }
+}
+
+// Tenta WTSS; se vazio, tenta STAC; retorna a primeira série válida.
+async function fetchAnySingleAttr(coverage, lat, lon, startISO, endISO, attribute) {
+  const wtss = await fetchWTSSSingleAttr(coverage, lat, lon, startISO, endISO, attribute);
+  if (wtss.values && wtss.values.length) return wtss;
+  const stac = await fetchSTACSingleAttr(coverage, lat, lon, startISO, endISO, attribute);
+  return stac;
+}
+
 // --------------------------------------
 async function listWTSSTitleAndAttributes(lat, lon) {
     const baseUrl = "https://data.inpe.br/bdc/wtss/v4/";
@@ -449,6 +503,17 @@ window.showWTSSElectionPanel = async function (lat, lng) {
 };
 
 // ESTÁGIO 2: Seleção de Atributos
+
+// === Helper: lê seleções do <select id="wtss-attribute-select"> como CSV (ex.: "NDVI,EVI") ===
+function getSelectedWTSSAttributes() {
+    const sel = document.getElementById('wtss-attribute-select');
+    if (!sel) return '';
+    if (sel.multiple) {
+        return Array.from(sel.selectedOptions).map(o => o.value).filter(Boolean).join(',');
+    }
+    return sel.value || '';
+}
+
 window.showWTSSAttributeSelection = function (collectionTitle, lat, lng) {
     const collection = WTSS_COLLECTIONS_CACHE.find(c => c.title === collectionTitle);
     if (!collection) {
@@ -458,10 +523,13 @@ window.showWTSSAttributeSelection = function (collectionTitle, lat, lng) {
 
     const defaultAttribute = collection.availableAttributes.find(attr => attr.toUpperCase().includes('NDVI')) || collection.availableAttributes[0];
     const attributeSelector = `
-        <select id="wtss-attribute-select" class="wtss-full-width-select">
+        <select id="wtss-attribute-select" class="wtss-full-width-select" multiple title="Segure Ctrl (Windows/Linux) ou ⌘ Command (Mac) para selecionar mais de um.">
             ${collection.availableAttributes.map(attr =>
         `<option value="${attr}" ${attr === defaultAttribute ? 'selected' : ''}>${attr}</option>`).join('')}
         </select>
+        <p style="margin: 6px 0 0; font-size: 0.85em; opacity: 0.9;">
+          💡 <b>Dica:</b> para selecionar <u>mais de um</u> atributo, mantenha pressionado <b>Ctrl</b> (Windows/Linux) ou <b>⌘ Command</b> (Mac) ao clicar nas opções.
+        </p>
     `;
 
     const now = new Date();
@@ -479,7 +547,7 @@ window.showWTSSAttributeSelection = function (collectionTitle, lat, lng) {
             <p><b>Período Solicitado:</b> ${calculated_start_date} → ${calculated_end_date}</p>
             <p><b>Atributo:</b> ${attributeSelector}</p>
             
-            <button onclick="fetchWTSSTimeSeriesAndPlot(${lat}, ${lng}, '${collectionTitle}', document.getElementById('wtss-attribute-select').value)"
+            <button onclick="fetchWTSSTimeSeriesAndPlot(${lat}, ${lng}, '${collectionTitle}', getSelectedWTSSAttributes())"
                 class="action-button wtss-full-width-button plot-button-spacing">
                 Plotar Série Temporal
             </button>
@@ -497,7 +565,6 @@ window.showWTSSAttributeSelection = function (collectionTitle, lat, lng) {
     document.getElementById('wtss-controls-panel').outerHTML = controlsPanelHTML;
     document.getElementById('wtss-tab').scrollTop = 0;
 };
-
 // Limpa gráficos empilhados
 window.clearWTSSEmpilhados = function () {
     const graphArea = document.getElementById('wtss-graph-area');
@@ -528,8 +595,50 @@ window.fetchWTSSTimeSeriesAndPlot = async function (lat, lon, coverage, attribut
         const calculated_end_date = now.toISOString().split('T')[0];
         const calculated_start_date = date01YearsAgo.toISOString().split('T')[0];
 
-        const timeSeriesUrl = `${baseUrl}time_series?coverage=${coverage}&attributes=${attribute}&start_date=${calculated_start_date}&end_date=${calculated_end_date}&latitude=${lat}&longitude=${lon}`;
+        // === MULTI-ATRIBUTOS (1 por atributo; se WTSS vazio, tenta STAC local) ===
+        const requestedAttrs = parseAttributesList(attribute);
+        if (requestedAttrs.length > 1) {
+            const promises = requestedAttrs.map(function(attr) {
+                return fetchAnySingleAttr(coverage, lat, lon, calculated_start_date, calculated_end_date, attr);
+            });
+            try {
+                const results = await Promise.all(promises);
+                const mapAttrToValues = {};
+                // timeline de referência = mais curta entre as válidas
+                let candidateTimelines = results.map(r => ({ attr: r.attribute, tl: r.timeline || [], len: (r.timeline || []).length }))
+                                                .filter(o => o.len > 0);
+                let refTimeline = (candidateTimelines.length > 0)
+                                  ? candidateTimelines.reduce((a,b) => a.len <= b.len ? a : b).tl
+                                  : [];
 
+                results.forEach(function(r) {
+                    if (Array.isArray(r.values) && r.values.length) {
+                        const cut = refTimeline.length ? r.values.slice(0, refTimeline.length) : r.values;
+                        mapAttrToValues[r.attribute] = cut;
+                    }
+                });
+
+                if (Object.keys(mapAttrToValues).length) {
+                    createWTSSTimeSeriesChartMulti(
+                        `WTSS - ${coverage}`,
+                        mapAttrToValues,
+                        refTimeline,
+                        requestedAttrs,
+                        coverage
+                    );
+                    const loadingMessage = document.getElementById('wtss-loading-message');
+                    if (loadingMessage) loadingMessage.remove();
+                    return; // evita cair no fluxo single
+                }
+            } catch (e) {
+                console.error('[WTSS multi] falha nas requisições múltiplas (WTSS/STAC):', e);
+                // segue para fluxo single
+            }
+        }
+        // === FIM MULTI-ATRIBUTOS ===
+
+        // Single atributo (WTSS direto)
+        const timeSeriesUrl = `${baseUrl}time_series?coverage=${coverage}&attributes=${attribute}&start_date=${calculated_start_date}&end_date=${calculated_end_date}&latitude=${lat}&longitude=${lon}`;
         const timeSeriesResponse = await fetch(timeSeriesUrl);
         if (!timeSeriesResponse.ok) {
             const errorDetails = await timeSeriesResponse.text();
@@ -648,6 +757,134 @@ function createWTSSTimeSeriesChart(title, values, timeline, attribute, coverage)
         }
     };
 }
+
+
+// ===  gráfico WTSS com múltiplos atributos no MESMO canvas ===
+function createWTSSTimeSeriesChartMulti(title, attrValuesMap, timeline, attributes, coverage) {
+  const uniqueId = `chart-multi-${coverage}-${Date.now()}`;
+  const graphArea = document.getElementById('wtss-graph-area');
+  if (!graphArea) return;
+
+  const loadingMessage = document.getElementById('wtss-loading-message');
+  if (loadingMessage) loadingMessage.remove();
+
+  const chartBlock = document.createElement('div');
+  chartBlock.id = uniqueId;
+  chartBlock.classList.add('wtss-chart-block');
+
+  const attrsCsv = attributes.join(',');
+
+  chartBlock.innerHTML =
+    '<details id="details-' + uniqueId + '" class="wtss-details-container" ' +
+      'ontoggle="if(this.open) plotMultiChartInAcordeon(\'' + uniqueId + '\')">' +
+      '<summary class="wtss-summary-header">🛰️ ' + title + ' (' + attributes.join(', ') + ')</summary>' +
+      '<div class="wtss-panel wtss-chart-container-border">' +
+        '<p><b>Atributos:</b> ' + attributes.join(', ') + '</p>' +
+        '<hr class="satelite-popup-divider">' +
+        '<div class="wtss-canvas-wrapper">' +
+          '<canvas id="canvas-' + uniqueId + '"></canvas>' +
+        '</div>' +
+        '<p class="chart-footer stac-chart-footer">Valores reais (escala padrão aplicada).</p>' +
+      '</div>' +
+    '</details>';
+
+  graphArea.appendChild(chartBlock);
+  document.getElementById('wtss-tab').scrollTop = 0;
+
+  // cache p/ o plot
+  window['wtss_multi_' + uniqueId] = { attrValuesMap, timeline, attributes, coverage };
+
+  // Plota imediatamente e abre o <details>
+  const det = document.getElementById('details-' + uniqueId);
+  if (det) det.open = true;
+  plotMultiChartInAcordeon(uniqueId);
+}
+
+window.plotMultiChartInAcordeon = function (id) {
+  const data = window['wtss_multi_' + id];
+  if (!data) return;
+  const canvas = document.getElementById('canvas-' + id);
+  if (!canvas) return;
+
+  if (canvas._chart) { try { canvas._chart.destroy(); } catch(e){} }
+
+  // comprimento comum mínimo entre timeline e cada série
+  let minLen = Array.isArray(data.timeline) ? data.timeline.length : 0;
+  data.attributes.forEach(function(attr) {
+    const arr = data.attrValuesMap[attr] || [];
+    minLen = minLen ? Math.min(minLen, arr.length) : arr.length;
+  });
+  if (!minLen) {
+    const area = canvas.closest('.wtss-panel') || document.getElementById('wtss-graph-area');
+    if (area) {
+      area.insertAdjacentHTML('beforeend',
+        '<div class="wtss-error-margin"><strong>Obs.:</strong> Sem pontos válidos para a combinação atual (verifique datas/atributos).</div>');
+    }
+    return;
+  }
+
+  const labels = (Array.isArray(data.timeline) && data.timeline.length >= minLen)
+    ? data.timeline.slice(0, minLen)
+    : [];
+
+  const datasets = data.attributes.map(function(attr, index) {
+    const raw = (data.attrValuesMap[attr] || []).slice(0, minLen);
+    const scaled = raw.map(function(v) {
+      return (v !== undefined && v !== null)
+        ? (typeof applyScale === 'function' ? applyScale(v) : v)
+        : null;
+    });
+
+    let color = 'hsl(' + ((index * 60) % 360) + ', 70%, 50%)';
+    const U = String(attr).toUpperCase();
+    if (U.includes('NDVI')) color = 'rgba(0, 128, 0, 1)';
+    else if (U.includes('EVI')) color = 'rgba(0, 0, 255, 1)';
+
+    return {
+      label: attr,
+      data: scaled,
+      borderColor: color,
+      borderWidth: 2,
+      fill: false,
+      tension: 0.1,
+      pointRadius: 3,
+      pointHoverRadius: 5,
+      pointBackgroundColor: '#fff',
+      pointBorderColor: color,
+      pointBorderWidth: 2
+    };
+  });
+
+  const allY = [];
+  datasets.forEach(function(ds) { ds.data.forEach(function(y) { if (y != null) allY.push(y); }); });
+  let ymin = -2.5, ymax = 2.5;
+  if (allY.length) {
+    const minV = Math.min.apply(Math, allY);
+    const maxV = Math.max.apply(Math, allY);
+    const pad = Math.max((maxV - minV) * 0.1, 0.1);
+    ymin = minV - pad;
+    ymax = maxV + pad;
+  }
+
+  canvas._chart = new Chart(canvas, {
+    type: 'line',
+    data: { labels: labels, datasets: datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      parsing: true,
+      plugins: {
+        legend: { display: true, position: 'top' },
+        tooltip: { enabled: true }
+      },
+      scales: {
+        x: { type: 'time', time: { unit: 'month', tooltipFormat: 'dd MMM yyyy' } },
+        y: { min: ymin, max: ymax }
+      },
+      interaction: { mode: 'nearest', intersect: false }
+    }
+  });
+};
 
 // --------------------------------------
 // CLIQUE NO MAPA (STAC + WTSS)

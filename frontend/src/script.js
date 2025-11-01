@@ -918,7 +918,6 @@ map.on('click', async function (e) {
                     <div class="product-info-block">
                         <strong class="product-title">🛰️ ${popularName}</strong>
                         <p class="product-description">${item.description || item.title || 'Sem descrição disponível.'}</p>
-                        <p class="product-bands"><strong>Bandas:</strong> ${availableBands.join(', ') || 'N/A'}</p>
                     </div>`;
             });
         } else {

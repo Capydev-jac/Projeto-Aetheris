@@ -484,3 +484,73 @@ html {
 .wtss-error-margin {
   margin-top: 10px;
 }
+
+/* Abas de satélite */
+.satellite-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.satellite-tab {
+  background: #1a1d2b;
+  color: #c9d1d9;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid #2d3250;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.satellite-tab:hover {
+  background: #2b2f44;
+}
+
+.satellite-tab.active {
+  background: #3b82f6;
+  color: #fff;
+}
+
+/* Listagem de coleções */
+.collection-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.collection-item {
+  background: #141724;
+  border-radius: 8px;
+  padding: 10px;
+  cursor: pointer;
+  transition: 0.2s;
+  border: 1px solid #1f2338;
+}
+
+.collection-item:hover {
+  background: #20243a;
+}
+
+.stac-accordion details {
+  margin-bottom: 8px;
+  border-radius: 5px;
+  background: #021120;
+  padding: 4px 8px;
+}
+.stac-accordion summary {
+  cursor: pointer;
+  font-size: 1.05em;
+  padding: 4px 0;
+}
+.stac-accordion .product-info-block {
+  margin-top: 6px;
+}
+
+#wtss-clear-all {
+  background-color: #fa3c3c; /* cor desejada */
+  color: #ffffff;
+  border: none;
+}
+#wtss-clear-all:hover {
+  background-color: #ff4d4d; /* cor ao passar o mouse */
+}

@@ -270,9 +270,9 @@ function createChart(lat, lng, title, timeSeriesData) {
         if (band.toUpperCase().includes('NDVI')) color = 'rgba(0, 128, 0, 1)';
         else if (band.toUpperCase().includes('EVI')) color = 'rgba(0, 0, 255, 1)';
         return {
-            label: band,
-            data: timeSeriesData.timeline.map((date, i) => ({ x: date, y: scaledData[i] })),
-            borderColor: color,
+           label: attribute,
+    data: timeline.map((date, i) => ({ x: date, y: (values[i] !== undefined && values[i] !== null) ? applyScale(values[i]) : null })),
+            borderColor: band.toUpperCase().includes('NDVI') ? 'rgba(0, 80, 0, 1)' : (band.toUpperCase().includes('EVI') ? 'rgba(50, 50, 150, 1)' : '#333333'),
             borderWidth: 2,
             fill: false,
             tension: 0.1,
@@ -320,12 +320,12 @@ function createChart(lat, lng, title, timeSeriesData) {
                         time: { unit: 'month', tooltipFormat: 'dd MMM yyyy' },
                         title: { display: true, text: 'Data', color: '#0001' },
                         ticks: { color: '#0001' },
-                        grid: { color: 'rgba(0, 0, 0, 1)' }
+                        grid: { color: 'rgba(0, 0, 0, 1)', borderDash: [2, 2] }
                     },
                     y: {
                         title: { display: true, text: 'Valor (Escala aplicada)', color: '#0001' },
                         ticks: { color: '#0001' },
-                        grid: { color: 'rgba(0,0,0,1)' },
+                        grid: { color: 'rgba(0,0,0,1)', borderDash: [2, 2] },
                         min: yMin,
                         max: yMax
                     }
@@ -664,12 +664,12 @@ function createWTSSTimeSeriesChart(title, values, timeline, attribute, coverage)
                             time: { unit: 'month', tooltipFormat: 'dd MMM yyyy' },
                             title: { display: true, text: 'Data', color: '#111' },
                             ticks: { color: '#111' },
-                            grid: { color: 'rgba(1,1,1,0.1)' }
+                            grid: { color: '#111' }
                         },
                         y: {
                             title: { display: true, text: 'Valor (Escala aplicada)', color: '#111' },
                             ticks: { color: '#111' },
-                            grid: { color: 'rgba(1,1,1,0.1)' },
+                            grid: { color: '#111' },
                             min: ymin,
                             max: ymax
                         }
@@ -771,7 +771,10 @@ window.showSelectedWTSSInModal = function () {
                     maintainAspectRatio: false,
                     scales: {
                         x: { type: 'time', time: { unit: 'month' } },
-                        y: { min: ymin, max: ymax }
+                        y: { min: ymin, max: ymax },
+                        grid: { color: '#111',
+                            borderDash: [2, 2]
+                         }
                     }
                 }
             });

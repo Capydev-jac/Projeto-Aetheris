@@ -10,10 +10,6 @@ html {
   overflow-x: hidden;
 }
 
-.hidden {
-  display: none !important;
-}
-
 /* ========================================================
     HEADER 
    ======================================================== */
@@ -70,25 +66,25 @@ html {
 /* ========================================================
    MAPA
    ======================================================== */
-#map {
-  height: calc(100% - 50px);
-  width: 100%;
-  position: absolute;
-  top: 50px;
-  left: 0;
-  z-index: 0;
-}
+   #map {
+    height: calc(100% - 50px);
+    width: 100%;
+    position: absolute;
+    top: 50px;
+    left: 0;
+    z-index: 0;
+  }
 /* ========================================================
    SIDEBAR
    ===================================================== */
 
 #sidebar .site-description {
-  font-size: 0.85rem;
-  margin-top: -10px;
-  margin-bottom: 20px;
-  color: #e9edf3;
-  padding-bottom: 10px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 0.85rem;
+    margin-top: -10px; 
+    margin-bottom: 20px;
+    color: #e9edf3; 
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1); 
 }
 
 #sidebar {
@@ -179,11 +175,11 @@ html {
 #tag-input {
   width: 100%;
   padding: 10px 12px;
-  box-sizing: border-box;
+  box-sizing: border-box; 
   border-radius: 6px;
   font-size: 14px;
 }
-
+  
 #tag-input::placeholder {
   color: #aaa;
 }
@@ -232,25 +228,26 @@ html {
 
 /* 1. CONTÊINER DO CANVAS: Aumenta a altura para dar mais espaço de visualização vertical */
 .wtss-canvas-wrapper {
-  position: relative;
-  height: 400px; /* Aumentado de 300px para 400px ou 450px */
-  width: 100%;
-  background-color: #ffffff;
-  padding: 15px; /* Opcional: para dar um pequeno espaçamento interno */
-  box-sizing: border-box; /* Garante que padding não aumente a largura/altura total */
+    position: relative;
+    height: 400px; /* Aumentado de 300px para 400px ou 450px */
+    width: 100%;
+    background-color: #FFFFFF; 
+    padding: 15px; /* Opcional: para dar um pequeno espaçamento interno */
+    box-sizing: border-box; /* Garante que padding não aumente a largura/altura total */
 }
+ 
 
 /* 2. CONTÊINER DO GRÁFICO: Aumenta o espaçamento acima e abaixo do canvas/header */
 .wtss-chart-container-border {
-  border-top: 1px solid #0f0f0f;
-  margin-top: 10px; /* Aumentado para dar mais respiro em relação ao item de cima */
-  padding-top: 15px; /* Aumentado o padding superior */
-  padding-bottom: 25px; /* Adiciona padding na parte de baixo do gráfico (se não estiver em outra regra) */
+    border-top: 1px solid #0f0f0f; 
+    margin-top: 10px; /* Aumentado para dar mais respiro em relação ao item de cima */
+    padding-top: 15px; /* Aumentado o padding superior */
+    padding-bottom: 25px; /* Adiciona padding na parte de baixo do gráfico (se não estiver em outra regra) */
 }
 
 /* 3. BLOCO WTSS GERAL: Garante que os elementos de texto tenham espaço */
 .wtss-panel {
-  padding: 15px 0; /* Exemplo: Padding vertical */
+    padding: 15px 0; /* Exemplo: Padding vertical */
 }
 
 #info-panel-right.visible {
@@ -355,11 +352,18 @@ html {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.7);
+  background-color: rgba(0, 0, 0, 0.7);
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
   z-index: 2000;
+  transition: opacity 0.4s ease;
+}
+
+.tutorial-overlay.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
 }
 
 .tutorial-box {
@@ -371,30 +375,11 @@ html {
   text-align: center;
   box-shadow: 0 5px 25px rgba(0, 0, 0, 0.3);
   animation: fadeInUp 0.4s ease;
-  position: relative;
-}
-
-.tutorial-close-btn {
-  position: absolute;
-  top: 10px;
-  right: 15px;
-  background: transparent;
-  border: none;
-  font-size: 28px;
-  font-weight: bold;
-  color: #aaa;
-  cursor: pointer;
-  line-height: 1;
-  padding: 0 5px;
-}
-.tutorial-close-btn:hover {
-  color: #333;
 }
 
 .tutorial-box h2 {
   margin-top: 0;
   font-size: 22px;
-  padding-right: 25px;
 }
 
 .tutorial-box p {
@@ -403,33 +388,20 @@ html {
   margin-bottom: 20px;
 }
 
-.tutorial-buttons {
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-  margin-top: 25px;
-}
-
-.tutorial-button {
-  flex: 1;
+.tutorial-box button {
+  background-color: #4a59ff;
   border: none;
   color: #fff;
-  padding: 10px 15px;
+  padding: 10px 20px;
   border-radius: 6px;
   font-size: 15px;
   cursor: pointer;
-  transition: background-color 0.3s, opacity 0.3s, visibility 0.3s;
-  background-color: #4a59ff;
+  transition: background-color 0.3s;
 }
 
-.tutorial-button:hover {
+.action-button:hover,
+.tutorial-box button:hover {
   background-color: #6d7aff;
-}
-
-.tutorial-button.hidden {
-  visibility: hidden;
-  opacity: 0;
-  pointer-events: none;
 }
 
 @keyframes fadeInUp {
@@ -477,7 +449,7 @@ html {
   display: block;
 }
 .aetheris-highlight {
-  color: #4a59ff;
+    color: #4a59ff;
 }
 
 .wtss-full-width-select {

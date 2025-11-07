@@ -1017,16 +1017,23 @@ window.showSelectedWTSSInModal = function () {
             },
           ],
         },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            x: { type: "time", time: { unit: "month" } },
-            y: { min: ymin, max: ymax },
-            grid: { color: "#111", borderDash: [2, 2] },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    type: 'time',
+                    time: { unit: 'month' },
+                    grid: { color: '#111', borderDash: [2, 2] }
+                },
+                y: {
+                    min: ymin,
+                    max: ymax,
+                    grid: { color: '#111', borderDash: [2, 2] }
+                },
+            },
           },
-        },
-      });
+        });
       window.wtss_modal_charts.push(chart);
     } else {
       // se não há dados salvos, cria placeholder

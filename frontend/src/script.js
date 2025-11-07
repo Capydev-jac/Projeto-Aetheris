@@ -786,32 +786,37 @@ window.fetchWTSSTimeSeriesAndPlot = async function (
 
 // ======================================
 // FUNÇÃO DE PLOTAGEM WTSS (com autoescala e acordeão)
-//
-// ✅ LÓGICA ATUALIZADA: Plota imediatamente para estar pronto para a exportação manual.
 // ======================================
-function createWTSSTimeSeriesChart(title, values, timeline, attribute, coverage) {
-    // sanitize unique id to safe HTML id
-    const uniqueId = sanitizeId(`chart-${coverage}-${attribute}-${Date.now()}`);
-    const graphArea = document.getElementById('wtss-graph-area');
-    if (!graphArea) return;
- 
-    // Remove mensagem de carregamento, se existir
-    const loadingMessage = document.getElementById('wtss-loading-message');
-    if (loadingMessage) loadingMessage.remove();
- 
-    // Cria bloco HTML do gráfico WTSS (acordeão) com checkbox
-    const chartBlock = document.createElement('div');
-    chartBlock.id = uniqueId;
-    chartBlock.classList.add('wtss-chart-block');
-    chartBlock.innerHTML = `
-        <details id="details-${uniqueId}" class="wtss-details-container">
+function createWTSSTimeSeriesChart(
+  title,
+  values,
+  timeline,
+  attribute,
+  coverage
+) {
+  // sanitize unique id to safe HTML id
+  const uniqueId = sanitizeId(`chart-${coverage}-${attribute}-${Date.now()}`);
+  const graphArea = document.getElementById("wtss-graph-area");
+  if (!graphArea) return;
+
+  // Remove mensagem de carregamento, se existir
+  const loadingMessage = document.getElementById("wtss-loading-message");
+  if (loadingMessage) loadingMessage.remove();
+
+  // Cria bloco HTML do gráfico WTSS (acordeão) com checkbox
+  const chartBlock = document.createElement("div");
+  chartBlock.id = uniqueId;
+  chartBlock.classList.add("wtss-chart-block");
+  chartBlock.innerHTML = `
+        <details id="details-${uniqueId}" class="wtss-details-container"
+            ontoggle="if(this.open) plotChartInAcordeon('${uniqueId}', '${title}', '${attribute}')">
             <summary class="wtss-summary-header">
                 <label style="display:inline-flex;align-items:center;gap:8px;">
                   <input type="checkbox" class="wtss-select-checkbox" data-wtss-id="${uniqueId}">
-                  <span>🛰️ ${title} (${attribute}) - <small>Carregando...</small></span>
+                  <span>🛰️ ${title} (${attribute})</span>
                 </label>
             </summary>
-            <div class="wtss-panel wts-chart-container-border">
+            <div class="wtss-panel wtss-chart-container-border">
                 <p><b>Atributo:</b> ${attribute}</p>
                 <hr class="satelite-popup-divider">
                 <div class="wtss-canvas-wrapper">
@@ -823,90 +828,87 @@ function createWTSSTimeSeriesChart(title, values, timeline, attribute, coverage)
             </div>
         </details>
     `;
- 
-    // Adiciona o bloco ao painel (mantendo ele fechado inicialmente)
-    graphArea.prepend(chartBlock); // Prefiro prepend para ver o mais recente no topo
-    document.getElementById('wtss-tab').scrollTop = 0;
- 
-    // Guarda dados temporariamente no objeto global
-    window[`wtss_data_${uniqueId}`] = { values, timeline, attribute, coverage };
-   
-    // =================================================================================
-    // PLOTAGEM IMEDIATA (para preparar o canvas para exportação manual)
-    // =================================================================================
-    setTimeout(() => {
-        const ctx = document.getElementById(`canvas-${uniqueId}`);
-        const summarySpan = chartBlock.querySelector('.wtss-summary-header span');
-       
-        if (!ctx) return;
- 
-        const chartData = timeline.map((date, i) => ({
-            x: date,
-            y: (values[i] !== undefined && values[i] !== null)
-                 ? applyScale(values[i])
-                 : null
-        }));
- 
-        // Autoescala Y
-        const ys = chartData.map(p => p.y).filter(v => v !== null);
-        let ymin = -2.0, ymax = 1.5;
-        if (ys.length) {
-            const minV = Math.min(...ys);
-            const maxV = Math.max(...ys);
-            const pad = Math.max((maxV - minV) * 0.1, 0.1);
-            ymin = minV - pad;
-            ymax = maxV + pad;
-        }
- 
-        // Criação do gráfico Chart.js
-        const chart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                datasets: [{
-                    label: attribute,
-                    data: chartData,
-                    borderColor: attribute.toUpperCase().includes('NDVI') ? 'green' : 'blue',
-                    borderWidth: 2,
-                    fill: false,
-                    pointRadius: 3
-                }]
+
+  graphArea.appendChild(chartBlock);
+  document.getElementById("wtss-tab").scrollTop = 0;
+
+  // Guarda dados temporariamente no objeto global
+  window[`wtss_data_${uniqueId}`] = { values, timeline, attribute, coverage };
+
+  // Função que plota o gráfico dentro do acordeão
+  window.plotChartInAcordeon = function (id, title, attribute) {
+    const data = window[`wtss_data_${id}`];
+    if (!data) return;
+
+    const ctx = document.getElementById(`canvas-${id}`);
+    if (ctx && !ctx._chart) {
+      const chartData = data.timeline.map((date, i) => ({
+        x: date,
+        y:
+          data.values[i] !== undefined && data.values[i] !== null
+            ? applyScale(data.values[i])
+            : null,
+      }));
+
+      // Autoescala Y
+      const ys = chartData.map((p) => p.y).filter((v) => v !== null);
+      let ymin = -2.0,
+        ymax = 1.5;
+      if (ys.length) {
+        const minV = Math.min(...ys);
+        const maxV = Math.max(...ys);
+        const pad = Math.max((maxV - minV) * 0.1, 0.1);
+        ymin = minV - pad;
+        ymax = maxV + pad;
+      }
+
+      // Criação do gráfico Chart.js
+      const chart = new Chart(ctx, {
+        type: "line",
+        data: {
+          datasets: [
+            {
+              label: attribute,
+              data: chartData,
+              borderColor: attribute.toUpperCase().includes("NDVI")
+                ? "green"
+                : "blue",
+              borderWidth: 2,
+              fill: false,
+              pointRadius: 3,
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                color: '#111',
-                scales: {
-                    x: {
-                        type: 'time',
-                        time: { unit: 'month', tooltipFormat: 'dd MMM yyyy' },
-                        title: { display: true, text: 'Data', color: '#111' },
-                        ticks: { color: '#111' },
-                        grid: { color: '#111' }
-                    },
-                    y: {
-                        title: { display: true, text: 'Valor (Escala aplicada)', color: '#111' },
-                        ticks: { color: '#111' },
-                        grid: { color: '#111' },
-                        min: ymin,
-                        max: ymax
-                    }
-                }
-            }
-        });
- 
-        ctx._chart = chart; // armazena o chart para referência futura
- 
-        if (summarySpan) {
-           // Atualiza o texto do summary para indicar que está pronto
-           summarySpan.innerHTML = `🛰️ ${title} (${attribute}) - <small>Pronto para exportar</small>`;
-        }
-       
-        // ========================================================
-        // ATENÇÃO: O BLOCO DE EXPORTAÇÃO AUTOMÁTICA FOI REMOVIDO.
-        // O gráfico AGORA está pronto para a exportação manual (botão Exportar Todos).
-        // ========================================================
- 
-    }, 100); // Pequeno atraso para garantir que o elemento canvas esteja no DOM
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          color: "#111",
+          scales: {
+            x: {
+              type: "time",
+              time: { unit: "month", tooltipFormat: "dd MMM yyyy" },
+              title: { display: true, text: "Data", color: "#111" },
+              ticks: { color: "#111" },
+              grid: { color: "#111" },
+            },
+            y: {
+              title: {
+                display: true,
+                text: "Valor (Escala aplicada)",
+                color: "#111",
+              },
+              ticks: { color: "#111" },
+              grid: { color: "#111" },
+              min: ymin,
+              max: ymax,
+            },
+          },
+        },
+      });
+
+      ctx._chart = chart; // evita recriar o gráfico ao abrir/fechar
+    }
+  };
 }
 
 // --------------------------------------

@@ -1283,21 +1283,13 @@ document.addEventListener("click", function (e) {
 // TUTORIAL INTERATIVO AO INICIAR O SITE
 // --------------------------------------
 const tutorialSteps = [
-  {
-    text: "🌍 Este é o mapa interativo do Aetheris. Clique em qualquer ponto para explorar dados de satélites.",
-  },
-  {
-    text: "🔍 Use o campo de busca na lateral para selecionar os satélites ou produtos que deseja visualizar.",
-  },
-  {
-    text: "📊 Após clicar no mapa, o painel à direita mostrará os produtos disponíveis e séries temporais.",
-  },
-  {
-    text: "✅ Dica: Clique nas bandas para ver gráficos de NDVI e EVI ao longo do tempo.",
-  },
-  {
-    text: "✨ Pronto! Agora explore o mapa livremente. Divirta-se com o Aetheris!",
-  },
+{ text: "🌍 Bem-vindo ao Aetheris! Esta plataforma visualiza dados de séries temporais do Brazil Data Cube. Clique em qualquer ponto do mapa para começar." },
+    { text: "🔍 **Passo 1: Seleção Inicial.** Após clicar no mapa, o painel WTSS à direita mostrará as coleções disponíveis. Comece selecionando a primeira Coleção e o Atributo (ex: NDVI)." },
+    { text: "▶️ **Passo 2: Plotar.** Clique em '▶️ Plotar Série Temporal'. O gráfico será adicionado à área inferior do painel." },
+    { text: "🖥️ **Passo 3: Comparação (A Chave!).** Para comparar, selecione **outra Coleção/Atributo** e clique em '▶️ Plotar' novamente." },
+    { text: "✅ **Passo 4: Visualizar Lado a Lado.** Para visualizar os gráficos lado a lado e compará-los de forma limpa, use o botão '🖥️ Mostrar Selecionados' no painel de controle." },
+    { text: "⬇️ **Passo 5: Exportar.** Você pode usar o botão 'Exportar Todos Gráficos' para baixar um arquivo .zip com todas as suas séries plotadas em PNG." },
+    { text: "✨ Pronto! Use o filtro de satélites na barra lateral e o botão 'Limpar Gráficos' para gerenciar sua análise." }
 ];
 
 let currentStep = 0;
@@ -1631,4 +1623,5 @@ function createWTSSTimeSeriesChart(
       ctx._chart = chart; // evita recriar o gráfico ao abrir/fechar
     }
   };
+
 }

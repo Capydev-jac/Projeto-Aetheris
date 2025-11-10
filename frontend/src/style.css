@@ -78,6 +78,7 @@ html {
   left: 0;
   z-index: 0;
 }
+
 /* ========================================================
    SIDEBAR
    ===================================================== */
@@ -117,6 +118,7 @@ html {
     height: 95vh;
   }
 }
+
 @media screen and (min-height: 801px) {
   #sidebar {
     height: 65vh;
@@ -139,6 +141,7 @@ html {
   opacity: 0.95;
   transition: opacity 0.3s ease, transform 0.3s ease;
 }
+
 .logo:hover {
   opacity: 1;
   transform: scale(1.05);
@@ -233,24 +236,31 @@ html {
 /* 1. CONTÊINER DO CANVAS: Aumenta a altura para dar mais espaço de visualização vertical */
 .wtss-canvas-wrapper {
   position: relative;
-  height: 400px; /* Aumentado de 300px para 400px ou 450px */
+  height: 400px;
+  /* Aumentado de 300px para 400px ou 450px */
   width: 100%;
   background-color: #ffffff;
-  padding: 15px; /* Opcional: para dar um pequeno espaçamento interno */
-  box-sizing: border-box; /* Garante que padding não aumente a largura/altura total */
+  padding: 15px;
+  /* Opcional: para dar um pequeno espaçamento interno */
+  box-sizing: border-box;
+  /* Garante que padding não aumente a largura/altura total */
 }
 
 /* 2. CONTÊINER DO GRÁFICO: Aumenta o espaçamento acima e abaixo do canvas/header */
 .wtss-chart-container-border {
   border-top: 1px solid #0f0f0f;
-  margin-top: 10px; /* Aumentado para dar mais respiro em relação ao item de cima */
-  padding-top: 15px; /* Aumentado o padding superior */
-  padding-bottom: 25px; /* Adiciona padding na parte de baixo do gráfico (se não estiver em outra regra) */
+  margin-top: 10px;
+  /* Aumentado para dar mais respiro em relação ao item de cima */
+  padding-top: 15px;
+  /* Aumentado o padding superior */
+  padding-bottom: 25px;
+  /* Adiciona padding na parte de baixo do gráfico (se não estiver em outra regra) */
 }
 
 /* 3. BLOCO WTSS GERAL: Garante que os elementos de texto tenham espaço */
 .wtss-panel {
-  padding: 15px 0; /* Exemplo: Padding vertical */
+  padding: 15px 0;
+  /* Exemplo: Padding vertical */
 }
 
 #info-panel-right.visible {
@@ -387,6 +397,7 @@ html {
   line-height: 1;
   padding: 0 5px;
 }
+
 .tutorial-close-btn:hover {
   color: #333;
 }
@@ -437,6 +448,7 @@ html {
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -476,14 +488,58 @@ html {
 .tab-content.active {
   display: block;
 }
+
 .aetheris-highlight {
   color: #4a59ff;
 }
 
 .wtss-full-width-select {
   width: 100%;
-  padding: 8px;
+  padding: 8px 12px;
+  font-size: 14px;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23333%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.4-12.8z%22%2F%3E%3C%2Fsvg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px top 50%;
+  background-size: 12px auto;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
+
+.wtss-full-width-select:hover {
+  border-color: #bbbbbb;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+}
+
+.wtss-full-width-select:focus {
+  outline: none;
+  border-color: #2e7d32;
+  box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.2);
+}
+
+.wtss-selection-row {
+  margin-bottom: 12px;
+}
+
+.wtss-selection-row label {
+  display: block;
+  margin-bottom: 6px;
+  color: #e7e7e7;
+  font-size: 20px;
+}
+
+/* Style disabled state */
+.wtss-full-width-select:disabled {
+  background-color: #f5f5f5;
+  border-color: #ddd;
+  cursor: not-allowed;
+  color: #999;
+};
 
 .plot-button-spacing {
   margin-bottom: 5px;
@@ -565,20 +621,25 @@ html {
   background: #021120;
   padding: 4px 8px;
 }
+
 .stac-accordion summary {
   cursor: pointer;
   font-size: 1.05em;
   padding: 4px 0;
 }
+
 .stac-accordion .product-info-block {
   margin-top: 6px;
 }
 
 #wtss-clear-all {
-  background-color: #fa3c3c; /* cor desejada */
+  background-color: #fa3c3c;
+  /* cor desejada */
   color: #ffffff;
   border: none;
 }
+
 #wtss-clear-all:hover {
-  background-color: #ff4d4d; /* cor ao passar o mouse */
+  background-color: #ff4d4d;
+  /* cor ao passar o mouse */
 }

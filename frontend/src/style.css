@@ -233,7 +233,7 @@ html {
   transition: transform 0.4s ease-in-out;
 }
 
-/* 1. CONTÊINER DO CANVAS: Aumenta a altura para dar mais espaço de visualização vertical */
+/* CONTÊINER DO CANVAS: Aumenta a altura para dar mais espaço de visualização vertical */
 .wtss-canvas-wrapper {
   position: relative;
   height: 400px;
@@ -246,21 +246,17 @@ html {
   /* Garante que padding não aumente a largura/altura total */
 }
 
-/* 2. CONTÊINER DO GRÁFICO: Aumenta o espaçamento acima e abaixo do canvas/header */
+/* CONTÊINER DO GRÁFICO: Aumenta o espaçamento acima e abaixo do canvas/header */
 .wtss-chart-container-border {
-  border-top: 1px solid #0f0f0f;
-  margin-top: 10px;
-  /* Aumentado para dar mais respiro em relação ao item de cima */
+  border-top: 1px solid #0b0b0b;
+  margin-top: 15px;
   padding-top: 15px;
-  /* Aumentado o padding superior */
   padding-bottom: 25px;
-  /* Adiciona padding na parte de baixo do gráfico (se não estiver em outra regra) */
 }
 
-/* 3. BLOCO WTSS GERAL: Garante que os elementos de texto tenham espaço */
+/* BLOCO WTSS GERAL: Garante que os elementos de texto tenham espaço */
 .wtss-panel {
   padding: 15px 0;
-  /* Exemplo: Padding vertical */
 }
 
 #info-panel-right.visible {
@@ -539,17 +535,10 @@ html {
   border-color: #ddd;
   cursor: not-allowed;
   color: #999;
-};
+}
 
 .plot-button-spacing {
   margin-bottom: 5px;
-}
-
-/* Container que dá o espaçamento e a linha divisória superior */
-.wtss-chart-container-border {
-  border-top: 1px solid #0b0b0b;
-  margin-top: 15px;
-  padding-top: 15px;
 }
 
 /* Header que alinha título e botão de fechar */
@@ -634,12 +623,10 @@ html {
 
 #wtss-clear-all {
   background-color: #fa3c3c;
-  /* cor desejada */
   color: #ffffff;
   border: none;
 }
 
 #wtss-clear-all:hover {
   background-color: #ff4d4d;
-  /* cor ao passar o mouse */
 }

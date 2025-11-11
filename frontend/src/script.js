@@ -818,6 +818,45 @@ function injectWTSSStyles() {
     }
     .wtss-summary-header label { cursor: pointer; display:flex; align-items:center; gap:8px; }
 
+    /* Botão fechar (×) vermelho, minimalista */
+.wtss-close-btn{
+  margin-left:auto;
+  display:grid;
+  place-items:center;
+  width:26px;
+  height:26px;
+  padding:0;
+  border:1px solid rgba(217,30,24,0.28);
+  background:#fff;
+  color:#d91e18;                 /* vermelho do “×” */
+  font-weight:700;
+  font-size:16px;
+  line-height:1;
+  border-radius:9999px;          /* circular */
+  cursor:pointer;
+  transition:
+    transform 120ms ease,
+    box-shadow 140ms ease,
+    background 120ms ease,
+    border-color 120ms ease,
+    color 120ms ease;
+}
+.wtss-close-btn:hover{
+  background:rgba(217,30,24,0.10);
+  border-color:rgba(217,30,24,0.45);
+  box-shadow:0 6px 16px rgba(217,30,24,0.12);
+  transform:translateY(-1px);
+}
+.wtss-close-btn:active{
+  transform:translateY(0);
+  box-shadow:none;
+  background:rgba(217,30,24,0.16);
+}
+.wtss-close-btn:focus-visible{
+  outline:2px solid rgba(217,30,24,0.45);
+  outline-offset:2px;
+}
+
     /* Checkbox customizado */
     .wtss-select-checkbox {
       -webkit-appearance: none;
@@ -1502,12 +1541,13 @@ function createWTSSTimeSeriesChart(
   chartBlock.innerHTML = `
         <details id="details-${uniqueId}" class="wtss-details-container"
             ontoggle="if(this.open) plotChartInAcordeon('${uniqueId}', '${title}', '${attribute}')">
-            <summary class="wtss-summary-header">
-                <label style="display:inline-flex;align-items:center;gap:8px;">
-                  <input type="checkbox" class="wtss-select-checkbox" data-wtss-id="${uniqueId}">
-                  <span>🛰️ ${title} <small style="color:#666; margin-left:6px;">(${attribute})</small></span>
-                </label>
-            </summary>
+           <summary class="wtss-summary-header">
+  <label style="display:inline-flex;align-items:center;gap:8px;">
+    <input type="checkbox" class="wtss-select-checkbox" data-wtss-id="${uniqueId}">
+    <span>🛰️ ${title} <small style="color:#666; margin-left:6px;">(${attribute})</small></span>
+  </label>
+  <button type="button" class="wtss-close-btn" title="Fechar este gráfico" aria-label="Fechar">×</button>
+</summary>
             <div class="wtss-panel wtss-chart-container-border">
                 <p style="margin:6px 0;"><b>Atributo:</b> ${attribute}</p>
                 <hr class="satelite-popup-divider">
@@ -1522,6 +1562,27 @@ function createWTSSTimeSeriesChart(
     `;
 
   graphArea.appendChild(chartBlock);
+
+  // handler do botão fechar
+const closeBtn = chartBlock.querySelector(".wtss-close-btn");
+if (closeBtn) {
+  closeBtn.addEventListener("click", (ev) => {
+    ev.stopPropagation(); // não alterna o <details> nem o checkbox
+
+    // destruir Chart.js se tiver sido criado
+    const canvas = chartBlock.querySelector(`#canvas-${uniqueId}`);
+    if (canvas && canvas._chart) {
+      try { canvas._chart.destroy(); } catch (e) {}
+    }
+
+    // limpar referência temporária
+    try { delete window[`wtss_data_${uniqueId}`]; } catch (e) {}
+
+    // remover o bloco
+    chartBlock.remove();
+  });
+}
+
   document.getElementById("wtss-tab").scrollTop = 0;
 
   // Interatividade visual: atualiza classe .selected quando checkbox muda
@@ -1619,8 +1680,8 @@ function createWTSSTimeSeriesChart(
           },
         },
       });
-
-      ctx._chart = chart; // evita recriar o gráfico ao abrir/fechar
+      canvas._chart = chart;
+    
     }
   };
 

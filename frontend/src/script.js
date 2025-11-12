@@ -786,7 +786,7 @@ window.fetchWTSSTimeSeriesAndPlot = async function (
 };
 
 // --------------------------------------
-// Modal para exibir gráficos selecionados (máx 6)
+// Modal para exibir gráficos selecionados
 // --------------------------------------
 window.showSelectedWTSSInModal = function () {
   const checked = Array.from(
@@ -801,59 +801,50 @@ window.showSelectedWTSSInModal = function () {
     return;
   }
 
-  // remove modal antigo se existir
   const existing = document.getElementById("wtss-modal-overlay");
   if (existing) existing.remove();
 
-  // cria overlay/modal
   const overlay = document.createElement("div");
   overlay.id = "wtss-modal-overlay";
-  overlay.style = `
-        position:fixed; inset:0; background:rgba(0,0,0,0.6); display:flex;
-        align-items:center; justify-content:center; z-index:9999;
-    `;
 
   const modal = document.createElement("div");
   modal.id = "wtss-modal";
-  modal.style = `
-        background:#fff; width:90%; max-width:1200px; max-height:90%; overflow:auto;
-        border-radius:8px; padding:12px; box-shadow:0 6px 24px rgba(0,0,0,0.4);
-    `;
 
   const header = document.createElement("div");
-  header.style =
-    "display:flex; justify-content:space-between; align-items:center; gap:12px;";
+  header.className = "wtss-modal-header";
   header.innerHTML = `<h3>Visualização — Gráficos Selecionados (${checked.length})</h3>`;
+
   const closeBtn = document.createElement("button");
   closeBtn.textContent = "Fechar ✖";
   closeBtn.className = "action-button secondary-button";
   header.appendChild(closeBtn);
 
   const grid = document.createElement("div");
-  grid.style =
-    "display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:12px; margin-top:12px;";
+  grid.className = "wtss-modal-grid";
 
   modal.appendChild(header);
   modal.appendChild(grid);
   overlay.appendChild(modal);
   document.body.appendChild(overlay);
 
-  // guardar para destruir depois
   window.wtss_modal_charts = [];
 
-  // cria cada canvas e renderiza com os dados salvos
   checked.forEach((cb, idx) => {
     const id = cb.getAttribute("data-wtss-id");
     const dataObj = window[`wtss_data_${id}`];
     const title = dataObj ? `${dataObj.coverage} — ${dataObj.attribute}` : id;
 
     const card = document.createElement("div");
-    card.style =
-      "background:#fafafa; padding:8px; border-radius:6px; border:1px solid #eee;";
-    card.innerHTML = `<div style="font-weight:600; margin-bottom:6px;">${title}</div><div style="height:260px;"><canvas id="modal-canvas-${id}"></canvas></div>`;
+    card.className = "wtss-modal-card";
+
+    card.innerHTML = `
+        <div class="wtss-modal-card-title">${title}</div>
+        <div class="wtss-modal-canvas-wrapper">
+            <canvas id="modal-canvas-${id}"></canvas>
+        </div>
+    `;
     grid.appendChild(card);
 
-    // re-render chart
     if (dataObj) {
       const ctx = document.getElementById(`modal-canvas-${id}`);
       const chartData = dataObj.timeline.map((date, i) => ({
@@ -891,23 +882,23 @@ window.showSelectedWTSSInModal = function () {
             },
           ],
         },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                x: {
-                    type: 'time',
-                    time: { unit: 'month' },
-                    grid: { color: '#111', borderDash: [2, 2] }
-                },
-                y: {
-                    min: ymin,
-                    max: ymax,
-                    grid: { color: '#111', borderDash: [2, 2] }
-                },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: {
+              type: "time",
+              time: { unit: "month" },
+              grid: { color: "#111", borderDash: [2, 2] },
+            },
+            y: {
+              min: ymin,
+              max: ymax,
+              grid: { color: "#111", borderDash: [2, 2] },
             },
           },
-        });
+        },
+      });
       window.wtss_modal_charts.push(chart);
     } else {
       // se não há dados salvos, cria placeholder
@@ -920,7 +911,7 @@ window.showSelectedWTSSInModal = function () {
     }
   });
 
-  // fechar modal: destruir charts e remover overlay
+  // fechar modal
   function closeModal() {
     if (window.wtss_modal_charts && window.wtss_modal_charts.length) {
       window.wtss_modal_charts.forEach((c) => {
@@ -1057,13 +1048,27 @@ document.addEventListener("click", function (e) {
 // TUTORIAL INTERATIVO AO INICIAR O SITE
 // --------------------------------------
 const tutorialSteps = [
-{ text: "🌍 Bem-vindo ao Aetheris! Esta plataforma visualiza dados de séries temporais do Brazil Data Cube. Clique em qualquer ponto do mapa para começar." },
-    { text: "🔍 **Passo 1: Seleção Inicial.** Após clicar no mapa, o painel WTSS à direita mostrará as coleções disponíveis. Comece selecionando a primeira Coleção e o Atributo (ex: NDVI)." },
-    { text: "▶️ **Passo 2: Plotar.** Clique em '▶️ Plotar Série Temporal'. O gráfico será adicionado à área inferior do painel." },
-    { text: "🖥️ **Passo 3: Comparação (A Chave!).** Para comparar, selecione **outra Coleção/Atributo** e clique em '▶️ Plotar' novamente." },
-    { text: "✅ **Passo 4: Visualizar Lado a Lado.** Para visualizar os gráficos lado a lado e compará-los de forma limpa, use o botão '🖥️ Mostrar Selecionados' no painel de controle." },
-    { text: "⬇️ **Passo 5: Exportar.** Você pode usar o botão 'Exportar Todos Gráficos' para baixar um arquivo .zip com todas as suas séries plotadas em PNG." },
-    { text: "✨ Pronto! Use o filtro de satélites na barra lateral e o botão 'Limpar Gráficos' para gerenciar sua análise." }
+  {
+    text: "🌍 Bem-vindo ao Aetheris! Esta plataforma visualiza dados de séries temporais do Brazil Data Cube. Clique em qualquer ponto do mapa para começar.",
+  },
+  {
+    text: "🔍 **Passo 1: Seleção Inicial.** Após clicar no mapa, o painel WTSS à direita mostrará as coleções disponíveis. Comece selecionando a primeira Coleção e o Atributo (ex: NDVI).",
+  },
+  {
+    text: "▶️ **Passo 2: Plotar.** Clique em '▶️ Plotar Série Temporal'. O gráfico será adicionado à área inferior do painel.",
+  },
+  {
+    text: "🖥️ **Passo 3: Comparação (A Chave!).** Para comparar, selecione **outra Coleção/Atributo** e clique em '▶️ Plotar' novamente.",
+  },
+  {
+    text: "✅ **Passo 4: Visualizar Lado a Lado.** Para visualizar os gráficos lado a lado e compará-los de forma limpa, use o botão '🖥️ Mostrar Selecionados' no painel de controle.",
+  },
+  {
+    text: "⬇️ **Passo 5: Exportar.** Você pode usar o botão 'Exportar Todos Gráficos' para baixar um arquivo .zip com todas as suas séries plotadas em PNG.",
+  },
+  {
+    text: "✨ Pronto! Use o filtro de satélites na barra lateral e o botão 'Limpar Gráficos' para gerenciar sua análise.",
+  },
 ];
 
 let currentStep = 0;
@@ -1173,86 +1178,6 @@ async function loadJSZip() {
   });
 }
 
-function injectWTSSStyles() {
-  if (document.getElementById("wtss-custom-styles")) return;
-  const css = `
-    /* Contêiner do bloco do gráfico */
-    .wtss-chart-block {
-      margin: 10px 0;
-      border: 1px solid #e6e6e6;
-      border-radius: 8px;
-      padding: 6px;
-      transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
-      background: linear-gradient(180deg, #ffffff 0%, #fbfbfb 100%);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-      overflow: hidden;
-    }
-    .wtss-chart-block:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 10px 24px rgba(0,0,0,0.08);
-    }
-    .wtss-chart-block.selected {
-      border-color: #2e7d32;
-      box-shadow: 0 12px 30px rgba(46,125,50,0.12);
-      background: linear-gradient(180deg, #f6ffef 0%, #ffffff 100%);
-    }
-
-    /* Summary / cabeçalho */
-    .wtss-summary-header {
-      display:flex;
-      align-items:center;
-      gap:8px;
-      padding:6px 4px;
-      cursor: pointer;
-    }
-    .wtss-summary-header label { cursor: pointer; display:flex; align-items:center; gap:8px; }
-
-    /* Checkbox customizado */
-    .wtss-select-checkbox {
-      -webkit-appearance: none;
-      appearance: none;
-      width:20px;
-      height:20px;
-      border-radius:4px;
-      border:2px solid #cfcfcf;
-      background:#fff;
-      display:inline-block;
-      vertical-align:middle;
-      position:relative;
-      transition: all 140ms ease;
-      box-shadow: inset 0 -1px 0 rgba(0,0,0,0.03);
-    }
-    .wtss-select-checkbox:checked {
-      background: linear-gradient(135deg,#4caf50,#2e7d32);
-      border-color: #2e7d32;
-      box-shadow: 0 4px 12px rgba(46,125,50,0.12);
-    }
-    .wtss-select-checkbox:checked::after{
-      content: "✓";
-      color: #fff;
-      font-size:12px;
-      position:absolute;
-      left:3px;
-      top:-1px;
-      font-weight:700;
-    }
-
-    /* Canvas wrapper com altura fixa para manter layout */
-    .wtss-canvas-wrapper { height:260px; display:block; }
-    .wtss-panel { padding:8px 6px 12px 6px; background:transparent; }
-
-    /* Pequeno destaque do título */
-    .wtss-summary-header span { font-weight:600; color:#222; }
-  `;
-  const style = document.createElement("style");
-  style.id = "wtss-custom-styles";
-  style.innerHTML = css;
-  document.head.appendChild(style);
-}
-injectWTSSStyles();
-// ...existing code...
-
-// ...existing code...
 function createWTSSTimeSeriesChart(
   title,
   values,
@@ -1299,24 +1224,28 @@ function createWTSSTimeSeriesChart(
   graphArea.appendChild(chartBlock);
 
   // handler do botão fechar
-const closeBtn = chartBlock.querySelector(".wtss-close-btn");
-if (closeBtn) {
-  closeBtn.addEventListener("click", (ev) => {
-    ev.stopPropagation(); // não alterna o <details> nem o checkbox
+  const closeBtn = chartBlock.querySelector(".wtss-close-btn");
+  if (closeBtn) {
+    closeBtn.addEventListener("click", (ev) => {
+      ev.stopPropagation(); // não alterna o <details> nem o checkbox
 
-    // destruir Chart.js se tiver sido criado
-    const canvas = chartBlock.querySelector(`#canvas-${uniqueId}`);
-    if (canvas && canvas._chart) {
-      try { canvas._chart.destroy(); } catch (e) {}
-    }
+      // destruir Chart.js se tiver sido criado
+      const canvas = chartBlock.querySelector(`#canvas-${uniqueId}`);
+      if (canvas && canvas._chart) {
+        try {
+          canvas._chart.destroy();
+        } catch (e) {}
+      }
 
-    // limpar referência temporária
-    try { delete window[`wtss_data_${uniqueId}`]; } catch (e) {}
+      // limpar referência temporária
+      try {
+        delete window[`wtss_data_${uniqueId}`];
+      } catch (e) {}
 
-    // remover o bloco
-    chartBlock.remove();
-  });
-}
+      // remover o bloco
+      chartBlock.remove();
+    });
+  }
 
   document.getElementById("wtss-tab").scrollTop = 0;
 
@@ -1416,10 +1345,8 @@ if (closeBtn) {
         },
       });
       canvas._chart = chart;
-    
     }
   };
-
 }
 
 // --------------------------------------
@@ -1454,18 +1381,23 @@ function updateHistoryList() {
         <span class="history-icon">📌</span>
         <span>Lat: ${p.lat.toFixed(3)}<br>Lng: ${p.lng.toFixed(3)}</span>
       </div>
-      <div class="history-time">${new Date(p.timestamp).toLocaleTimeString("pt-BR", {
-        hour: "2-digit", minute: "2-digit"
-      })}</div>
+      <div class="history-time">${new Date(p.timestamp).toLocaleTimeString(
+        "pt-BR",
+        {
+          hour: "2-digit",
+          minute: "2-digit",
+        }
+      )}</div>
     `;
 
     item.addEventListener("click", () => {
-  map.setView([p.lat, p.lng], 5); // 🔹 zoom mais distante
-  createSelectionVisuals({ lat: p.lat, lng: p.lng });
-  showInfoPanelSTAC("<strong>📍 Ponto selecionado</strong><br>Buscando produtos STAC...");
-  showWTSSElectionPanel(p.lat, p.lng);
-});
-
+      map.setView([p.lat, p.lng], 5); // 🔹 zoom mais distante
+      createSelectionVisuals({ lat: p.lat, lng: p.lng });
+      showInfoPanelSTAC(
+        "<strong>📍 Ponto selecionado</strong><br>Buscando produtos STAC..."
+      );
+      showWTSSElectionPanel(p.lat, p.lng);
+    });
 
     container.appendChild(item);
   });
@@ -1484,96 +1416,3 @@ map.on("click", (e) => {
 });
 
 updateHistoryList();
-
-// ---- Estilo CSS injetado ----
-const style = document.createElement("style");
-style.textContent = `
-  /* ====== HISTÓRICO DE PONTOS ====== */
-  #history-container {
-    border-top: 1px solid #ddd;
-    margin-top: 12px;
-    padding-top: 10px;
-  }
-
-  .sidebar-section-title {
-    font-size: 1rem;
-    font-weight: 600;
-    margin-bottom: 8px;
-    color: #e4e4e4ff;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .history-list {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    max-height: 240px;
-    overflow-y: auto;
-    padding-right: 2px;
-  }
-
-  .history-item {
-    background: linear-gradient(180deg, #1a57ffff 0%, #444444ff 100%);
-    border: 1px solid #e2e2e2;
-    border-radius: 8px;
-    padding: 8px 10px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 13px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-  }
-
-  .history-item:hover {
-    background: linear-gradient(180deg,  #3b6efaff 0%, #727272ff 100%);
-    border-color: #4caf50;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 10px rgba(76, 175, 80, 0.15);
-  }
-
-  .history-coords {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .history-icon {
-    font-size: 18px;
-  }
-
-  .history-time {
-    font-size: 11px;
-    color: #0a0a0aff;
-    text-align: right;
-  }
-
-  .empty-history {
-    color: #ff0000ff;
-    font-size: 13px;
-    text-align: center;
-    padding: 8px;
-  }
-
-  .clear-history-btn {
-    margin-top: 8px;
-    width: 100%;
-    font-size: 13px;
-  }
-
-  /* Scrollbar suave */
-  .history-list::-webkit-scrollbar {
-    width: 6px;
-  }
-  .history-list::-webkit-scrollbar-thumb {
-    background: #ccc;
-    border-radius: 3px;
-  }
-  .history-list::-webkit-scrollbar-thumb:hover {
-    background: #aaa;
-  }
-`;
-document.head.appendChild(style);

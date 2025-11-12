@@ -59,7 +59,7 @@ html {
   color: #fff;
   margin-right: 5px;
   margin-left: auto;
-  transition: transforme 0.3s ease, transform 0.3s ease;
+  transition: transform 0.3s ease;
 }
 
 .capy-link:hover {
@@ -233,30 +233,12 @@ html {
   transition: transform 0.4s ease-in-out;
 }
 
-/* CONTÊINER DO CANVAS: Aumenta a altura para dar mais espaço de visualização vertical */
-.wtss-canvas-wrapper {
-  position: relative;
-  height: 400px;
-  /* Aumentado de 300px para 400px ou 450px */
-  width: 100%;
-  background-color: #ffffff;
-  padding: 15px;
-  /* Opcional: para dar um pequeno espaçamento interno */
-  box-sizing: border-box;
-  /* Garante que padding não aumente a largura/altura total */
-}
-
 /* CONTÊINER DO GRÁFICO: Aumenta o espaçamento acima e abaixo do canvas/header */
 .wtss-chart-container-border {
   border-top: 1px solid #0b0b0b;
   margin-top: 15px;
   padding-top: 15px;
   padding-bottom: 25px;
-}
-
-/* BLOCO WTSS GERAL: Garante que os elementos de texto tenham espaço */
-.wtss-panel {
-  padding: 15px 0;
 }
 
 #info-panel-right.visible {
@@ -629,4 +611,228 @@ html {
 
 #wtss-clear-all:hover {
   background-color: #ff4d4d;
+}
+
+/* ====== HISTÓRICO DE PONTOS ====== */
+#history-container {
+  border-top: 1px solid #ddd;
+  margin-top: 12px;
+  padding-top: 10px;
+}
+
+.sidebar-section-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #e4e4e4ff;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 240px;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+
+.history-item {
+  background: linear-gradient(180deg, #1a57ffff 0%, #444444ff 100%);
+  border: 1px solid #e2e2e2;
+  border-radius: 8px;
+  padding: 8px 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.history-item:hover {
+  background: linear-gradient(180deg, #3b6efaff 0%, #727272ff 100%);
+  border-color: #4caf50;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(76, 175, 80, 0.15);
+}
+
+.history-coords {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.history-icon {
+  font-size: 18px;
+}
+
+.history-time {
+  font-size: 11px;
+  color: #0a0a0aff;
+  text-align: right;
+}
+
+.empty-history {
+  color: #ff0000ff;
+  font-size: 13px;
+  text-align: center;
+  padding: 8px;
+}
+
+.clear-history-btn {
+  margin-top: 8px;
+  width: 100%;
+  font-size: 13px;
+}
+
+/* Scrollbar suave */
+.history-list::-webkit-scrollbar {
+  width: 6px;
+}
+.history-list::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 3px;
+}
+.history-list::-webkit-scrollbar-thumb:hover {
+  background: #aaa;
+}
+
+/* === Contêiner do bloco do gráfico === */
+.wtss-chart-block {
+  margin: 10px 0;
+  border: 1px solid #e6e6e6;
+  border-radius: 8px;
+  padding: 6px;
+  transition: transform 160ms ease, box-shadow 160ms ease,
+    border-color 160ms ease;
+  background: linear-gradient(180deg, #ffffff 0%, #fbfbfb 100%);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+}
+.wtss-chart-block:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+}
+.wtss-chart-block.selected {
+  border-color: #2e7d32;
+  box-shadow: 0 12px 30px rgba(46, 125, 50, 0.12);
+  background: linear-gradient(180deg, #f6ffef 0%, #ffffff 100%);
+}
+
+/* Summary / cabeçalho */
+.wtss-summary-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 4px;
+  cursor: pointer;
+}
+.wtss-summary-header label {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Checkbox customizado */
+.wtss-select-checkbox {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  border: 2px solid #cfcfcf;
+  background: #fff;
+  display: inline-block;
+  vertical-align: middle;
+  position: relative;
+  transition: all 140ms ease;
+  box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.03);
+}
+.wtss-select-checkbox:checked {
+  background: linear-gradient(135deg, #4caf50, #2e7d32);
+  border-color: #2e7d32;
+  box-shadow: 0 4px 12px rgba(46, 125, 50, 0.12);
+}
+.wtss-select-checkbox:checked::after {
+  content: "✓";
+  color: #fff;
+  font-size: 12px;
+  position: absolute;
+  left: 3px;
+  top: -1px;
+  font-weight: 700;
+}
+
+/* Canvas wrapper com altura fixa para manter layout */
+.wtss-canvas-wrapper {
+  height: 260px;
+  display: block;
+}
+.wtss-panel {
+  padding: 8px 6px 12px 6px;
+  background: transparent;
+}
+
+/* Pequeno destaque do título */
+.wtss-summary-header span {
+  font-weight: 600;
+  color: #222;
+}
+
+/* === MODAL WTSS === */
+#wtss-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+#wtss-modal {
+  background: #fff;
+  width: 90%;
+  max-width: 1200px;
+  max-height: 90%;
+  overflow: auto;
+  border-radius: 8px;
+  padding: 12px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4);
+  color: #333;
+}
+
+.wtss-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.wtss-modal-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.wtss-modal-card {
+  background: #fafafa;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #eee;
+}
+
+.wtss-modal-card-title {
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.wtss-modal-canvas-wrapper {
+  height: 260px;
 }

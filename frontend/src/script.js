@@ -627,7 +627,6 @@ window.showWTSSElectionPanel = async function (lat, lng) {
 
             <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
                 <button id="wtss-plot-selected" class="action-button">▶️ Plotar</button>
-                <button id="wtss-show-selected" class="action-button primary-button">🖥️ Mostrar Selecionados</button>
                 <button id="wtss-export-all" class="action-button secondary-button">⬇️ Exportar Todos Gráficos</button>
                 <button id="wtss-clear-all" class="action-button secondary-button">Limpar Todos os Gráficos</button>
             </div>
@@ -635,6 +634,8 @@ window.showWTSSElectionPanel = async function (lat, lng) {
             <br>
             <small>Selecione uma coleção e um atributo. Clique em "Plotar" várias vezes para comparar diferentes séries. Use as caixas ao lado dos títulos para selecionar até 6 gráficos e clicar em "Mostrar Selecionados".</small>
         </div>
+
+            <button id="wtss-show-selected" class="action-button primary-button">🖥️ Mostrar Selecionados</button>
 
         <div id="wtss-graph-area"></div>
     `;
@@ -1420,3 +1421,159 @@ if (closeBtn) {
   };
 
 }
+
+// --------------------------------------
+// HISTÓRICO DE PONTOS SELECIONADOS (somente em memória)
+// --------------------------------------
+let pointHistory = []; // 🔹 armazenado apenas enquanto a página está aberta
+
+const historyContainer = document.createElement("div");
+historyContainer.id = "history-container";
+historyContainer.classList.add("sidebar-section");
+historyContainer.innerHTML = `
+  <h3 class="sidebar-section-title">📍 Histórico de Pontos</h3>
+  <div id="history-list" class="history-list"></div>
+  <button id="clear-history-btn" class="action-button secondary-button clear-history-btn">🗑️ Limpar Histórico</button>
+`;
+sidebar.appendChild(historyContainer);
+
+function updateHistoryList() {
+  const container = document.getElementById("history-list");
+  container.innerHTML = "";
+
+  if (pointHistory.length === 0) {
+    container.innerHTML = `<div class="empty-history">Nenhum ponto selecionado ainda.</div>`;
+    return;
+  }
+
+  pointHistory.forEach((p) => {
+    const item = document.createElement("div");
+    item.classList.add("history-item");
+    item.innerHTML = `
+      <div class="history-coords">
+        <span class="history-icon">📌</span>
+        <span>Lat: ${p.lat.toFixed(3)}<br>Lng: ${p.lng.toFixed(3)}</span>
+      </div>
+      <div class="history-time">${new Date(p.timestamp).toLocaleTimeString("pt-BR", {
+        hour: "2-digit", minute: "2-digit"
+      })}</div>
+    `;
+
+    item.addEventListener("click", () => {
+  map.setView([p.lat, p.lng], 5); // 🔹 zoom mais distante
+  createSelectionVisuals({ lat: p.lat, lng: p.lng });
+  showInfoPanelSTAC("<strong>📍 Ponto selecionado</strong><br>Buscando produtos STAC...");
+  showWTSSElectionPanel(p.lat, p.lng);
+});
+
+
+    container.appendChild(item);
+  });
+}
+
+document.getElementById("clear-history-btn").addEventListener("click", () => {
+  pointHistory = [];
+  updateHistoryList();
+});
+
+map.on("click", (e) => {
+  const { lat, lng } = e.latlng;
+  pointHistory.unshift({ lat, lng, timestamp: Date.now() });
+  if (pointHistory.length > 12) pointHistory.pop();
+  updateHistoryList();
+});
+
+updateHistoryList();
+
+// ---- Estilo CSS injetado ----
+const style = document.createElement("style");
+style.textContent = `
+  /* ====== HISTÓRICO DE PONTOS ====== */
+  #history-container {
+    border-top: 1px solid #ddd;
+    margin-top: 12px;
+    padding-top: 10px;
+  }
+
+  .sidebar-section-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #e4e4e4ff;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 240px;
+    overflow-y: auto;
+    padding-right: 2px;
+  }
+
+  .history-item {
+    background: linear-gradient(180deg, #1a57ffff 0%, #444444ff 100%);
+    border: 1px solid #e2e2e2;
+    border-radius: 8px;
+    padding: 8px 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+
+  .history-item:hover {
+    background: linear-gradient(180deg,  #3b6efaff 0%, #727272ff 100%);
+    border-color: #4caf50;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(76, 175, 80, 0.15);
+  }
+
+  .history-coords {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .history-icon {
+    font-size: 18px;
+  }
+
+  .history-time {
+    font-size: 11px;
+    color: #0a0a0aff;
+    text-align: right;
+  }
+
+  .empty-history {
+    color: #ff0000ff;
+    font-size: 13px;
+    text-align: center;
+    padding: 8px;
+  }
+
+  .clear-history-btn {
+    margin-top: 8px;
+    width: 100%;
+    font-size: 13px;
+  }
+
+  /* Scrollbar suave */
+  .history-list::-webkit-scrollbar {
+    width: 6px;
+  }
+  .history-list::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 3px;
+  }
+  .history-list::-webkit-scrollbar-thumb:hover {
+    background: #aaa;
+  }
+`;
+document.head.appendChild(style);

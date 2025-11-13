@@ -1803,69 +1803,68 @@ window.plotMultiChartInAcordeon = function (id) {
 
 
 // --------------------------------------
-// HISTÓRICO DE PONTOS SELECIONADOS (somente em memória)
+// HISTÓRICO DE PONTOS FLUTUANTE (Funcionalidade)
 // --------------------------------------
-let pointHistory = [];
-
-const historyContainer = document.createElement("div");
-historyContainer.id = "history-container";
-historyContainer.classList.add("sidebar-section");
-historyContainer.innerHTML = `
-  <h3 class="sidebar-section-title">📍 Histórico de Pontos</h3>
-  <div id="history-list" class="history-list"></div>
-  <button id="clear-history-btn" class="action-button secondary-button clear-history-btn">🗑️ Limpar Histórico</button>
-`;
-sidebar.appendChild(historyContainer);
+let pointHistory = []; 
 
 function updateHistoryList() {
-  const container = document.getElementById("history-list");
-  container.innerHTML = "";
+    const container = document.getElementById("history-list");
+    const widget = document.getElementById('history-floating-widget');
 
-  if (pointHistory.length === 0) {
-    container.innerHTML = `<div class="empty-history">Nenhum ponto selecionado ainda.</div>`;
-    return;
-  }
+    if (!container) return; 
 
-  pointHistory.forEach((p) => {
-    const item = document.createElement("div");
-    item.classList.add("history-item");
-    item.innerHTML = `
-      <div class="history-coords">
-        <span class="history-icon">📌</span>
-        <span>Lat: ${p.lat.toFixed(3)}<br>Lng: ${p.lng.toFixed(3)}</span>
-      </div>
-      <div class="history-time">${new Date(p.timestamp).toLocaleTimeString(
-        "pt-BR",
-        {
-          hour: "2-digit",
-          minute: "2-digit",
-        }
-      )}</div>
-    `;
+    container.innerHTML = "";
+    
+    if (pointHistory.length === 0) {
+        container.innerHTML = `<div class="empty-history">Nenhum ponto selecionado ainda.</div>`;
+        if (widget) widget.classList.add('hidden'); // Oculta o widget se estiver vazio
+        return;
+    }
+    
+    if (widget) widget.classList.remove('hidden'); // Mostra o widget se houver conteúdo
 
-    item.addEventListener("click", () => {
-      map.setView([p.lat, p.lng], 5);
-      createSelectionVisuals({ lat: p.lat, lng: p.lng });
-      showInfoPanelSTAC(
-        "<strong>📍 Ponto selecionado</strong><br>Buscando produtos STAC..."
-      );
-      showWTSSElectionPanel(p.lat, p.lng);
+    pointHistory.forEach((p) => {
+        const item = document.createElement("div");
+        item.classList.add("history-item");
+        item.innerHTML = `
+            <div class="history-coords">
+                <span class="history-icon">📌</span>
+                <span>Lat: ${p.lat.toFixed(3)}<br>Lng: ${p.lng.toFixed(3)}</span>
+            </div>
+            <div class="history-time">${new Date(p.timestamp).toLocaleTimeString("pt-BR", {
+                hour: "2-digit", minute: "2-digit"
+            })}</div>
+        `;
+
+        item.addEventListener("click", () => {
+            map.setView([p.lat, p.lng], 5);
+            createSelectionVisuals({ lat: p.lat, lng: p.lng });
+            showInfoPanelSTAC("<strong>📍 Ponto selecionado</strong><br>Buscando produtos STAC...");
+            showWTSSElectionPanel(p.lat, p.lng);
+        });
+
+        container.appendChild(item);
     });
-
-    container.appendChild(item);
-  });
 }
 
-document.getElementById("clear-history-btn").addEventListener("click", () => {
-  pointHistory = [];
-  updateHistoryList();
-});
+document.addEventListener("DOMContentLoaded", function() {
+    const clearBtn = document.getElementById("clear-history-btn");
+    const toggleBtn = document.getElementById("toggle-history-btn"); // NOVO
+    const widget = document.getElementById('history-floating-widget'); // NOVO
 
-map.on("click", (e) => {
-  const { lat, lng } = e.latlng;
-  pointHistory.unshift({ lat, lng, timestamp: Date.now() });
-  if (pointHistory.length > 12) pointHistory.pop();
-  updateHistoryList();
-});
+    if (clearBtn) {
+        clearBtn.addEventListener("click", () => {
+            pointHistory = [];
+            updateHistoryList();
+        });
+    }
 
-updateHistoryList();
+    // LÓGICA DE LIGAR/DESLIGAR (TOGGLE) O WIDGET
+    if (toggleBtn && widget) {
+        toggleBtn.addEventListener('click', () => {
+            widget.classList.toggle('hidden');
+        });
+    }
+
+    updateHistoryList(); 
+});

@@ -1281,6 +1281,10 @@ map.on("click", async function (e) {
     // Ainda tenta inicializar o painel WTSS
     await showWTSSElectionPanel(lat, lng);
   }
+// LÓGICA DO HISTÓRICO DE PONTOS
+    pointHistory.unshift({ lat, lng, timestamp: Date.now() });
+    if (pointHistory.length > 12) pointHistory.pop();
+    updateHistoryList(); // <--- ISTO ATIVA O WIDGET
 });
 
 // --------------------------------------
@@ -1868,3 +1872,4 @@ document.addEventListener("DOMContentLoaded", function() {
 
     updateHistoryList(); 
 });
+

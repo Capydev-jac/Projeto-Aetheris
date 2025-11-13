@@ -52,6 +52,11 @@
       Brazil Data Cube. Analise a evolução de índices de satélite em qualquer
       ponto do território brasileiro.
     </p>
+     <div>
+          <button id="toggle-history-btn" class="floating-toggle-btn">
+        📍 Histórico
+    </button>
+    </div>
 
     <div class="tag-selector">
       <input type="text" id="tag-input" placeholder="Buscar ou selecionar..." autocomplete="off" />
@@ -83,7 +88,15 @@
       &times;
     </button>
   </div>
-
+   <div id="history-floating-widget" class="floating-widget hidden">
+        <div class="widget-header">
+            📍 Histórico de Pontos
+        </div>
+        <div id="history-list" class="history-list">
+            <div class="empty-history">Nenhum ponto selecionado ainda.</div>
+        </div>
+        <button id="clear-history-btn" class="action-button secondary-button clear-history-btn">🗑️ Limpar Histórico</button>
+    </div>
   <script src="./src/script.js"></script>
 </body>
 

@@ -497,6 +497,102 @@ function createChart(lat, lng, title, timeSeriesData) {
 // --------------------------------------
 // WTSS - LÓGICA MULTI-ESTÁGIO E COMPARAÇÃO
 // --------------------------------------
+
+// === Helper: "NDVI,EVI" -> ["NDVI","EVI"] ===
+function parseAttributesList(value) {
+  if (Array.isArray(value)) return value.filter(Boolean);
+  return String(value || "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
+// WTSS direto para um único atributo
+async function fetchWTSSSingleAttr(coverage, lat, lon, startISO, endISO, attribute) {
+  const baseUrl = "https://data.inpe.br/bdc/wtss/v4/";
+  const url = `${baseUrl}time_series?coverage=${encodeURIComponent(
+    coverage
+  )}&attributes=${encodeURIComponent(
+    attribute
+  )}&start_date=${encodeURIComponent(
+    startISO
+  )}&end_date=${encodeURIComponent(
+    endISO
+  )}&latitude=${encodeURIComponent(lat)}&longitude=${encodeURIComponent(lon)}`;
+
+  try {
+    const r = await fetch(url);
+    if (!r.ok) throw new Error("WTSS status " + r.status);
+    const j = await r.json();
+    const attrs =
+      j && j.result && Array.isArray(j.result.attributes)
+        ? j.result.attributes
+        : [];
+    const found = attrs.find((a) => a.attribute === attribute);
+    const values = found && Array.isArray(found.values) ? found.values : [];
+    const timeline =
+      j && j.result && Array.isArray(j.result.timeline)
+        ? j.result.timeline
+        : [];
+    return { source: "WTSS", attribute, values, timeline };
+  } catch (e) {
+    console.error("[WTSS] erro single attr:", e);
+    return { source: "WTSS", attribute, values: [], timeline: [] };
+  }
+}
+
+// Backend STAC: /api/timeseries?lat=..&lng=..&coverage=..&bands=ATTRIBUTE
+async function fetchSTACSingleAttr(coverage, lat, lon, startISO, endISO, attribute) {
+  try {
+    const url = `http://localhost:3000/api/timeseries?lat=${encodeURIComponent(
+      lat
+    )}&lng=${encodeURIComponent(
+      lon
+    )}&coverage=${encodeURIComponent(
+      coverage
+    )}&bands=${encodeURIComponent(
+      attribute
+    )}&start=${encodeURIComponent(startISO)}&end=${encodeURIComponent(endISO)}`;
+    const r = await fetch(url);
+    if (!r.ok) throw new Error("STAC status " + r.status);
+    const j = await r.json();
+    const attrs = Array.isArray(j.attributes) ? j.attributes : [];
+    const timeline = Array.isArray(j.timeline) ? j.timeline : [];
+    let values = [];
+    if (attrs.includes(attribute) && Array.isArray(j.values)) {
+      values = j.values.map((v) =>
+        v && v[attribute] != null ? v[attribute] : null
+      );
+    }
+    return { source: "STAC", attribute, values, timeline };
+  } catch (e) {
+    console.error("[STAC] erro single attr:", e);
+    return { source: "STAC", attribute, values: [], timeline: [] };
+  }
+}
+
+// Tenta WTSS; se vazio, tenta STAC; retorna a primeira série válida (ou vazia)
+async function fetchAnySingleAttr(coverage, lat, lon, startISO, endISO, attribute) {
+  const wtss = await fetchWTSSSingleAttr(
+    coverage,
+    lat,
+    lon,
+    startISO,
+    endISO,
+    attribute
+  );
+  if (wtss.values && wtss.values.length) return wtss;
+  const stac = await fetchSTACSingleAttr(
+    coverage,
+    lat,
+    lon,
+    startISO,
+    endISO,
+    attribute
+  );
+  return stac;
+}
+
 async function listWTSSTitleAndAttributes(lat, lon) {
   const baseUrl = "https://data.inpe.br/bdc/wtss/v4/";
 
@@ -566,6 +662,22 @@ function sanitizeId(text) {
   return text.replace(/[^a-z0-9]/gi, "_");
 }
 
+// === Helper: lê seleções do <select id="wtss-attribute-select"> como CSV (ex.: "NDVI,EVI") ===
+function getSelectedWTSSAttributes() {
+  const sel = document.getElementById("wtss-attribute-select");
+  if (!sel) return "";
+  if (sel.multiple) {
+    const values = Array.from(sel.selectedOptions)
+      .map((o) => o.value)
+      .filter(Boolean);
+    if (!values.length && sel.options.length > 0) {
+      values.push(sel.options[0].value);
+    }
+    return values.join(",");
+  }
+  return sel.value || "";
+}
+
 // Mantém função antiga como compatibilidade mínima (mas agora a seleção ocorre na mesma aba)
 window.showWTSSElectionPanel = async function (lat, lng) {
   const result = await listWTSSTitleAndAttributes(lat, lng);
@@ -596,7 +708,6 @@ window.showWTSSElectionPanel = async function (lat, lng) {
   // Monta options de coleção (pode ajustar escaping se necessário)
   const collectionOptions = result.collections
     .map((col) => {
-      // escape básico para evitar quebra de HTML
       const safeTitle = String(col.title)
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
@@ -621,8 +732,12 @@ window.showWTSSElectionPanel = async function (lat, lng) {
             </div>
 
             <div class="wtss-selection-row" style="margin-top:8px;">
-                <label for="wtss-attribute-select"><strong>Atributo</strong></label>
-                <select id="wtss-attribute-select" class="wtss-full-width-select"></select>
+                <label for="wtss-attribute-select"><strong>Atributos</strong></label>
+                <select id="wtss-attribute-select" class="wtss-full-width-select" multiple
+                    title="Segure Ctrl (Windows/Linux) ou ⌘ Command (Mac) para selecionar mais de um."></select>
+                <p style="margin: 6px 0 0; font-size: 0.85em; opacity: 0.9;">
+                  💡 <b>Dica:</b> para selecionar <u>mais de um</u> atributo, mantenha pressionado <b>Ctrl</b> (Windows/Linux) ou <b>⌘ Command</b> (Mac) ao clicar nas opções.
+                </p>
             </div>
 
             <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
@@ -632,7 +747,7 @@ window.showWTSSElectionPanel = async function (lat, lng) {
             </div>
 
             <br>
-            <small>Selecione uma coleção e um atributo. Clique em "Plotar" várias vezes para comparar diferentes séries. Use as caixas ao lado dos títulos para selecionar até 6 gráficos e clicar em "Mostrar Selecionados".</small>
+            <small>Selecione uma coleção e um ou mais atributos. Clique em "Plotar" várias vezes para comparar diferentes séries. Use as caixas ao lado dos títulos para selecionar até 6 gráficos e clicar em "Mostrar Selecionados".</small>
         </div>
 
             <button id="wtss-show-selected" class="action-button primary-button">🖥️ Mostrar Selecionados</button>
@@ -645,7 +760,6 @@ window.showWTSSElectionPanel = async function (lat, lng) {
   wtssTab.style.overflowY = "auto";
   showTab("wtss-tab");
 
-  // Referência às coleções para lookup (usar título original do result)
   const collectionsByTitle = {};
   result.collections.forEach((col) => {
     collectionsByTitle[col.title] = col;
@@ -659,7 +773,6 @@ window.showWTSSElectionPanel = async function (lat, lng) {
   const showSelectedBtn = document.getElementById("wtss-show-selected");
 
   function populateAttributesFor(collectionTitleEscaped) {
-    // encontra coleção original (desfazendo escape simples)
     const collectionTitle = collectionTitleEscaped
       .replace(/&amp;/g, "&")
       .replace(/&lt;/g, "<")
@@ -688,7 +801,6 @@ window.showWTSSElectionPanel = async function (lat, lng) {
   );
 
   plotBtn.addEventListener("click", () => {
-    // reconstrói título original conforme collectionsByTitle keys
     const selectedEsc = collSelect.value;
     const selectedTitle = selectedEsc
       .replace(/&amp;/g, "&")
@@ -696,12 +808,12 @@ window.showWTSSElectionPanel = async function (lat, lng) {
       .replace(/&gt;/g, ">")
       .replace(/&quot;/g, '"');
     const coverage = selectedTitle;
-    const attribute = attrSelect.value;
-    if (!coverage || !attribute) {
-      alert("Selecione coleção e atributo antes de plotar.");
+    const attributeCsv = getSelectedWTSSAttributes();
+    if (!coverage || !attributeCsv) {
+      alert("Selecione coleção e pelo menos um atributo antes de plotar.");
       return;
     }
-    fetchWTSSTimeSeriesAndPlot(lat, lng, coverage, attribute);
+    fetchWTSSTimeSeriesAndPlot(lat, lng, coverage, attributeCsv);
   });
 
   clearBtn.addEventListener("click", () => {
@@ -713,7 +825,6 @@ window.showWTSSElectionPanel = async function (lat, lng) {
     if (typeof exportAllWTSSCharts === "function") exportAllWTSSCharts();
   });
 
-  // botão que abre modal com os selecionados (max 6)
   showSelectedBtn.addEventListener("click", () => {
     if (typeof showSelectedWTSSInModal === "function")
       showSelectedWTSSInModal();
@@ -733,12 +844,6 @@ window.fetchWTSSTimeSeriesAndPlot = async function (
   const startISO = startDate.toISOString().split("T")[0];
   const endISO = new Date().toISOString().split("T")[0];
 
-  const url = `${baseUrl}time_series?coverage=${encodeURIComponent(
-    coverage
-  )}&attributes=${encodeURIComponent(
-    attribute
-  )}&latitude=${lat}&longitude=${lon}&start_date=${startISO}&end_date=${endISO}`;
-
   const graphArea = document.getElementById("wtss-graph-area");
   const loadingId = "wtss-loading-message";
   if (graphArea) {
@@ -747,6 +852,63 @@ window.fetchWTSSTimeSeriesAndPlot = async function (
     msg.innerHTML = `<p>Carregando série WTSS: <strong>${coverage}</strong> / ${attribute} ...</p>`;
     graphArea.prepend(msg);
   }
+
+  // === MULTI-ATRIBUTOS ===
+  const requestedAttrs = parseAttributesList(attribute);
+  if (requestedAttrs.length > 1) {
+    const promises = requestedAttrs.map((attr) =>
+      fetchAnySingleAttr(coverage, lat, lon, startISO, endISO, attr)
+    );
+
+    try {
+      const results = await Promise.all(promises);
+      const mapAttrToValues = {};
+
+      const candidateTimelines = results
+        .map((r) => ({
+          attr: r.attribute,
+          tl: r.timeline || [],
+          len: (r.timeline || []).length,
+        }))
+        .filter((o) => o.len > 0);
+
+      const refTimeline = candidateTimelines.length
+        ? candidateTimelines.reduce((a, b) => (a.len <= b.len ? a : b)).tl
+        : [];
+
+      results.forEach((r) => {
+        if (Array.isArray(r.values) && r.values.length) {
+          const cut = refTimeline.length
+            ? r.values.slice(0, refTimeline.length)
+            : r.values;
+          mapAttrToValues[r.attribute] = cut;
+        }
+      });
+
+      if (Object.keys(mapAttrToValues).length) {
+        createWTSSTimeSeriesChartMulti(
+          `WTSS - ${coverage}`,
+          mapAttrToValues,
+          refTimeline,
+          requestedAttrs,
+          coverage
+        );
+        const loadingMessage = document.getElementById(loadingId);
+        if (loadingMessage) loadingMessage.remove();
+        return;
+      }
+    } catch (e) {
+      console.error("[WTSS multi] falha nas requisições múltiplas (WTSS/STAC):", e);
+      // Cai no fluxo single abaixo
+    }
+  }
+  // === FIM MULTI-ATRIBUTOS ===
+
+  const url = `${baseUrl}time_series?coverage=${encodeURIComponent(
+    coverage
+  )}&attributes=${encodeURIComponent(
+    attribute
+  )}&latitude=${lat}&longitude=${lon}&start_date=${startISO}&end_date=${endISO}`;
 
   try {
     const resp = await fetch(url);
@@ -829,24 +991,45 @@ window.showSelectedWTSSInModal = function () {
 
   window.wtss_modal_charts = [];
 
-  checked.forEach((cb, idx) => {
+  checked.forEach((cb) => {
     const id = cb.getAttribute("data-wtss-id");
-    const dataObj = window[`wtss_data_${id}`];
-    const title = dataObj ? `${dataObj.coverage} — ${dataObj.attribute}` : id;
+    const dataObj = window[`wtss_data_${id}`]; // agora pode ser single ou multi
+
+    let cardTitle = id;
+    if (dataObj) {
+      if (dataObj.multi) {
+        // multi-atributo
+        cardTitle = `${dataObj.coverage} — ${dataObj.attributes.join(", ")}`;
+      } else {
+        cardTitle = `${dataObj.coverage} — ${dataObj.attribute}`;
+      }
+    }
 
     const card = document.createElement("div");
     card.className = "wtss-modal-card";
 
     card.innerHTML = `
-        <div class="wtss-modal-card-title">${title}</div>
-        <div class="wtss-modal-canvas-wrapper">
-            <canvas id="modal-canvas-${id}"></canvas>
-        </div>
+      <div class="wtss-modal-card-title">${cardTitle}</div>
+      <div class="wtss-modal-canvas-wrapper">
+          <canvas id="modal-canvas-${id}"></canvas>
+      </div>
     `;
     grid.appendChild(card);
 
-    if (dataObj) {
-      const ctx = document.getElementById(`modal-canvas-${id}`);
+    const ctx = document.getElementById(`modal-canvas-${id}`);
+
+    if (!dataObj) {
+      // placeholder se algo der errado
+      new Chart(ctx, {
+        type: "line",
+        data: { datasets: [] },
+        options: { responsive: true, maintainAspectRatio: false },
+      });
+      return;
+    }
+
+    // SINGLE-ATRIBUTO (mesma lógica antiga)
+    if (!dataObj.multi) {
       const chartData = dataObj.timeline.map((date, i) => ({
         x: date,
         y:
@@ -900,18 +1083,99 @@ window.showSelectedWTSSInModal = function () {
         },
       });
       window.wtss_modal_charts.push(chart);
-    } else {
-      // se não há dados salvos, cria placeholder
-      const ctx = document.getElementById(`modal-canvas-${id}`);
+      return;
+    }
+
+    // MULTI-ATRIBUTO ======================
+    const timeline = Array.isArray(dataObj.timeline)
+      ? dataObj.timeline
+      : [];
+    const attributes = dataObj.attributes || [];
+    const mapAttrToValues = dataObj.attrValuesMap || {};
+
+    let minLen = timeline.length;
+    attributes.forEach((attr) => {
+      const arr = mapAttrToValues[attr] || [];
+      minLen = minLen ? Math.min(minLen, arr.length) : arr.length;
+    });
+
+    if (!minLen) {
       new Chart(ctx, {
         type: "line",
         data: { datasets: [] },
         options: { responsive: true, maintainAspectRatio: false },
       });
+      return;
     }
+
+    const labels = timeline.slice(0, minLen);
+
+    const datasets = attributes.map((attr, index) => {
+      const raw = (mapAttrToValues[attr] || []).slice(0, minLen);
+      const scaled = raw.map((v) =>
+        v !== undefined && v !== null
+          ? typeof applyScale === "function"
+            ? applyScale(v)
+            : v
+          : null
+      );
+
+      let color = "hsl(" + ((index * 60) % 360) + ", 70%, 50%)";
+      const U = String(attr).toUpperCase();
+      if (U.includes("NDVI")) color = "rgba(0, 128, 0, 1)";
+      else if (U.includes("EVI")) color = "rgba(0, 0, 255, 1)";
+
+      return {
+        label: attr,
+        data: scaled,
+        borderColor: color,
+        borderWidth: 2,
+        fill: false,
+        tension: 0.1,
+        pointRadius: 2,
+      };
+    });
+
+    const allY = [];
+    datasets.forEach((ds) =>
+      ds.data.forEach((y) => {
+        if (y != null) allY.push(y);
+      })
+    );
+    let ymin = -2.5,
+      ymax = 2.5;
+    if (allY.length) {
+      const minV = Math.min.apply(Math, allY);
+      const maxV = Math.max.apply(Math, allY);
+      const pad = Math.max((maxV - minV) * 0.1, 0.1);
+      ymin = minV - pad;
+      ymax = maxV + pad;
+    }
+
+    const chart = new Chart(ctx, {
+      type: "line",
+      data: { labels, datasets },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        parsing: true,
+        scales: {
+          x: {
+            type: "time",
+            time: { unit: "month" },
+            grid: { color: "#111", borderDash: [2, 2] },
+          },
+          y: {
+            min: ymin,
+            max: ymax,
+            grid: { color: "#111", borderDash: [2, 2] },
+          },
+        },
+      },
+    });
+    window.wtss_modal_charts.push(chart);
   });
 
-  // fechar modal
   function closeModal() {
     if (window.wtss_modal_charts && window.wtss_modal_charts.length) {
       window.wtss_modal_charts.forEach((c) => {
@@ -1145,7 +1409,6 @@ async function exportAllWTSSCharts() {
     return;
   }
 
-  // Carrega JSZip dinamicamente se necessário
   if (typeof JSZip === "undefined") {
     await loadJSZip();
   }
@@ -1185,16 +1448,13 @@ function createWTSSTimeSeriesChart(
   attribute,
   coverage
 ) {
-  // sanitize unique id to safe HTML id
   const uniqueId = sanitizeId(`chart-${coverage}-${attribute}-${Date.now()}`);
   const graphArea = document.getElementById("wtss-graph-area");
   if (!graphArea) return;
 
-  // Remove mensagem de carregamento, se existir
   const loadingMessage = document.getElementById("wtss-loading-message");
   if (loadingMessage) loadingMessage.remove();
 
-  // Cria bloco HTML do gráfico WTSS (acordeão) com checkbox
   const chartBlock = document.createElement("div");
   chartBlock.id = uniqueId;
   chartBlock.classList.add("wtss-chart-block");
@@ -1223,47 +1483,36 @@ function createWTSSTimeSeriesChart(
 
   graphArea.appendChild(chartBlock);
 
-  // handler do botão fechar
   const closeBtn = chartBlock.querySelector(".wtss-close-btn");
   if (closeBtn) {
     closeBtn.addEventListener("click", (ev) => {
-      ev.stopPropagation(); // não alterna o <details> nem o checkbox
-
-      // destruir Chart.js se tiver sido criado
+      ev.stopPropagation();
       const canvas = chartBlock.querySelector(`#canvas-${uniqueId}`);
       if (canvas && canvas._chart) {
         try {
           canvas._chart.destroy();
         } catch (e) {}
       }
-
-      // limpar referência temporária
       try {
         delete window[`wtss_data_${uniqueId}`];
       } catch (e) {}
-
-      // remover o bloco
       chartBlock.remove();
     });
   }
 
   document.getElementById("wtss-tab").scrollTop = 0;
 
-  // Interatividade visual: atualiza classe .selected quando checkbox muda
   const checkbox = chartBlock.querySelector(".wtss-select-checkbox");
   if (checkbox) {
     checkbox.addEventListener("change", () => {
       if (checkbox.checked) chartBlock.classList.add("selected");
       else chartBlock.classList.remove("selected");
     });
-    // clique no header também alterna o checkbox (melhor UX)
     const summary = chartBlock.querySelector("summary");
     if (summary) {
       summary.addEventListener("click", (ev) => {
-        // evita fechar o details ao clicar no checkbox/label
         const targetIsInput = ev.target.closest("input") !== null;
         if (!targetIsInput) {
-          // toggle checkbox selection independentemente do detalhe aberto
           checkbox.checked = !checkbox.checked;
           checkbox.dispatchEvent(new Event("change"));
         }
@@ -1271,10 +1520,8 @@ function createWTSSTimeSeriesChart(
     }
   }
 
-  // Guarda dados temporariamente no objeto global
   window[`wtss_data_${uniqueId}`] = { values, timeline, attribute, coverage };
 
-  // Função que plota o gráfico dentro do acordeão
   window.plotChartInAcordeon = function (id, title, attribute) {
     const data = window[`wtss_data_${id}`];
     if (!data) return;
@@ -1289,7 +1536,6 @@ function createWTSSTimeSeriesChart(
             : null,
       }));
 
-      // Autoescala Y
       const ys = chartData.map((p) => p.y).filter((v) => v !== null);
       let ymin = -2.0,
         ymax = 1.5;
@@ -1301,7 +1547,6 @@ function createWTSSTimeSeriesChart(
         ymax = maxV + pad;
       }
 
-      // Criação do gráfico Chart.js
       const chart = new Chart(ctx, {
         type: "line",
         data: {
@@ -1349,10 +1594,218 @@ function createWTSSTimeSeriesChart(
   };
 }
 
+// === Gráfico WTSS com múltiplos atributos no MESMO canvas ===
+function createWTSSTimeSeriesChartMulti(
+  title,
+  attrValuesMap,
+  timeline,
+  attributes,
+  coverage
+) {
+  const uniqueId = sanitizeId(`chart-multi-${coverage}-${Date.now()}`);
+  const graphArea = document.getElementById("wtss-graph-area");
+  if (!graphArea) return;
+
+  const loadingMessage = document.getElementById("wtss-loading-message");
+  if (loadingMessage) loadingMessage.remove();
+
+  const chartBlock = document.createElement("div");
+  chartBlock.id = uniqueId;
+  chartBlock.classList.add("wtss-chart-block");
+
+  chartBlock.innerHTML = `
+    <details id="details-${uniqueId}" class="wtss-details-container"
+      ontoggle="if(this.open) plotMultiChartInAcordeon('${uniqueId}')">
+      <summary class="wtss-summary-header">
+        <label style="display:inline-flex;align-items:center;gap:8px;">
+          <input type="checkbox" class="wtss-select-checkbox" data-wtss-id="${uniqueId}">
+          <span>🛰️ ${title} <small style="color:#666; margin-left:6px;">(${attributes.join(
+            ", "
+          )})</small></span>
+        </label>
+        <button type="button" class="wtss-close-btn" title="Fechar este gráfico" aria-label="Fechar">×</button>
+      </summary>
+      <div class="wtss-panel wtss-chart-container-border">
+        <p><b>Atributos:</b> ${attributes.join(", ")}</p>
+        <hr class="satelite-popup-divider">
+        <div class="wtss-canvas-wrapper">
+          <canvas id="canvas-${uniqueId}"></canvas>
+        </div>
+        <p class="chart-footer stac-chart-footer">Valores reais (escala padrão aplicada).</p>
+      </div>
+    </details>
+  `;
+
+  graphArea.appendChild(chartBlock);
+  document.getElementById("wtss-tab").scrollTop = 0;
+
+  // guarda dados em 2 chaves: uma específica e outra genérica usada pelo modal
+  window["wtss_multi_" + uniqueId] = {
+    attrValuesMap,
+    timeline,
+    attributes,
+    coverage,
+  };
+  window["wtss_data_" + uniqueId] = {
+    multi: true,
+    attrValuesMap,
+    timeline,
+    attributes,
+    coverage,
+  };
+
+  const det = document.getElementById("details-" + uniqueId);
+  if (det) det.open = true;
+  plotMultiChartInAcordeon(uniqueId);
+
+  // botão fechar (destrói chart + limpa dados globais)
+  const closeBtn = chartBlock.querySelector(".wtss-close-btn");
+  if (closeBtn) {
+    closeBtn.addEventListener("click", (ev) => {
+      ev.stopPropagation();
+      const canvas = chartBlock.querySelector(`#canvas-${uniqueId}`);
+      if (canvas && canvas._chart) {
+        try {
+          canvas._chart.destroy();
+        } catch (e) {}
+      }
+      try {
+        delete window["wtss_multi_" + uniqueId];
+        delete window["wtss_data_" + uniqueId];
+      } catch (e) {}
+      chartBlock.remove();
+    });
+  }
+
+  // seleção visual (igual ao gráfico single)
+  const checkbox = chartBlock.querySelector(".wtss-select-checkbox");
+  if (checkbox) {
+    checkbox.addEventListener("change", () => {
+      if (checkbox.checked) chartBlock.classList.add("selected");
+      else chartBlock.classList.remove("selected");
+    });
+    const summary = chartBlock.querySelector("summary");
+    if (summary) {
+      summary.addEventListener("click", (ev) => {
+        const targetIsInput = ev.target.closest("input") !== null;
+        if (!targetIsInput) {
+          checkbox.checked = !checkbox.checked;
+          checkbox.dispatchEvent(new Event("change"));
+        }
+      });
+    }
+  }
+}
+
+window.plotMultiChartInAcordeon = function (id) {
+  const data = window["wtss_multi_" + id];
+  if (!data) return;
+  const canvas = document.getElementById("canvas-" + id);
+  if (!canvas) return;
+
+  if (canvas._chart) {
+    try {
+      canvas._chart.destroy();
+    } catch (e) {}
+  }
+
+  let minLen = Array.isArray(data.timeline) ? data.timeline.length : 0;
+  data.attributes.forEach(function (attr) {
+    const arr = data.attrValuesMap[attr] || [];
+    minLen = minLen ? Math.min(minLen, arr.length) : arr.length;
+  });
+  if (!minLen) {
+    const area =
+      canvas.closest(".wtss-panel") ||
+      document.getElementById("wtss-graph-area");
+    if (area) {
+      area.insertAdjacentHTML(
+        "beforeend",
+        '<div class="wtss-error-margin"><strong>Obs.:</strong> Sem pontos válidos para a combinação atual (verifique datas/atributos).</div>'
+      );
+    }
+    return;
+  }
+
+  const labels =
+    Array.isArray(data.timeline) && data.timeline.length >= minLen
+      ? data.timeline.slice(0, minLen)
+      : [];
+
+  const datasets = data.attributes.map(function (attr, index) {
+    const raw = (data.attrValuesMap[attr] || []).slice(0, minLen);
+    const scaled = raw.map(function (v) {
+      return v !== undefined && v !== null
+        ? typeof applyScale === "function"
+          ? applyScale(v)
+          : v
+        : null;
+    });
+
+    let color = "hsl(" + ((index * 60) % 360) + ", 70%, 50%)";
+    const U = String(attr).toUpperCase();
+    if (U.includes("NDVI")) color = "rgba(0, 128, 0, 1)";
+    else if (U.includes("EVI")) color = "rgba(0, 0, 255, 1)";
+
+    return {
+      label: attr,
+      data: scaled,
+      borderColor: color,
+      borderWidth: 2,
+      fill: false,
+      tension: 0.1,
+      pointRadius: 3,
+      pointHoverRadius: 5,
+      pointBackgroundColor: "#fff",
+      pointBorderColor: color,
+      pointBorderWidth: 2,
+    };
+  });
+
+  const allY = [];
+  datasets.forEach(function (ds) {
+    ds.data.forEach(function (y) {
+      if (y != null) allY.push(y);
+    });
+  });
+  let ymin = -2.5,
+    ymax = 2.5;
+  if (allY.length) {
+    const minV = Math.min.apply(Math, allY);
+    const maxV = Math.max.apply(Math, allY);
+    const pad = Math.max((maxV - minV) * 0.1, 0.1);
+    ymin = minV - pad;
+    ymax = maxV + pad;
+  }
+
+  canvas._chart = new Chart(canvas, {
+    type: "line",
+    data: { labels: labels, datasets: datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      parsing: true,
+      plugins: {
+        legend: { display: true, position: "top" },
+        tooltip: { enabled: true },
+      },
+      scales: {
+        x: {
+          type: "time",
+          time: { unit: "month", tooltipFormat: "dd MMM yyyy" },
+        },
+        y: { min: ymin, max: ymax },
+      },
+      interaction: { mode: "nearest", intersect: false },
+    },
+  });
+};
+
+
 // --------------------------------------
 // HISTÓRICO DE PONTOS SELECIONADOS (somente em memória)
 // --------------------------------------
-let pointHistory = []; // 🔹 armazenado apenas enquanto a página está aberta
+let pointHistory = [];
 
 const historyContainer = document.createElement("div");
 historyContainer.id = "history-container";
@@ -1391,7 +1844,7 @@ function updateHistoryList() {
     `;
 
     item.addEventListener("click", () => {
-      map.setView([p.lat, p.lng], 5); // 🔹 zoom mais distante
+      map.setView([p.lat, p.lng], 5);
       createSelectionVisuals({ lat: p.lat, lng: p.lng });
       showInfoPanelSTAC(
         "<strong>📍 Ponto selecionado</strong><br>Buscando produtos STAC..."

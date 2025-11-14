@@ -223,6 +223,120 @@ const FALLBACK_ATTRIBUTES_MAP = {
 };
 const WTSS_REFERENCE_COVERAGE = "LANDSAT-16D-1";
 
+// Legendas / descrições dos principais atributos WTSS
+const ATTRIBUTE_INFO = {
+  NDVI: {
+    nome: "NDVI (Índice de Vegetação por Diferença Normalizada)",
+    descricao:
+      "Índice de vegetação calculado a partir das bandas do vermelho e do infravermelho próximo. Valores maiores indicam vegetação mais densa e saudável.",
+    unidade: "adimensional (≈ -1 a 1)",
+  },
+  EVI: {
+    nome: "EVI (Índice de Vegetação Realçado)",
+    descricao:
+      "Índice de vegetação que corrige alguns efeitos atmosféricos e influência do solo. Sensível principalmente à vegetação densa.",
+    unidade: "adimensional (≈ -1 a 1)",
+  },
+  NBR: {
+    nome: "NBR (Normalized Burn Ratio)",
+    descricao:
+      "Índice usado para detectar áreas queimadas, usando bandas de infravermelho próximo e infravermelho de ondas curtas.",
+    unidade: "adimensional",
+  },
+  LST_DAY_1KM: {
+    nome: "LST_Day_1km (Land Surface Temperature - Dia)",
+    descricao:
+      "Temperatura da superfície terrestre durante o dia, derivada de bandas térmicas.",
+    unidade: "Kelvin (K) – geralmente convertida para °C.",
+  },
+  LST_NIGHT_1KM: {
+    nome: "LST_Night_1km (Land Surface Temperature - Noite)",
+    descricao:
+      "Temperatura da superfície terrestre durante a noite, derivada de bandas térmicas.",
+    unidade: "Kelvin (K) – geralmente convertida para °C.",
+  },
+  CLEAROB: {
+    nome: "CLEAROB (Observações sem nuvem)",
+    descricao:
+      "Número de observações válidas (sem nuvem) usadas na composição daquele pixel.",
+    unidade: "contagem (número de observações)",
+  },
+  TOTALOB: {
+    nome: "TOTALOB (Total de observações)",
+    descricao:
+      "Total de observações disponíveis no período, incluindo com e sem nuvem.",
+    unidade: "contagem (número de observações)",
+  },
+  SCL: {
+    nome: "SCL (Scene Classification Layer)",
+    descricao:
+      "Camada de classificação de cena, indicando se o pixel é vegetação, solo exposto, nuvem, água, etc.",
+    unidade: "categoria (código inteiro)",
+  },
+};
+
+// retorna um objeto com nome/descrição/unidade para qualquer atributo
+function getAttributeInfo(attribute) {
+  if (!attribute) {
+    return {
+      nome: "Atributo não definido",
+      descricao: "Nenhum atributo selecionado.",
+      unidade: "-",
+    };
+  }
+
+  const key = attribute.toUpperCase();
+
+  // Tenta match direto (NDVI, EVI, NBR...)
+  if (ATTRIBUTE_INFO[key]) {
+    return ATTRIBUTE_INFO[key];
+  }
+
+  // Heurísticas para bandas espectrais
+  if (/^B0?\d/i.test(key)) {
+    return {
+      nome: `Banda ${attribute}`,
+      descricao:
+        "Banda espectral original do sensor (por exemplo, azul, verde, vermelho ou infravermelho). A interpretação exata depende do satélite.",
+      unidade: "reflectância escalada (adimensional)",
+    };
+  }
+
+  if (key.includes("RED")) {
+    return {
+      nome: attribute,
+      descricao:
+        "Reflectância na região do vermelho do espectro eletromagnético.",
+      unidade: "reflectância escalada (adimensional)",
+    };
+  }
+
+  if (key.includes("NIR")) {
+    return {
+      nome: attribute,
+      descricao:
+        "Reflectância na região do infravermelho próximo, muito sensível à vegetação.",
+      unidade: "reflectância escalada (adimensional)",
+    };
+  }
+
+  if (key.includes("BLUE")) {
+    return {
+      nome: attribute,
+      descricao: "Reflectância na região do azul do espectro.",
+      unidade: "reflectância escalada (adimensional)",
+    };
+  }
+
+  // Fallback genérico
+  return {
+    nome: attribute,
+    descricao:
+      "Atributo proveniente do produto original. Consulte a documentação técnica do dataset para detalhes específicos.",
+    unidade: "ver documentação",
+  };
+}
+
 // --------------------------------------
 // CONTROLE DO SIDEBAR
 // --------------------------------------
@@ -718,41 +832,46 @@ window.showWTSSElectionPanel = async function (lat, lng) {
 
   // Conteúdo da aba: select de coleção + select de atributo + botões + área de gráficos
   const panelContent = `
-        <div id="wtss-controls-panel" class="wtss-panel wtss-controls-sticky">
-            <h3>WTSS — Seleção</h3>
-            <p>Período solicitado: ${calculated_start_date} → ${calculated_end_date}</p>
-            <hr class="satelite-popup-divider">
+  <div id="wtss-controls-panel" class="wtss-panel wtss-controls-sticky">
+      <h3>WTSS — Seleção</h3>
+      <p>Período solicitado: ${calculated_start_date} → ${calculated_end_date}</p>
+      <hr class="satelite-popup-divider">
 
-            <div class="wtss-selection-row">
-                <label for="wtss-collection-select"><strong>Coleção</strong></label>
-                <select id="wtss-collection-select" class="wtss-full-width-select">
-                    ${collectionOptions}
-                </select>
-            </div>
+      <div class="wtss-selection-row">
+          <label for="wtss-collection-select"><strong>Coleção</strong></label>
+          <select id="wtss-collection-select" class="wtss-full-width-select">
+              ${collectionOptions}
+          </select>
+      </div>
 
-            <div class="wtss-selection-row" style="margin-top:8px;">
-                <label for="wtss-attribute-select"><strong>Atributos</strong></label>
-                <select id="wtss-attribute-select" class="wtss-full-width-select" multiple
-                    title="Segure Ctrl (Windows/Linux) ou ⌘ Command (Mac) para selecionar mais de um."></select>
-                <p style="margin: 6px 0 0; font-size: 0.85em; opacity: 0.9;">
-                  💡 <b>Dica:</b> para selecionar <u>mais de um</u> atributo, mantenha pressionado <b>Ctrl</b> (Windows/Linux) ou <b>⌘ Command</b> (Mac) ao clicar nas opções.
-                </p>
-            </div>
+      <div class="wtss-selection-row" style="margin-top:8px;">
+          <label for="wtss-attribute-select"><strong>Atributos</strong></label>
+          <select id="wtss-attribute-select" class="wtss-full-width-select" multiple
+              title="Segure Ctrl (Windows/Linux) ou ⌘ Command (Mac) para selecionar mais de um."></select>
+          <p style="margin: 6px 0 0; font-size: 0.85em; opacity: 0.9;">
+            💡 <b>Dica:</b> para selecionar <u>mais de um</u> atributo, mantenha pressionado <b>Ctrl</b> (Windows/Linux) ou <b>⌘ Command</b> (Mac) ao clicar nas opções.
+          </p>
+      </div>
 
-            <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
-                <button id="wtss-plot-selected" class="action-button">▶️ Plotar</button>
-                <button id="wtss-export-all" class="action-button secondary-button">⬇️ Exportar Todos Gráficos</button>
-                <button id="wtss-clear-all" class="action-button secondary-button">Limpar Todos os Gráficos</button>
-            </div>
+      <!-- CAIXA DE LEGENDA DOS ATRIBUTOS -->
+      <div id="wtss-attribute-info" class="wtss-attribute-info-box" style="margin-top:8px; padding:6px 8px; border-radius:6px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); font-size:0.85em;">
+        <p style="margin:0; opacity:0.9;">Selecione um atributo para ver a descrição aqui.</p>
+      </div>
 
-            <br>
-            <small>Selecione uma coleção e um ou mais atributos. Clique em "Plotar" várias vezes para comparar diferentes séries. Use as caixas ao lado dos títulos para selecionar até 6 gráficos e clicar em "Mostrar Selecionados".</small>
-        </div>
+      <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
+          <button id="wtss-plot-selected" class="action-button">▶️ Plotar</button>
+          <button id="wtss-export-all" class="action-button secondary-button">⬇️ Exportar Todos Gráficos</button>
+          <button id="wtss-clear-all" class="action-button secondary-button">Limpar Todos os Gráficos</button>
+      </div>
 
-            <button id="wtss-show-selected" class="action-button primary-button">🖥️ Mostrar Selecionados</button>
+      <br>
+  
+  </div>
 
-        <div id="wtss-graph-area"></div>
-    `;
+  <button id="wtss-show-selected" class="action-button primary-button">🖥️ Mostrar Selecionados</button>
+
+  <div id="wtss-graph-area"></div>
+`;
 
   const wtssTab = document.getElementById("wtss-tab");
   wtssTab.innerHTML = panelContent;
@@ -771,6 +890,42 @@ window.showWTSSElectionPanel = async function (lat, lng) {
   const exportBtn = document.getElementById("wtss-export-all");
   const showSelectedBtn = document.getElementById("wtss-show-selected");
 
+  function updateAttributeInfoBox() {
+  const box = document.getElementById("wtss-attribute-info");
+  if (!box) return;
+
+  const csv = getSelectedWTSSAttributes(); // usa a função que já criamos para montar o CSV
+  if (!csv) {
+    box.innerHTML =
+      '<p style="margin:0; opacity:0.9;">Selecione um atributo para ver a descrição aqui.</p>';
+    return;
+  }
+
+  const attrs = parseAttributesList(csv);
+
+  if (attrs.length === 1) {
+    const info = getAttributeInfo(attrs[0]);
+    box.innerHTML = `
+      <p style="margin:0 0 4px;"><strong>${info.nome}</strong></p>
+      <p style="margin:0 0 2px; font-size:0.85em; opacity:0.9;">${info.descricao}</p>
+      <p style="margin:0; font-size:0.8em; opacity:0.7;"><b>Unidade:</b> ${info.unidade}</p>
+    `;
+  } else {
+    const listHtml = attrs
+      .map((a) => {
+        const i = getAttributeInfo(a);
+        return `<li><b>${i.nome}:</b> ${i.descricao}</li>`;
+      })
+      .join("");
+    box.innerHTML = `
+      <p style="margin:0 0 4px;"><strong>Atributos selecionados:</strong></p>
+      <ul style="margin:0 0 0 18px; padding:0; font-size:0.85em; opacity:0.9;">
+        ${listHtml}
+      </ul>
+    `;
+  }
+}
+
   function populateAttributesFor(collectionTitleEscaped) {
     const collectionTitle = collectionTitleEscaped
       .replace(/&amp;/g, "&")
@@ -783,6 +938,7 @@ window.showWTSSElectionPanel = async function (lat, lng) {
         ? col.availableAttributes.slice()
         : [];
     const defaultIdx = attrs.findIndex((a) => a.toUpperCase().includes("NDVI"));
+    
     attrSelect.innerHTML = attrs
       .map(
         (a, i) =>
@@ -790,13 +946,21 @@ window.showWTSSElectionPanel = async function (lat, lng) {
           }>${a}</option>`
       )
       .join("");
+
+      updateAttributeInfoBox();
   }
 
-  if (collSelect.value) populateAttributesFor(collSelect.value);
+ if (collSelect.value) {
+  populateAttributesFor(collSelect.value);
+}
 
   collSelect.addEventListener("change", () =>
     populateAttributesFor(collSelect.value)
   );
+
+  // quando mudar os atributos selecionados, só atualiza a legenda
+attrSelect.addEventListener("change", updateAttributeInfoBox);
+
 
   plotBtn.addEventListener("click", () => {
     const selectedEsc = collSelect.value;
@@ -946,7 +1110,7 @@ window.fetchWTSSTimeSeriesAndPlot = async function (
 };
 
 // --------------------------------------
-// Modal para exibir gráficos selecionados
+// Modal para exibir gráficos selecionados (com legenda)
 // --------------------------------------
 window.showSelectedWTSSInModal = function () {
   const checked = Array.from(
@@ -991,7 +1155,7 @@ window.showSelectedWTSSInModal = function () {
 
   checked.forEach((cb) => {
     const id = cb.getAttribute("data-wtss-id");
-    const dataObj = window[`wtss_data_${id}`]; // agora pode ser single ou multi
+    const dataObj = window[`wtss_data_${id}`]; // single ou multi
 
     let cardTitle = id;
     if (dataObj) {
@@ -1003,14 +1167,52 @@ window.showSelectedWTSSInModal = function () {
       }
     }
 
+    // =========================
+    // MONTA A LEGENDA (legendHtml)
+    // =========================
+    let legendHtml = "";
+    if (dataObj) {
+      if (dataObj.multi && Array.isArray(dataObj.attributes)) {
+        const blocks = dataObj.attributes.map((attr) => {
+          const info = getAttributeInfo(attr);
+          return `
+            <div class="wtss-modal-legend-item">
+              <strong>${info.nome}</strong><br>
+              <small><b>Atributo:</b> ${attr}</small><br>
+              <span>${info.descricao}</span><br>
+              <small class="wtss-modal-legend-unit"><i>Unidade:</i> ${info.unidade}</small>
+            </div>
+          `;
+        });
+        legendHtml = `
+          <div class="wtss-modal-legend">
+            ${blocks.join("")}
+          </div>
+        `;
+      } else if (!dataObj.multi && dataObj.attribute) {
+        const info = getAttributeInfo(dataObj.attribute);
+        legendHtml = `
+          <div class="wtss-modal-legend">
+            <div class="wtss-modal-legend-item">
+              <strong>${info.nome}</strong><br>
+              <small><b>Atributo:</b> ${dataObj.attribute}</small><br>
+              <span>${info.descricao}</span><br>
+              <small class="wtss-modal-legend-unit"><i>Unidade:</i> ${info.unidade}</small>
+            </div>
+          </div>
+        `;
+      }
+    }
+
     const card = document.createElement("div");
     card.className = "wtss-modal-card";
 
     card.innerHTML = `
       <div class="wtss-modal-card-title">${cardTitle}</div>
       <div class="wtss-modal-canvas-wrapper">
-          <canvas id="modal-canvas-${id}"></canvas>
+        <canvas id="modal-canvas-${id}"></canvas>
       </div>
+      ${legendHtml}
     `;
     grid.appendChild(card);
 
@@ -1179,7 +1381,7 @@ window.showSelectedWTSSInModal = function () {
       window.wtss_modal_charts.forEach((c) => {
         try {
           c.destroy();
-        } catch (e) { }
+        } catch (e) {}
       });
       window.wtss_modal_charts = [];
     }
@@ -1191,6 +1393,7 @@ window.showSelectedWTSSInModal = function () {
     if (ev.target === overlay) closeModal();
   });
 };
+
 
 // --------------------------------------
 // CLIQUE NO MAPA (STAC + WTSS)

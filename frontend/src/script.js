@@ -364,7 +364,7 @@ window.fetchTimeSeriesAndPlot = async function (
       const errorData = await response.json();
       throw new Error(
         errorData.details?.description ||
-          `Erro ${response.status} na API Local.`
+        `Erro ${response.status} na API Local.`
       );
     }
 
@@ -423,8 +423,8 @@ function createChart(lat, lng, title, timeSeriesData) {
       borderColor: band.toUpperCase().includes("NDVI")
         ? "rgba(0, 80, 0, 1)"
         : band.toUpperCase().includes("EVI")
-        ? "rgba(50, 50, 150, 1)"
-        : "#333333",
+          ? "rgba(50, 50, 150, 1)"
+          : "#333333",
       borderWidth: 2,
       fill: false,
       tension: 0.1,
@@ -688,9 +688,8 @@ window.showWTSSElectionPanel = async function (lat, lng) {
             <h3>📈 Catálogos WTSS</h3>
             <div class="wtss-error-message">
                 <strong>Falha ao buscar catálogos.</strong>
-                <p>Detalhes: ${
-                  result.error || "Nenhuma coleção funcional encontrada."
-                }</p>
+                <p>Detalhes: ${result.error || "Nenhuma coleção funcional encontrada."
+      }</p>
             </div>
         `);
     return;
@@ -787,8 +786,7 @@ window.showWTSSElectionPanel = async function (lat, lng) {
     attrSelect.innerHTML = attrs
       .map(
         (a, i) =>
-          `<option value="${a}" ${
-            i === (defaultIdx === -1 ? 0 : defaultIdx) ? "selected" : ""
+          `<option value="${a}" ${i === (defaultIdx === -1 ? 0 : defaultIdx) ? "selected" : ""
           }>${a}</option>`
       )
       .join("");
@@ -1181,7 +1179,7 @@ window.showSelectedWTSSInModal = function () {
       window.wtss_modal_charts.forEach((c) => {
         try {
           c.destroy();
-        } catch (e) {}
+        } catch (e) { }
       });
       window.wtss_modal_charts = [];
     }
@@ -1244,21 +1242,18 @@ map.on("click", async function (e) {
           .filter(Boolean);
 
         panelContent += `
-                    <details class="stac-accordion-item" ${
-                      idx === 0 ? "open" : ""
-                    }>
+                    <details class="stac-accordion-item" ${idx === 0 ? "open" : ""
+          }>
                         <summary>
                             <strong>🛰️ ${popularName}</strong>
                         </summary>
                         <div class="product-info-block">
-                            <p class="product-description">${
-                              item.description ||
-                              item.title ||
-                              "Sem descrição disponível."
-                            }</p>
-                            <p class="product-bands"><strong>Bandas:</strong> ${
-                              availableBands.join(", ") || "N/A"
-                            }</p>
+                            <p class="product-description">${item.description ||
+          item.title ||
+          "Sem descrição disponível."
+          }</p>
+                            <p class="product-bands"><strong>Bandas:</strong> ${availableBands.join(", ") || "N/A"
+          }</p>
                         </div>
                     </details>
                 `;
@@ -1281,10 +1276,10 @@ map.on("click", async function (e) {
     // Ainda tenta inicializar o painel WTSS
     await showWTSSElectionPanel(lat, lng);
   }
-// LÓGICA DO HISTÓRICO DE PONTOS
-    pointHistory.unshift({ lat, lng, timestamp: Date.now() });
-    if (pointHistory.length > 12) pointHistory.pop();
-    updateHistoryList(); // <--- ISTO ATIVA O WIDGET
+  // LÓGICA DO HISTÓRICO DE PONTOS
+  pointHistory.unshift({ lat, lng, timestamp: Date.now() });
+  if (pointHistory.length > 12) pointHistory.pop();
+  updateHistoryList(); // <--- ISTO ATIVA O WIDGET
 });
 
 // --------------------------------------
@@ -1495,11 +1490,11 @@ function createWTSSTimeSeriesChart(
       if (canvas && canvas._chart) {
         try {
           canvas._chart.destroy();
-        } catch (e) {}
+        } catch (e) { }
       }
       try {
         delete window[`wtss_data_${uniqueId}`];
-      } catch (e) {}
+      } catch (e) { }
       chartBlock.remove();
     });
   }
@@ -1624,8 +1619,8 @@ function createWTSSTimeSeriesChartMulti(
         <label style="display:inline-flex;align-items:center;gap:8px;">
           <input type="checkbox" class="wtss-select-checkbox" data-wtss-id="${uniqueId}">
           <span>🛰️ ${title} <small style="color:#666; margin-left:6px;">(${attributes.join(
-            ", "
-          )})</small></span>
+    ", "
+  )})</small></span>
         </label>
         <button type="button" class="wtss-close-btn" title="Fechar este gráfico" aria-label="Fechar">×</button>
       </summary>
@@ -1671,12 +1666,12 @@ function createWTSSTimeSeriesChartMulti(
       if (canvas && canvas._chart) {
         try {
           canvas._chart.destroy();
-        } catch (e) {}
+        } catch (e) { }
       }
       try {
         delete window["wtss_multi_" + uniqueId];
         delete window["wtss_data_" + uniqueId];
-      } catch (e) {}
+      } catch (e) { }
       chartBlock.remove();
     });
   }
@@ -1710,7 +1705,7 @@ window.plotMultiChartInAcordeon = function (id) {
   if (canvas._chart) {
     try {
       canvas._chart.destroy();
-    } catch (e) {}
+    } catch (e) { }
   }
 
   let minLen = Array.isArray(data.timeline) ? data.timeline.length : 0;
@@ -1809,67 +1804,110 @@ window.plotMultiChartInAcordeon = function (id) {
 // --------------------------------------
 // HISTÓRICO DE PONTOS FLUTUANTE (Funcionalidade)
 // --------------------------------------
-let pointHistory = []; 
+let pointHistory = [];
 
 function updateHistoryList() {
-    const container = document.getElementById("history-list");
-    const widget = document.getElementById('history-floating-widget');
+  const container = document.getElementById("history-list");
+  const widget = document.getElementById('history-floating-widget');
 
-    if (!container) return; 
+  if (!container) return;
 
-    container.innerHTML = "";
-    
-    if (pointHistory.length === 0) {
-        container.innerHTML = `<div class="empty-history">Nenhum ponto selecionado ainda.</div>`;
-        if (widget) widget.classList.add('hidden'); // Oculta o widget se estiver vazio
-        return;
-    }
-    
-    if (widget) widget.classList.remove('hidden'); // Mostra o widget se houver conteúdo
+  container.innerHTML = "";
 
-    pointHistory.forEach((p) => {
-        const item = document.createElement("div");
-        item.classList.add("history-item");
-        item.innerHTML = `
-            <div class="history-coords">
-                <span class="history-icon">📌</span>
-                <span>Lat: ${p.lat.toFixed(3)}<br>Lng: ${p.lng.toFixed(3)}</span>
-            </div>
-            <div class="history-time">${new Date(p.timestamp).toLocaleTimeString("pt-BR", {
-                hour: "2-digit", minute: "2-digit"
-            })}</div>
-        `;
+  if (pointHistory.length === 0) {
+    container.innerHTML = `<div class="empty-history">Nenhum ponto selecionado ainda.</div>`;
+    if (widget) widget.classList.add('hidden');
+    return;
+  }
 
-        item.addEventListener("click", () => {
-            map.setView([p.lat, p.lng], 5);
-            createSelectionVisuals({ lat: p.lat, lng: p.lng });
-            showInfoPanelSTAC("<strong>📍 Ponto selecionado</strong><br>Buscando produtos STAC...");
-            showWTSSElectionPanel(p.lat, p.lng);
-        });
+  if (widget) widget.classList.remove('hidden');
 
-        container.appendChild(item);
+  pointHistory.forEach((p) => {
+    const item = document.createElement("div");
+    item.classList.add("history-item");
+    item.innerHTML = `
+      <div class="history-coords">
+          <span class="history-icon">📌</span>
+          <span>Lat: ${p.lat.toFixed(3)}<br>Lng: ${p.lng.toFixed(3)}</span>
+      </div>
+      <div class="history-time">
+        ${new Date(p.timestamp).toLocaleTimeString("pt-BR", {
+          hour: "2-digit", minute: "2-digit"
+        })}
+      </div>
+    `;
+
+    item.addEventListener("click", () => {
+      map.setView([p.lat, p.lng], 5);
+      createSelectionVisuals({ lat: p.lat, lng: p.lng });
+      showInfoPanelSTAC("<strong>📍 Ponto selecionado</strong><br>Buscando produtos STAC...");
+      showWTSSElectionPanel(p.lat, p.lng);
     });
+
+    container.appendChild(item);
+  });
 }
 
-document.addEventListener("DOMContentLoaded", function() {
-    const clearBtn = document.getElementById("clear-history-btn");
-    const toggleBtn = document.getElementById("toggle-history-btn"); // NOVO
-    const widget = document.getElementById('history-floating-widget'); // NOVO
+document.addEventListener("DOMContentLoaded", function () {
+  const widget = document.getElementById('history-floating-widget');
+  const header = widget.querySelector('.widget-header');  // ✅ CORRIGIDO
 
-    if (clearBtn) {
-        clearBtn.addEventListener("click", () => {
-            pointHistory = [];
-            updateHistoryList();
-        });
-    }
+  if (widget && header) {
+    makeDraggable(widget, header);
+  }
 
-    // LÓGICA DE LIGAR/DESLIGAR (TOGGLE) O WIDGET
-    if (toggleBtn && widget) {
-        toggleBtn.addEventListener('click', () => {
-            widget.classList.toggle('hidden');
-        });
-    }
+  const clearBtn = document.getElementById("clear-history-btn");
+  const toggleBtn = document.getElementById("toggle-history-btn");
 
-    updateHistoryList(); 
+  if (clearBtn) {
+    clearBtn.addEventListener("click", () => {
+      pointHistory = [];
+      updateHistoryList();
+    });
+  }
+
+  if (toggleBtn && widget) {
+    toggleBtn.addEventListener('click', () => {
+      widget.classList.toggle('hidden');
+    });
+  }
+
+  updateHistoryList();
 });
 
+function makeDraggable(widget, handle) {
+  let startX = 0, startY = 0;
+  let widgetX = 0, widgetY = 0;
+  let isDragging = false;
+
+  handle.addEventListener("mousedown", (e) => {
+    isDragging = true;
+
+    // Posição inicial do mouse
+    startX = e.clientX;
+    startY = e.clientY;
+
+    // Pega o transform atual do widget (se houver)
+    const style = window.getComputedStyle(widget);
+    const matrix = new DOMMatrixReadOnly(style.transform);
+
+    widgetX = matrix.m41;
+    widgetY = matrix.m42;
+
+    handle.style.cursor = "grabbing";
+  });
+
+  document.addEventListener("mouseup", () => {
+    isDragging = false;
+    handle.style.cursor = "grab";
+  });
+
+  document.addEventListener("mousemove", (e) => {
+    if (!isDragging) return;
+
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+
+    widget.style.transform = `translate(${widgetX + dx}px, ${widgetY + dy}px)`;
+  });
+}

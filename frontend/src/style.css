@@ -911,13 +911,13 @@ bottom: 50px;
     background: linear-gradient(180deg, #1a57ffff 0%, #444444ff 100%);
     border: 1px solid #e2e2e2;
     border-radius: 6px;
-    padding: 6px 8px;
+    padding: 4px 5px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     font-size: 12px;
     cursor: pointer;
-    gap: 12px; /* Espaçamento corrigido */
+    gap: 7px; /* Espaçamento corrigido */
     box-shadow: 0 1px 3px rgba(0,0,0,0.04);
 }
 .history-item:hover {
@@ -957,4 +957,20 @@ bottom: 50px;
     margin-top: 10px;
     width: 100%;
     font-size: 13px;
+}
+
+.floating-widget {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+
+    /* Posição inicial usada pelo script */
+    transform: translate(0, 0);
+
+    z-index: 9999;
+}
+
+.widget-header {
+    cursor: grab;
+    user-select: none;
 }

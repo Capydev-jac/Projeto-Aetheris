@@ -1614,14 +1614,6 @@ function createWTSSTimeSeriesChartMulti(
         </label>
         <button type="button" class="wtss-close-btn" title="Fechar este gráfico" aria-label="Fechar">×</button>
       </summary>
-      <div class="wtss-panel wtss-chart-container-border">
-        <p><b>Atributos:</b> ${attributes.join(", ")}</p>
-        <hr class="satelite-popup-divider">
-        <div class="wtss-canvas-wrapper">
-          <canvas id="canvas-${uniqueId}"></canvas>
-        </div>
-        <p class="chart-footer stac-chart-footer">Valores reais (escala padrão aplicada).</p>
-      </div>
     </details>
   `;
 

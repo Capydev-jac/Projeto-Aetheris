@@ -1,11 +1,4 @@
-// ==============================
-// Aetheris - Script Unificado
-// Mapa + STAC + WTSS (com autoescala e exportação de gráficos)
-// ==============================
-
-// --------------------------------------
-// MAPA (Leaflet)
-// --------------------------------------
+// Aetheris
 const BR_BOUNDS = [
   [-34.0, -74.0],
   [5.3, -34.0],
@@ -22,13 +15,13 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   attribution: "&copy; OpenStreetMap contributors",
 }).addTo(map);
 
-// Variáveis de estado global para o novo sistema WTSS
-window.currentWtssResult = null;
-let WTSS_COLLECTIONS_CACHE = []; // Cache para coleções disponíveis
 
-// --------------------------------------
+window.currentWtssResult = null;
+let WTSS_COLLECTIONS_CACHE = []; 
+
+
 // ELEMENTOS DE INTERFACE
-// --------------------------------------
+
 const sidebar = document.getElementById("sidebar");
 const input = document.getElementById("tag-input");
 const suggestionsBox = document.getElementById("suggestions");
@@ -39,9 +32,8 @@ let selectedTags = [];
 let selectedMarker;
 let selectedArea;
 
-// --------------------------------------
 // DADOS BASE
-// --------------------------------------
+
 const allSuggestions = [
   "CBERS4A",
   "Landsat-2",
@@ -223,7 +215,6 @@ const FALLBACK_ATTRIBUTES_MAP = {
 };
 const WTSS_REFERENCE_COVERAGE = "LANDSAT-16D-1";
 
-// Legendas / descrições dos principais atributos WTSS
 const ATTRIBUTE_INFO = {
   NDVI: {
     nome: "NDVI (Índice de Vegetação por Diferença Normalizada)",
@@ -275,7 +266,7 @@ const ATTRIBUTE_INFO = {
   },
 };
 
-// retorna um objeto com nome/descrição/unidade para qualquer atributo
+
 function getAttributeInfo(attribute) {
   if (!attribute) {
     return {
@@ -287,12 +278,11 @@ function getAttributeInfo(attribute) {
 
   const key = attribute.toUpperCase();
 
-  // Tenta match direto (NDVI, EVI, NBR...)
+  // Tenta (NDVI, EVI, NBR...)
   if (ATTRIBUTE_INFO[key]) {
     return ATTRIBUTE_INFO[key];
   }
 
-  // Heurísticas para bandas espectrais
   if (/^B0?\d/i.test(key)) {
     return {
       nome: `Banda ${attribute}`,
@@ -328,7 +318,6 @@ function getAttributeInfo(attribute) {
     };
   }
 
-  // Fallback genérico
   return {
     nome: attribute,
     descricao:
@@ -337,16 +326,14 @@ function getAttributeInfo(attribute) {
   };
 }
 
-// --------------------------------------
 // CONTROLE DO SIDEBAR
-// --------------------------------------
+
 window.toggleMenu = function () {
   sidebar.classList.toggle("ativo");
 };
 
-// --------------------------------------
 // SELEÇÃO NO MAPA
-// --------------------------------------
+
 function createSelectionVisuals(latlng) {
   if (selectedMarker) map.removeLayer(selectedMarker);
   if (selectedArea) map.removeLayer(selectedArea);
@@ -368,9 +355,8 @@ function createSelectionVisuals(latlng) {
   }).addTo(map);
 }
 
-// --------------------------------------
 // TAG SELECTOR (filtros de satélite)
-// --------------------------------------
+
 function showSuggestions(filter) {
   suggestionsBox.innerHTML = "";
   const filtered = allSuggestions.filter(
@@ -410,9 +396,8 @@ function renderSelectedTags() {
   });
 }
 
-// --------------------------------------
 // ABAS DO PAINEL DIREITO (STAC / WTSS)
-// --------------------------------------
+
 function showTab(tabId) {
   document
     .querySelectorAll(".tab-button")
@@ -451,9 +436,8 @@ function hideInfoPanel() {
   document.getElementById("info-panel-right").classList.remove("visible");
 }
 
-// --------------------------------------
 /* STAC - CHARTS / API */
-// --------------------------------------
+
 function applyScale(rawValue) {
   return rawValue * 0.0001;
 }
@@ -608,11 +592,9 @@ function createChart(lat, lng, title, timeSeriesData) {
   }, 500);
 }
 
-// --------------------------------------
 // WTSS - LÓGICA MULTI-ESTÁGIO E COMPARAÇÃO
-// --------------------------------------
 
-// === Helper: "NDVI,EVI" -> ["NDVI","EVI"] ===
+//  Helper: "NDVI,EVI" -> ["NDVI","EVI"] 
 function parseAttributesList(value) {
   if (Array.isArray(value)) return value.filter(Boolean);
   return String(value || "")
@@ -621,7 +603,7 @@ function parseAttributesList(value) {
     .filter(Boolean);
 }
 
-// WTSS direto para um único atributo
+// WTSS único atributo
 async function fetchWTSSSingleAttr(coverage, lat, lon, startISO, endISO, attribute) {
   const baseUrl = "https://data.inpe.br/bdc/wtss/v4/";
   const url = `${baseUrl}time_series?coverage=${encodeURIComponent(
@@ -655,7 +637,6 @@ async function fetchWTSSSingleAttr(coverage, lat, lon, startISO, endISO, attribu
   }
 }
 
-// Backend STAC: /api/timeseries?lat=..&lng=..&coverage=..&bands=ATTRIBUTE
 async function fetchSTACSingleAttr(coverage, lat, lon, startISO, endISO, attribute) {
   try {
     const url = `http://localhost:3000/api/timeseries?lat=${encodeURIComponent(
@@ -685,7 +666,6 @@ async function fetchSTACSingleAttr(coverage, lat, lon, startISO, endISO, attribu
   }
 }
 
-// Tenta WTSS; se vazio, tenta STAC; retorna a primeira série válida (ou vazia)
 async function fetchAnySingleAttr(coverage, lat, lon, startISO, endISO, attribute) {
   const wtss = await fetchWTSSSingleAttr(
     coverage,
@@ -734,7 +714,7 @@ async function listWTSSTitleAndAttributes(lat, lon) {
           let availableAttributes =
             details.attributes?.map((attr) => attr.attribute) ?? [];
 
-          // Fallback de atributos quando o endpoint não retorna
+          // Fallback de atributos
           if (availableAttributes.length === 0) {
             const fallbackList = FALLBACK_ATTRIBUTES_MAP[name];
             if (fallbackList) {
@@ -771,12 +751,12 @@ async function listWTSSTitleAndAttributes(lat, lon) {
   }
 }
 
-// ESTÁGIO 1 (REFACTOR): Seleção da Coleção e Atributo na MESMA ABA (permite plotar múltiplas séries para comparação)
+// Seleção da Coleção e Atributo na mesma aba
 function sanitizeId(text) {
   return text.replace(/[^a-z0-9]/gi, "_");
 }
 
-// === Helper: lê seleções do <select id="wtss-attribute-select"> como CSV (ex.: "NDVI,EVI") ===
+// === Helper: lê seleções 
 function getSelectedWTSSAttributes() {
   const sel = document.getElementById("wtss-attribute-select");
   if (!sel) return "";
@@ -792,7 +772,6 @@ function getSelectedWTSSAttributes() {
   return sel.value || "";
 }
 
-// Mantém função antiga como compatibilidade mínima (mas agora a seleção ocorre na mesma aba)
 window.showWTSSElectionPanel = async function (lat, lng) {
   const result = await listWTSSTitleAndAttributes(lat, lng);
   window.currentWtssResult = { ...result, lat, lon: lng };
@@ -818,7 +797,7 @@ window.showWTSSElectionPanel = async function (lat, lng) {
   const calculated_start_date = date01YearsAgo.toISOString().split("T")[0];
   const calculated_end_date = now.toISOString().split("T")[0];
 
-  // Monta options de coleção (pode ajustar escaping se necessário)
+  // Monta options de coleção 
   const collectionOptions = result.collections
     .map((col) => {
       const safeTitle = String(col.title)
@@ -894,7 +873,7 @@ window.showWTSSElectionPanel = async function (lat, lng) {
   const box = document.getElementById("wtss-attribute-info");
   if (!box) return;
 
-  const csv = getSelectedWTSSAttributes(); // usa a função que já criamos para montar o CSV
+  const csv = getSelectedWTSSAttributes();
   if (!csv) {
     box.innerHTML =
       '<p style="margin:0; opacity:0.9;">Selecione um atributo para ver a descrição aqui.</p>';
@@ -958,7 +937,6 @@ window.showWTSSElectionPanel = async function (lat, lng) {
     populateAttributesFor(collSelect.value)
   );
 
-  // quando mudar os atributos selecionados, só atualiza a legenda
 attrSelect.addEventListener("change", updateAttributeInfoBox);
 
 
@@ -993,7 +971,7 @@ attrSelect.addEventListener("change", updateAttributeInfoBox);
   });
 };
 
-// Busca série temporal WTSS e plota
+// Busca série temporal WTSS 
 window.fetchWTSSTimeSeriesAndPlot = async function (
   lat,
   lon,
@@ -1015,7 +993,7 @@ window.fetchWTSSTimeSeriesAndPlot = async function (
     graphArea.prepend(msg);
   }
 
-  // === MULTI-ATRIBUTOS ===
+  // MULTI-ATRIBUTOS
   const requestedAttrs = parseAttributesList(attribute);
   if (requestedAttrs.length > 1) {
     const promises = requestedAttrs.map((attr) =>
@@ -1061,10 +1039,10 @@ window.fetchWTSSTimeSeriesAndPlot = async function (
       }
     } catch (e) {
       console.error("[WTSS multi] falha nas requisições múltiplas (WTSS/STAC):", e);
-      // Cai no fluxo single abaixo
+     
     }
   }
-  // === FIM MULTI-ATRIBUTOS ===
+  // FIM MULTI-ATRIBUTOS 
 
   const url = `${baseUrl}time_series?coverage=${encodeURIComponent(
     coverage
@@ -1079,8 +1057,6 @@ window.fetchWTSSTimeSeriesAndPlot = async function (
         `Erro ${resp.status} ao buscar WTSS (${resp.statusText})`
       );
     const json = await resp.json();
-
-    // Extrai timeline e valores
     const result = json.result || {};
     const attrs = result.attributes || [];
     const attrData = attrs.find((a) => a.attribute === attribute);
@@ -1109,9 +1085,8 @@ window.fetchWTSSTimeSeriesAndPlot = async function (
   }
 };
 
-// --------------------------------------
 // Modal para exibir gráficos selecionados (com legenda)
-// --------------------------------------
+
 window.showSelectedWTSSInModal = function () {
   const checked = Array.from(
     document.querySelectorAll(".wtss-select-checkbox:checked")
@@ -1155,7 +1130,7 @@ window.showSelectedWTSSInModal = function () {
 
   checked.forEach((cb) => {
     const id = cb.getAttribute("data-wtss-id");
-    const dataObj = window[`wtss_data_${id}`]; // single ou multi
+    const dataObj = window[`wtss_data_${id}`]; 
 
     let cardTitle = id;
     if (dataObj) {
@@ -1167,9 +1142,8 @@ window.showSelectedWTSSInModal = function () {
       }
     }
 
-    // =========================
     // MONTA A LEGENDA (legendHtml)
-    // =========================
+
     let legendHtml = "";
     if (dataObj) {
       if (dataObj.multi && Array.isArray(dataObj.attributes)) {
@@ -1219,7 +1193,6 @@ window.showSelectedWTSSInModal = function () {
     const ctx = document.getElementById(`modal-canvas-${id}`);
 
     if (!dataObj) {
-      // placeholder se algo der errado
       new Chart(ctx, {
         type: "line",
         data: { datasets: [] },
@@ -1228,7 +1201,6 @@ window.showSelectedWTSSInModal = function () {
       return;
     }
 
-    // SINGLE-ATRIBUTO (mesma lógica antiga)
     if (!dataObj.multi) {
       const chartData = dataObj.timeline.map((date, i) => ({
         x: date,
@@ -1286,7 +1258,7 @@ window.showSelectedWTSSInModal = function () {
       return;
     }
 
-    // MULTI-ATRIBUTO ======================
+    // MULTI-ATRIBUTO
     const timeline = Array.isArray(dataObj.timeline)
       ? dataObj.timeline
       : [];
@@ -1394,10 +1366,8 @@ window.showSelectedWTSSInModal = function () {
   });
 };
 
-
-// --------------------------------------
 // CLIQUE NO MAPA (STAC + WTSS)
-// --------------------------------------
+
 map.on("click", async function (e) {
   const { lat, lng } = e.latlng;
 
@@ -1419,7 +1389,7 @@ map.on("click", async function (e) {
   );
 
   try {
-    // STAC: apenas metadados
+ 
     const satelitesQuery = selectedTags
       .map((tag) => sateliteIdMap[tag])
       .filter((id) => id)
@@ -1476,18 +1446,15 @@ map.on("click", async function (e) {
       `<div class="text-error"><strong>Erro Geral:</strong> ${error.message}</div>`
     );
 
-    // Ainda tenta inicializar o painel WTSS
     await showWTSSElectionPanel(lat, lng);
   }
-  // LÓGICA DO HISTÓRICO DE PONTOS
   pointHistory.unshift({ lat, lng, timestamp: Date.now() });
   if (pointHistory.length > 12) pointHistory.pop();
-  updateHistoryList(); // <--- ISTO ATIVA O WIDGET
+  updateHistoryList();
 });
 
-// --------------------------------------
 // EVENTOS DE INPUT
-// --------------------------------------
+
 input.addEventListener("focus", () => showSuggestions(""));
 input.addEventListener("input", () =>
   showSuggestions(input.value.toLowerCase())
@@ -1510,9 +1477,8 @@ document.addEventListener("click", function (e) {
   }
 });
 
-// --------------------------------------
 // TUTORIAL INTERATIVO AO INICIAR O SITE
-// --------------------------------------
+
 const tutorialSteps = [
   {
     text: "🌍 Bem-vindo ao Aetheris! Esta plataforma visualiza dados de séries temporais do Brazil Data Cube. Clique em qualquer ponto do mapa para começar.",
@@ -1601,9 +1567,8 @@ if (showTutorialBtn) {
   showTutorialBtn.addEventListener("click", window.showTutorial);
 }
 
-// --------------------------------------
 // EXPORTAÇÃO DE GRÁFICOS WTSS (ZIP com PNGs)
-// --------------------------------------
+
 async function exportAllWTSSCharts() {
   const canvases = document.querySelectorAll("#wtss-tab canvas");
   if (canvases.length === 0) {
@@ -1786,7 +1751,7 @@ function createWTSSTimeSeriesChart(
   };
 }
 
-// === Gráfico WTSS com múltiplos atributos no MESMO canvas ===
+// Gráfico WTSS com múltiplos atributos
 function createWTSSTimeSeriesChartMulti(
   title,
   attrValuesMap,
@@ -1823,7 +1788,6 @@ function createWTSSTimeSeriesChartMulti(
   graphArea.appendChild(chartBlock);
   document.getElementById("wtss-tab").scrollTop = 0;
 
-  // guarda dados em 2 chaves: uma específica e outra genérica usada pelo modal
   window["wtss_multi_" + uniqueId] = {
     attrValuesMap,
     timeline,
@@ -1842,7 +1806,6 @@ function createWTSSTimeSeriesChartMulti(
   if (det) det.open = true;
   plotMultiChartInAcordeon(uniqueId);
 
-  // botão fechar (destrói chart + limpa dados globais)
   const closeBtn = chartBlock.querySelector(".wtss-close-btn");
   if (closeBtn) {
     closeBtn.addEventListener("click", (ev) => {
@@ -1861,7 +1824,6 @@ function createWTSSTimeSeriesChartMulti(
     });
   }
 
-  // seleção visual (igual ao gráfico single)
   const checkbox = chartBlock.querySelector(".wtss-select-checkbox");
   if (checkbox) {
     checkbox.addEventListener("change", () => {
@@ -1985,10 +1947,8 @@ window.plotMultiChartInAcordeon = function (id) {
   });
 };
 
-
-// --------------------------------------
 // HISTÓRICO DE PONTOS FLUTUANTE (Funcionalidade)
-// --------------------------------------
+
 let pointHistory = [];
 
 function updateHistoryList() {
@@ -2072,7 +2032,7 @@ function makeDraggable(widget, handle) {
     startX = e.clientX;
     startY = e.clientY;
 
-    // Pega o transform atual do widget (se houver)
+   
     const style = window.getComputedStyle(widget);
     const matrix = new DOMMatrixReadOnly(style.transform);
 

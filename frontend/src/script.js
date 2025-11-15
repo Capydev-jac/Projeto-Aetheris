@@ -15,10 +15,8 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   attribution: "&copy; OpenStreetMap contributors",
 }).addTo(map);
 
-
 window.currentWtssResult = null;
-let WTSS_COLLECTIONS_CACHE = []; 
-
+let WTSS_COLLECTIONS_CACHE = [];
 
 // ELEMENTOS DE INTERFACE
 
@@ -266,7 +264,6 @@ const ATTRIBUTE_INFO = {
   },
 };
 
-
 function getAttributeInfo(attribute) {
   if (!attribute) {
     return {
@@ -462,7 +459,7 @@ window.fetchTimeSeriesAndPlot = async function (
       const errorData = await response.json();
       throw new Error(
         errorData.details?.description ||
-        `Erro ${response.status} na API Local.`
+          `Erro ${response.status} na API Local.`
       );
     }
 
@@ -521,8 +518,8 @@ function createChart(lat, lng, title, timeSeriesData) {
       borderColor: band.toUpperCase().includes("NDVI")
         ? "rgba(0, 80, 0, 1)"
         : band.toUpperCase().includes("EVI")
-          ? "rgba(50, 50, 150, 1)"
-          : "#333333",
+        ? "rgba(50, 50, 150, 1)"
+        : "#333333",
       borderWidth: 2,
       fill: false,
       tension: 0.1,
@@ -594,7 +591,7 @@ function createChart(lat, lng, title, timeSeriesData) {
 
 // WTSS - LÓGICA MULTI-ESTÁGIO E COMPARAÇÃO
 
-//  Helper: "NDVI,EVI" -> ["NDVI","EVI"] 
+//  Helper: "NDVI,EVI" -> ["NDVI","EVI"]
 function parseAttributesList(value) {
   if (Array.isArray(value)) return value.filter(Boolean);
   return String(value || "")
@@ -604,15 +601,20 @@ function parseAttributesList(value) {
 }
 
 // WTSS único atributo
-async function fetchWTSSSingleAttr(coverage, lat, lon, startISO, endISO, attribute) {
+async function fetchWTSSSingleAttr(
+  coverage,
+  lat,
+  lon,
+  startISO,
+  endISO,
+  attribute
+) {
   const baseUrl = "https://data.inpe.br/bdc/wtss/v4/";
   const url = `${baseUrl}time_series?coverage=${encodeURIComponent(
     coverage
   )}&attributes=${encodeURIComponent(
     attribute
-  )}&start_date=${encodeURIComponent(
-    startISO
-  )}&end_date=${encodeURIComponent(
+  )}&start_date=${encodeURIComponent(startISO)}&end_date=${encodeURIComponent(
     endISO
   )}&latitude=${encodeURIComponent(lat)}&longitude=${encodeURIComponent(lon)}`;
 
@@ -637,17 +639,22 @@ async function fetchWTSSSingleAttr(coverage, lat, lon, startISO, endISO, attribu
   }
 }
 
-async function fetchSTACSingleAttr(coverage, lat, lon, startISO, endISO, attribute) {
+async function fetchSTACSingleAttr(
+  coverage,
+  lat,
+  lon,
+  startISO,
+  endISO,
+  attribute
+) {
   try {
     const url = `http://localhost:3000/api/timeseries?lat=${encodeURIComponent(
       lat
-    )}&lng=${encodeURIComponent(
-      lon
-    )}&coverage=${encodeURIComponent(
+    )}&lng=${encodeURIComponent(lon)}&coverage=${encodeURIComponent(
       coverage
-    )}&bands=${encodeURIComponent(
-      attribute
-    )}&start=${encodeURIComponent(startISO)}&end=${encodeURIComponent(endISO)}`;
+    )}&bands=${encodeURIComponent(attribute)}&start=${encodeURIComponent(
+      startISO
+    )}&end=${encodeURIComponent(endISO)}`;
     const r = await fetch(url);
     if (!r.ok) throw new Error("STAC status " + r.status);
     const j = await r.json();
@@ -666,7 +673,14 @@ async function fetchSTACSingleAttr(coverage, lat, lon, startISO, endISO, attribu
   }
 }
 
-async function fetchAnySingleAttr(coverage, lat, lon, startISO, endISO, attribute) {
+async function fetchAnySingleAttr(
+  coverage,
+  lat,
+  lon,
+  startISO,
+  endISO,
+  attribute
+) {
   const wtss = await fetchWTSSSingleAttr(
     coverage,
     lat,
@@ -756,7 +770,7 @@ function sanitizeId(text) {
   return text.replace(/[^a-z0-9]/gi, "_");
 }
 
-// === Helper: lê seleções 
+// === Helper: lê seleções
 function getSelectedWTSSAttributes() {
   const sel = document.getElementById("wtss-attribute-select");
   if (!sel) return "";
@@ -781,8 +795,9 @@ window.showWTSSElectionPanel = async function (lat, lng) {
             <h3>📈 Catálogos WTSS</h3>
             <div class="wtss-error-message">
                 <strong>Falha ao buscar catálogos.</strong>
-                <p>Detalhes: ${result.error || "Nenhuma coleção funcional encontrada."
-      }</p>
+                <p>Detalhes: ${
+                  result.error || "Nenhuma coleção funcional encontrada."
+                }</p>
             </div>
         `);
     return;
@@ -797,7 +812,7 @@ window.showWTSSElectionPanel = async function (lat, lng) {
   const calculated_start_date = date01YearsAgo.toISOString().split("T")[0];
   const calculated_end_date = now.toISOString().split("T")[0];
 
-  // Monta options de coleção 
+  // Monta options de coleção
   const collectionOptions = result.collections
     .map((col) => {
       const safeTitle = String(col.title)
@@ -868,40 +883,40 @@ window.showWTSSElectionPanel = async function (lat, lng) {
   const showSelectedBtn = document.getElementById("wtss-show-selected");
 
   function updateAttributeInfoBox() {
-  const box = document.getElementById("wtss-attribute-info");
-  if (!box) return;
+    const box = document.getElementById("wtss-attribute-info");
+    if (!box) return;
 
-  const csv = getSelectedWTSSAttributes();
-  if (!csv) {
-    box.innerHTML =
-      '<p style="margin:0; opacity:0.9;">Selecione um atributo para ver a descrição aqui.</p>';
-    return;
-  }
+    const csv = getSelectedWTSSAttributes();
+    if (!csv) {
+      box.innerHTML =
+        '<p style="margin:0; opacity:0.9;">Selecione um atributo para ver a descrição aqui.</p>';
+      return;
+    }
 
-  const attrs = parseAttributesList(csv);
+    const attrs = parseAttributesList(csv);
 
-  if (attrs.length === 1) {
-    const info = getAttributeInfo(attrs[0]);
-    box.innerHTML = `
+    if (attrs.length === 1) {
+      const info = getAttributeInfo(attrs[0]);
+      box.innerHTML = `
       <p style="margin:0 0 4px;"><strong>${info.nome}</strong></p>
       <p style="margin:0 0 2px; font-size:0.85em; opacity:0.9;">${info.descricao}</p>
       <p style="margin:0; font-size:0.8em; opacity:0.7;"><b>Unidade:</b> ${info.unidade}</p>
     `;
-  } else {
-    const listHtml = attrs
-      .map((a) => {
-        const i = getAttributeInfo(a);
-        return `<li><b>${i.nome}:</b> ${i.descricao}</li>`;
-      })
-      .join("");
-    box.innerHTML = `
+    } else {
+      const listHtml = attrs
+        .map((a) => {
+          const i = getAttributeInfo(a);
+          return `<li><b>${i.nome}:</b> ${i.descricao}</li>`;
+        })
+        .join("");
+      box.innerHTML = `
       <p style="margin:0 0 4px;"><strong>Atributos selecionados:</strong></p>
       <ul style="margin:0 0 0 18px; padding:0; font-size:0.85em; opacity:0.9;">
         ${listHtml}
       </ul>
     `;
+    }
   }
-}
 
   function populateAttributesFor(collectionTitleEscaped) {
     const collectionTitle = collectionTitleEscaped
@@ -915,28 +930,28 @@ window.showWTSSElectionPanel = async function (lat, lng) {
         ? col.availableAttributes.slice()
         : [];
     const defaultIdx = attrs.findIndex((a) => a.toUpperCase().includes("NDVI"));
-    
+
     attrSelect.innerHTML = attrs
       .map(
         (a, i) =>
-          `<option value="${a}" ${i === (defaultIdx === -1 ? 0 : defaultIdx) ? "selected" : ""
+          `<option value="${a}" ${
+            i === (defaultIdx === -1 ? 0 : defaultIdx) ? "selected" : ""
           }>${a}</option>`
       )
       .join("");
 
-      updateAttributeInfoBox();
+    updateAttributeInfoBox();
   }
 
- if (collSelect.value) {
-  populateAttributesFor(collSelect.value);
-}
+  if (collSelect.value) {
+    populateAttributesFor(collSelect.value);
+  }
 
   collSelect.addEventListener("change", () =>
     populateAttributesFor(collSelect.value)
   );
 
-attrSelect.addEventListener("change", updateAttributeInfoBox);
-
+  attrSelect.addEventListener("change", updateAttributeInfoBox);
 
   plotBtn.addEventListener("click", () => {
     const selectedEsc = collSelect.value;
@@ -959,14 +974,13 @@ attrSelect.addEventListener("change", updateAttributeInfoBox);
     if (graphArea) graphArea.innerHTML = "";
   });
 
-  
   showSelectedBtn.addEventListener("click", () => {
     if (typeof showSelectedWTSSInModal === "function")
       showSelectedWTSSInModal();
   });
 };
 
-// Busca série temporal WTSS 
+// Busca série temporal WTSS
 window.fetchWTSSTimeSeriesAndPlot = async function (
   lat,
   lon,
@@ -1033,11 +1047,13 @@ window.fetchWTSSTimeSeriesAndPlot = async function (
         return;
       }
     } catch (e) {
-      console.error("[WTSS multi] falha nas requisições múltiplas (WTSS/STAC):", e);
-     
+      console.error(
+        "[WTSS multi] falha nas requisições múltiplas (WTSS/STAC):",
+        e
+      );
     }
   }
-  // FIM MULTI-ATRIBUTOS 
+  // FIM MULTI-ATRIBUTOS
 
   const url = `${baseUrl}time_series?coverage=${encodeURIComponent(
     coverage
@@ -1108,30 +1124,28 @@ window.showSelectedWTSSInModal = function () {
   header.className = "wtss-modal-header";
   header.innerHTML = `<h3>Visualização — Gráficos Selecionados (${checked.length})</h3>`;
 
-   const titleDiv = document.createElement("div");
-  titleDiv.innerHTML = `<h3>Visualização — Gráficos Selecionados (${checked.length})</h3>`;
-  header.appendChild(titleDiv);
+  const titleDiv = document.createElement("div");
+  titleDiv.innerHTML = `<h3>Visualização — Gráficos Selecionados (${checked.length})</h3>`;
+  header.appendChild(titleDiv);
 
-  const controlsDiv = document.createElement("div");
-  controlsDiv.style = "display:flex; gap:8px;";
+  const controlsDiv = document.createElement("div");
+  controlsDiv.style = "display:flex; gap:8px;"; // NOVO: Botão de Exportação no Modal
 
-  // NOVO: Botão de Exportação no Modal
-  const exportModalBtn = document.createElement("button");
-  exportModalBtn.textContent = "⬇️ Exportar PNG/ZIP"; 
-  exportModalBtn.className = "action-button primary-button";
-  controlsDiv.appendChild(exportModalBtn);
+  const exportModalBtn = document.createElement("button");
+  exportModalBtn.textContent = "⬇️ Exportar PNG/ZIP";
+  exportModalBtn.className = "action-button primary-button";
+  controlsDiv.appendChild(exportModalBtn);
 
-  const closeBtn = document.createElement("button");
-  closeBtn.textContent = "Fechar ✖";
-  closeBtn.className = "action-button secondary-button";
-  controlsDiv.appendChild(closeBtn);
+  const closeBtn = document.createElement("button");
+  closeBtn.textContent = "Fechar ✖";
+  closeBtn.className = "action-button secondary-button";
+  controlsDiv.appendChild(closeBtn);
 
-  header.appendChild(controlsDiv);
+  header.appendChild(controlsDiv);
 
-
-  const grid = document.createElement("div");
-  grid.style =
-    "display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:12px; margin-top:12px;";
+  const grid = document.createElement("div");
+  grid.style =
+    "display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:12px; margin-top:12px;";
 
   modal.appendChild(header);
   modal.appendChild(grid);
@@ -1142,7 +1156,7 @@ window.showSelectedWTSSInModal = function () {
 
   checked.forEach((cb) => {
     const id = cb.getAttribute("data-wtss-id");
-    const dataObj = window[`wtss_data_${id}`]; 
+    const dataObj = window[`wtss_data_${id}`];
 
     let cardTitle = id;
     if (dataObj) {
@@ -1271,9 +1285,7 @@ window.showSelectedWTSSInModal = function () {
     }
 
     // MULTI-ATRIBUTO
-    const timeline = Array.isArray(dataObj.timeline)
-      ? dataObj.timeline
-      : [];
+    const timeline = Array.isArray(dataObj.timeline) ? dataObj.timeline : [];
     const attributes = dataObj.attributes || [];
     const mapAttrToValues = dataObj.attrValuesMap || {};
 
@@ -1376,6 +1388,7 @@ window.showSelectedWTSSInModal = function () {
   overlay.addEventListener("click", (ev) => {
     if (ev.target === overlay) closeModal();
   });
+  exportModalBtn.addEventListener("click", exportModalCharts);
 };
 
 // CLIQUE NO MAPA (STAC + WTSS)
@@ -1401,7 +1414,6 @@ map.on("click", async function (e) {
   );
 
   try {
- 
     const satelitesQuery = selectedTags
       .map((tag) => sateliteIdMap[tag])
       .filter((id) => id)
@@ -1427,18 +1439,21 @@ map.on("click", async function (e) {
           .filter(Boolean);
 
         panelContent += `
-                    <details class="stac-accordion-item" ${idx === 0 ? "open" : ""
-          }>
+                    <details class="stac-accordion-item" ${
+                      idx === 0 ? "open" : ""
+                    }>
                         <summary>
                             <strong>🛰️ ${popularName}</strong>
                         </summary>
                         <div class="product-info-block">
-                            <p class="product-description">${item.description ||
-          item.title ||
-          "Sem descrição disponível."
-          }</p>
-                            <p class="product-bands"><strong>Bandas:</strong> ${availableBands.join(", ") || "N/A"
-          }</p>
+                            <p class="product-description">${
+                              item.description ||
+                              item.title ||
+                              "Sem descrição disponível."
+                            }</p>
+                            <p class="product-bands"><strong>Bandas:</strong> ${
+                              availableBands.join(", ") || "N/A"
+                            }</p>
                         </div>
                     </details>
                 `;
@@ -1646,18 +1661,20 @@ async function exportModalCharts() {
       const imgData = canvas.toDataURL("image/png");
       const base64 = imgData.split(",")[1];
 
-      zip.file(`wtss_modal_${index + 1}_${sanitizeId(name)}.png`, base64, { base64: true });
+      zip.file(`wtss_modal_${index + 1}_${sanitizeId(name)}.png`, base64, {
+        base64: true,
+      });
     } catch (e) {
       console.error("Erro ao exportar gráfico do modal:", e);
     }
   });
 
-const blob = await zip.generateAsync({ type: "blob" });
-  const link = document.createElement("a");
-  link.href = URL.createObjectURL(blob);
-  link.download = "wtss_graficos_comparacao.zip";
-  link.click();
-  URL.revokeObjectURL(link.href);
+  const blob = await zip.generateAsync({ type: "blob" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = "wtss_graficos_comparacao.zip";
+  link.click();
+  URL.revokeObjectURL(link.href);
 }
 
 async function loadJSZip() {
@@ -1710,11 +1727,11 @@ function createWTSSTimeSeriesChart(
       if (canvas && canvas._chart) {
         try {
           canvas._chart.destroy();
-        } catch (e) { }
+        } catch (e) {}
       }
       try {
         delete window[`wtss_data_${uniqueId}`];
-      } catch (e) { }
+      } catch (e) {}
       chartBlock.remove();
     });
   }
@@ -1876,12 +1893,12 @@ function createWTSSTimeSeriesChartMulti(
       if (canvas && canvas._chart) {
         try {
           canvas._chart.destroy();
-        } catch (e) { }
+        } catch (e) {}
       }
       try {
         delete window["wtss_multi_" + uniqueId];
         delete window["wtss_data_" + uniqueId];
-      } catch (e) { }
+      } catch (e) {}
       chartBlock.remove();
     });
   }
@@ -1914,7 +1931,7 @@ window.plotMultiChartInAcordeon = function (id) {
   if (canvas._chart) {
     try {
       canvas._chart.destroy();
-    } catch (e) { }
+    } catch (e) {}
   }
 
   let minLen = Array.isArray(data.timeline) ? data.timeline.length : 0;
@@ -2015,7 +2032,7 @@ let pointHistory = [];
 
 function updateHistoryList() {
   const container = document.getElementById("history-list");
-  const widget = document.getElementById('history-floating-widget');
+  const widget = document.getElementById("history-floating-widget");
 
   if (!container) return;
 
@@ -2023,11 +2040,8 @@ function updateHistoryList() {
 
   if (pointHistory.length === 0) {
     container.innerHTML = `<div class="empty-history">Nenhum ponto selecionado ainda.</div>`;
-    if (widget) widget.classList.add('hidden');
     return;
   }
-
-  if (widget) widget.classList.remove('hidden');
 
   pointHistory.forEach((p) => {
     const item = document.createElement("div");
@@ -2039,7 +2053,8 @@ function updateHistoryList() {
       </div>
       <div class="history-time">
         ${new Date(p.timestamp).toLocaleTimeString("pt-BR", {
-          hour: "2-digit", minute: "2-digit"
+          hour: "2-digit",
+          minute: "2-digit",
         })}
       </div>
     `;
@@ -2047,7 +2062,9 @@ function updateHistoryList() {
     item.addEventListener("click", () => {
       map.setView([p.lat, p.lng], 5);
       createSelectionVisuals({ lat: p.lat, lng: p.lng });
-      showInfoPanelSTAC("<strong>📍 Ponto selecionado</strong><br>Buscando produtos STAC...");
+      showInfoPanelSTAC(
+        "<strong>📍 Ponto selecionado</strong><br>Buscando produtos STAC..."
+      );
       showWTSSElectionPanel(p.lat, p.lng);
     });
 
@@ -2056,15 +2073,23 @@ function updateHistoryList() {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-  const widget = document.getElementById('history-floating-widget');
-  const header = widget.querySelector('.widget-header');  // ✅ CORRIGIDO
+  const widget = document.getElementById("history-floating-widget");
+  const header = widget ? widget.querySelector(".widget-header") : null;
+  const toggleBtn = document.getElementById("toggle-history-btn");
+  const closeWidgetBtn = document.getElementById("close-history-widget");
+  const clearBtn = document.getElementById("clear-history-btn");
 
-  if (widget && header) {
-    makeDraggable(widget, header);
+  if (closeWidgetBtn && widget) {
+    closeWidgetBtn.addEventListener("click", () => {
+      widget.classList.add("hidden");
+    });
   }
 
-  const clearBtn = document.getElementById("clear-history-btn");
-  const toggleBtn = document.getElementById("toggle-history-btn");
+  if (toggleBtn && widget) {
+    toggleBtn.addEventListener("click", () => {
+      widget.classList.toggle("hidden");
+    });
+  }
 
   if (clearBtn) {
     clearBtn.addEventListener("click", () => {
@@ -2073,18 +2098,18 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  if (toggleBtn && widget) {
-    toggleBtn.addEventListener('click', () => {
-      widget.classList.toggle('hidden');
-    });
+  if (widget && header) {
+    makeDraggable(widget, header);
   }
 
   updateHistoryList();
 });
 
 function makeDraggable(widget, handle) {
-  let startX = 0, startY = 0;
-  let widgetX = 0, widgetY = 0;
+  let startX = 0,
+    startY = 0;
+  let widgetX = 0,
+    widgetY = 0;
   let isDragging = false;
 
   handle.addEventListener("mousedown", (e) => {
@@ -2094,7 +2119,6 @@ function makeDraggable(widget, handle) {
     startX = e.clientX;
     startY = e.clientY;
 
-   
     const style = window.getComputedStyle(widget);
     const matrix = new DOMMatrixReadOnly(style.transform);
 
@@ -2117,5 +2141,4 @@ function makeDraggable(widget, handle) {
 
     widget.style.transform = `translate(${widgetX + dx}px, ${widgetY + dy}px)`;
   });
-
 }

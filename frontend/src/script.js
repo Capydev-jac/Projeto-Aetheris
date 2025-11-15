@@ -839,7 +839,6 @@ window.showWTSSElectionPanel = async function (lat, lng) {
 
       <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
           <button id="wtss-plot-selected" class="action-button">▶️ Plotar</button>
-          <button id="wtss-export-all" class="action-button secondary-button">⬇️ Exportar Todos Gráficos</button>
           <button id="wtss-clear-all" class="action-button secondary-button">Limpar Todos os Gráficos</button>
       </div>
 
@@ -866,7 +865,6 @@ window.showWTSSElectionPanel = async function (lat, lng) {
   const attrSelect = document.getElementById("wtss-attribute-select");
   const plotBtn = document.getElementById("wtss-plot-selected");
   const clearBtn = document.getElementById("wtss-clear-all");
-  const exportBtn = document.getElementById("wtss-export-all");
   const showSelectedBtn = document.getElementById("wtss-show-selected");
 
   function updateAttributeInfoBox() {
@@ -961,10 +959,7 @@ attrSelect.addEventListener("change", updateAttributeInfoBox);
     if (graphArea) graphArea.innerHTML = "";
   });
 
-  exportBtn.addEventListener("click", () => {
-    if (typeof exportAllWTSSCharts === "function") exportAllWTSSCharts();
-  });
-
+  
   showSelectedBtn.addEventListener("click", () => {
     if (typeof showSelectedWTSSInModal === "function")
       showSelectedWTSSInModal();
@@ -1113,13 +1108,30 @@ window.showSelectedWTSSInModal = function () {
   header.className = "wtss-modal-header";
   header.innerHTML = `<h3>Visualização — Gráficos Selecionados (${checked.length})</h3>`;
 
-  const closeBtn = document.createElement("button");
-  closeBtn.textContent = "Fechar ✖";
-  closeBtn.className = "action-button secondary-button";
-  header.appendChild(closeBtn);
+   const titleDiv = document.createElement("div");
+  titleDiv.innerHTML = `<h3>Visualização — Gráficos Selecionados (${checked.length})</h3>`;
+  header.appendChild(titleDiv);
 
-  const grid = document.createElement("div");
-  grid.className = "wtss-modal-grid";
+  const controlsDiv = document.createElement("div");
+  controlsDiv.style = "display:flex; gap:8px;";
+
+  // NOVO: Botão de Exportação no Modal
+  const exportModalBtn = document.createElement("button");
+  exportModalBtn.textContent = "⬇️ Exportar PNG/ZIP"; 
+  exportModalBtn.className = "action-button primary-button";
+  controlsDiv.appendChild(exportModalBtn);
+
+  const closeBtn = document.createElement("button");
+  closeBtn.textContent = "Fechar ✖";
+  closeBtn.className = "action-button secondary-button";
+  controlsDiv.appendChild(closeBtn);
+
+  header.appendChild(controlsDiv);
+
+
+  const grid = document.createElement("div");
+  grid.style =
+    "display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:12px; margin-top:12px;";
 
   modal.appendChild(header);
   modal.appendChild(grid);
@@ -1597,6 +1609,56 @@ async function exportAllWTSSCharts() {
   link.click();
   URL.revokeObjectURL(link.href);
 }
+/**
+ * NOVO: Função para exportar os gráficos que estão no modal de comparação.
+ */
+async function exportModalCharts() {
+  if (!window.wtss_modal_charts || window.wtss_modal_charts.length === 0) {
+    alert("Nenhum gráfico no modal para exportar.");
+    return;
+  }
+
+  // Garante que JSZip esteja carregado
+  if (typeof JSZip === "undefined") {
+    await loadJSZip();
+  }
+
+  alert("Preparando exportação dos gráficos de comparação... Aguarde.");
+
+  const zip = new JSZip();
+
+  window.wtss_modal_charts.forEach((chart, index) => {
+    try {
+      const canvas = chart.canvas;
+      const id = canvas.id.replace("modal-canvas-", "");
+
+      // Tenta criar um nome descritivo a partir dos dados salvos
+      const dataObj = window[`wtss_data_${id}`];
+      let name = `chart-modal-${id}`;
+      if (dataObj) {
+        if (dataObj.multi) {
+          name = `${dataObj.coverage}_${dataObj.attributes.join("-")}`;
+        } else {
+          name = `${dataObj.coverage}_${dataObj.attribute}`;
+        }
+      }
+
+      const imgData = canvas.toDataURL("image/png");
+      const base64 = imgData.split(",")[1];
+
+      zip.file(`wtss_modal_${index + 1}_${sanitizeId(name)}.png`, base64, { base64: true });
+    } catch (e) {
+      console.error("Erro ao exportar gráfico do modal:", e);
+    }
+  });
+
+const blob = await zip.generateAsync({ type: "blob" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = "wtss_graficos_comparacao.zip";
+  link.click();
+  URL.revokeObjectURL(link.href);
+}
 
 async function loadJSZip() {
   return new Promise((resolve, reject) => {
@@ -2055,4 +2117,5 @@ function makeDraggable(widget, handle) {
 
     widget.style.transform = `translate(${widgetX + dx}px, ${widgetY + dy}px)`;
   });
+
 }

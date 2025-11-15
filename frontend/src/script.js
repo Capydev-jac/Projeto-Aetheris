@@ -307,6 +307,38 @@ function getAttributeInfo(attribute) {
     };
   }
 
+  if (key.includes("BAND5")) {
+    return {
+      nome: attribute,
+      descricao: "Nome comum 'Blue'.",
+      unidade: "reflectância escalada (adimensional)",
+    };
+  }
+  
+  if (key.includes("BAND6")) {
+    return {
+      nome: attribute,
+      descricao: "Nome comum 'Green'.",
+      unidade: "reflectância escalada (adimensional)",
+    };
+  }
+
+  if (key.includes("BAND7")) {
+    return {
+      nome: attribute,
+      descricao: "Nome comum 'Red'.",
+      unidade: "reflectância escalada (adimensional)",
+    };
+  }
+
+  if (key.includes("BAND8")) {
+    return {
+      nome: attribute,
+      descricao: "Nome comum 'Nir'. Reflectância na região do infravermelho próximo, muito sensível à vegetação.",
+      unidade: "reflectância escalada (adimensional)",
+    };
+  }
+  
   if (key.includes("BLUE")) {
     return {
       nome: attribute,

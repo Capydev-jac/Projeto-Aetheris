@@ -1,0 +1,939 @@
+/* ========================================================
+   RESET & CONFIGURAÇÕES GERAIS
+   ======================================================== */
+body,
+html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: Arial, sans-serif;
+  overflow-x: hidden;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* ========================================================
+    HEADER 
+   ======================================================== */
+#main-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 50px;
+  background: #1a1a1a;
+  color: #f5f5f5;
+  display: flex;
+  align-items: center;
+  padding: 0 15px;
+  box-sizing: border-box;
+  z-index: 1001;
+}
+
+.header-menu-btn {
+  background: transparent;
+  border: none;
+  color: #f5f5f5;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 5px;
+  margin-right: 15px;
+  transition: color 0.2s ease;
+}
+
+.header-menu-btn:hover {
+  color: #a9c7ff;
+}
+
+.header-title {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-left: 2%;
+}
+
+.capy-link {
+  text-decoration: none;
+  font-size: 1.2rem;
+  color: #fff;
+  margin-right: 5px;
+  margin-left: auto;
+  transition: transform 0.3s ease;
+}
+
+.capy-link:hover {
+  text-decoration: underline;
+  transform: scale(1.02);
+}
+
+/* ========================================================
+   MAPA
+   ======================================================== */
+#map {
+  height: calc(100% - 50px);
+  width: 100%;
+  position: absolute;
+  top: 50px;
+  left: 0;
+  z-index: 0;
+}
+
+/* ========================================================
+   SIDEBAR
+   ===================================================== */
+
+#sidebar .site-description {
+  font-size: 0.85rem;
+  margin-top: -10px;
+  margin-bottom: 20px;
+  color: #e9edf3;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#sidebar {
+  position: fixed;
+  top: 50px;
+  left: 0;
+  transform: translateX(-100%);
+  width: 220px;
+  border-bottom-right-radius: 1000px;
+  background: linear-gradient(145deg, #1a1a1a 20%, #4a59ff);
+  color: #f5f5f5;
+  padding: 20px;
+  box-shadow: 4px 0 12px rgba(0, 0, 0, 0.3);
+  transition: transform 0.3s ease, height 0.3s ease, box-shadow 0.2s ease;
+  z-index: 1002;
+  font-family: "Inter", "Segoe UI", Arial, sans-serif;
+}
+
+#sidebar.ativo {
+  transform: translateX(0);
+}
+
+/* Responsividade por altura do monitor */
+@media screen and (max-height: 800px) {
+  #sidebar {
+    height: 95vh;
+  }
+}
+
+@media screen and (min-height: 801px) {
+  #sidebar {
+    height: 65vh;
+  }
+}
+
+#sidebar h1 {
+  font-size: 1.35rem;
+  margin: 0 0 12px;
+  text-align: center;
+  color: #ffffff;
+  letter-spacing: 0.5px;
+  text-shadow: 0 0 6px rgba(74, 89, 255, 0.4);
+}
+
+.logo {
+  display: block;
+  margin: 0 auto 15px;
+  width: 70%;
+  opacity: 0.95;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.logo:hover {
+  opacity: 1;
+  transform: scale(1.05);
+}
+
+/* ========================================================
+   SELETOR DE TAGS
+   ======================================================== */
+.tag-selector {
+  max-width: 400px;
+  position: relative;
+}
+
+.selected-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 8px;
+  margin-top: 8px;
+}
+
+.selected-tags .tag {
+  background-color: #007bff;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.9em;
+}
+
+.selected-tags .tag .remove {
+  cursor: pointer;
+  font-weight: bold;
+}
+
+#tag-input {
+  display: none;
+}
+
+.suggestions {
+  position: absolute;
+  width: 100%;
+  max-height: 150px;
+  overflow-y: auto;
+  background: rgb(24, 48, 120);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  z-index: 1;
+}
+
+.suggestions li {
+  padding: 8px;
+  cursor: pointer;
+}
+
+.suggestions li:hover {
+  background-color: #1c4cb3;
+}
+
+/* ========================================================
+  PAINEL DE INFORMAÇÕES (DIREITA)
+  ======================================================== */
+#info-panel-right {
+  position: absolute;
+  top: 50px;
+  right: 0;
+  width: 480px;
+  height: calc(100% - 50px);
+  padding: 25px;
+  padding-bottom: 20px;
+  box-sizing: border-box;
+  background: linear-gradient(145deg, #1a1a1a 20%, #4a59ff);
+  color: white;
+  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  overflow-y: auto;
+  transform: translateX(100%);
+  transition: transform 0.4s ease-in-out;
+}
+
+/* CONTÊINER DO GRÁFICO: Aumenta o espaçamento acima e abaixo do canvas/header */
+.wtss-chart-container-border {
+  border-top: 1px solid #0b0b0b;
+  margin-top: 15px;
+  padding-top: 15px;
+  padding-bottom: 25px;
+}
+
+#info-panel-right.visible {
+  transform: translateX(0);
+}
+
+.info-panel-close {
+  position: absolute;
+  top: 5px;
+  right: 10px;
+  width: 30px;
+  height: 30px;
+  border: none;
+  background: transparent;
+  font-size: 24px;
+  font-weight: bold;
+  cursor: pointer;
+  color: #fff;
+  opacity: 0.7;
+}
+
+.info-panel-close:hover {
+  opacity: 1;
+}
+
+#info-panel-right .satelite-popup-header {
+  color: #a9c7ff;
+  font-size: 1.2em;
+  margin-bottom: 5px;
+}
+
+#info-panel-right .satelite-popup-divider {
+  border: 0;
+  height: 1px;
+  background-color: rgba(10, 10, 10, 0.2);
+  margin: 10px 0;
+}
+
+#info-panel-right .product-info-block {
+  background-color: rgba(0, 0, 0, 0.25);
+  border-left: 4px solid #6d7aff;
+  padding: 12px;
+  margin-bottom: 15px;
+  border-radius: 4px;
+}
+
+#info-panel-right .product-title {
+  font-size: 1.1em;
+  color: #ffffff;
+  display: block;
+  margin-bottom: 8px;
+}
+
+#info-panel-right .product-details {
+  margin-bottom: 12px;
+}
+
+#info-panel-right .product-name {
+  font-style: italic;
+  color: #c0c0c0;
+  font-size: 0.85em;
+  margin-bottom: 8px;
+}
+
+#info-panel-right .product-description {
+  font-size: 0.9em;
+  color: #dddddd;
+  line-height: 1.4;
+  margin-bottom: 10px;
+}
+
+#info-panel-right .product-bands {
+  font-size: 0.9em;
+  color: #dddddd;
+}
+
+#info-panel-right .product-bands strong {
+  color: #a9c7ff;
+}
+
+.action-button {
+  display: block;
+  width: 90%;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 10px;
+  background-color: #4a59ff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  text-align: center;
+  font-size: 0.9em;
+  font-weight: bold;
+  transition: background-color 0.3s;
+}
+
+/* ========================================================
+   POPUPS DE TUTORIAL 
+   ======================================================== */
+.tutorial-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.tutorial-box {
+  background: #fff;
+  color: #333;
+  padding: 25px 30px;
+  border-radius: 12px;
+  max-width: 420px;
+  text-align: center;
+  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.3);
+  animation: fadeInUp 0.4s ease;
+  position: relative;
+}
+
+.tutorial-close-btn {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  background: transparent;
+  border: none;
+  font-size: 28px;
+  font-weight: bold;
+  color: #aaa;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0 5px;
+}
+
+.tutorial-close-btn:hover {
+  color: #333;
+}
+
+.tutorial-box h2 {
+  margin-top: 0;
+  font-size: 22px;
+  padding-right: 25px;
+}
+
+.tutorial-box p {
+  font-size: 15px;
+  line-height: 1.4;
+  margin-bottom: 20px;
+}
+
+.tutorial-buttons {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 25px;
+}
+
+.tutorial-button {
+  flex: 1;
+  border: none;
+  color: #fff;
+  padding: 10px 15px;
+  border-radius: 6px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background-color 0.3s, opacity 0.3s, visibility 0.3s;
+  background-color: #4a59ff;
+}
+
+.tutorial-button:hover {
+  background-color: #6d7aff;
+}
+
+.tutorial-button.hidden {
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ========================================================
+   ABAS DO PAINEL DIREITO (STAC / WTSS)
+   ======================================================== */
+.tab-buttons {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 10px;
+}
+
+.tab-button {
+  flex: 1;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  border-bottom: 2px solid transparent;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.tab-button.active {
+  background: rgba(255, 255, 255, 0.2);
+  border-bottom: 2px solid #6d7aff;
+}
+
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+.aetheris-highlight {
+  color: #4a59ff;
+}
+
+.wtss-full-width-select {
+  width: 100%;
+  padding: 8px 12px;
+  font-size: 14px;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23333%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.4-12.8z%22%2F%3E%3C%2Fsvg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px top 50%;
+  background-size: 12px auto;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.wtss-full-width-select:hover {
+  border-color: #bbbbbb;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+}
+
+.wtss-full-width-select:focus {
+  outline: none;
+  border-color: #2e7d32;
+  box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.2);
+}
+
+.wtss-selection-row {
+  margin-bottom: 12px;
+}
+
+.wtss-selection-row label {
+  display: block;
+  margin-bottom: 6px;
+  color: #e7e7e7;
+  font-size: 20px;
+}
+
+/* Style disabled state */
+.wtss-full-width-select:disabled {
+  background-color: #f5f5f5;
+  border-color: #ddd;
+  cursor: not-allowed;
+  color: #999;
+}
+
+.plot-button-spacing {
+  margin-bottom: 5px;
+}
+
+/* Header que alinha título e botão de fechar */
+.wtss-chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Rodapé do gráfico STAC */
+.stac-chart-footer {
+  font-size: 0.7em;
+}
+
+/* Bloco de erro */
+.wtss-error-margin {
+  margin-top: 10px;
+}
+
+/* Abas de satélite */
+.satellite-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.satellite-tab {
+  background: #1a1d2b;
+  color: #c9d1d9;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid #2d3250;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.satellite-tab:hover {
+  background: #2b2f44;
+}
+
+.satellite-tab.active {
+  background: #3b82f6;
+  color: #fff;
+}
+
+/* Listagem de coleções */
+.collection-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.collection-item {
+  background: #141724;
+  border-radius: 8px;
+  padding: 10px;
+  cursor: pointer;
+  transition: 0.2s;
+  border: 1px solid #1f2338;
+}
+
+.collection-item:hover {
+  background: #20243a;
+}
+
+.stac-accordion details {
+  margin-bottom: 8px;
+  border-radius: 5px;
+  background: #021120;
+  padding: 4px 8px;
+}
+
+.stac-accordion summary {
+  cursor: pointer;
+  font-size: 1.05em;
+  padding: 4px 0;
+}
+
+.stac-accordion .product-info-block {
+  margin-top: 6px;
+}
+
+#wtss-clear-all {
+  background-color: #fa3c3c;
+  color: #ffffff;
+  border: none;
+}
+
+#wtss-clear-all:hover {
+  background-color: #ff4d4d;
+}
+
+/* ====== HISTÓRICO DE PONTOS ====== */
+#history-container {
+  border-top: 1px solid #ddd;
+  margin-top: 12px;
+  padding-top: 10px;
+}
+
+.sidebar-section-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #e4e4e4ff;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 240px;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+
+.history-coords {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.history-icon {
+  font-size: 18px;
+}
+
+.history-time {
+  font-size: 11px;
+  color: #0a0a0aff;
+  text-align: right;
+}
+
+.empty-history {
+  color: #ff0000ff;
+  font-size: 13px;
+  text-align: center;
+  padding: 8px;
+}
+
+.clear-history-btn {
+  margin-top: 8px;
+  width: 100%;
+  font-size: 13px;
+}
+
+/* Scrollbar suave */
+.history-list::-webkit-scrollbar {
+  width: 6px;
+}
+.history-list::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 3px;
+}
+.history-list::-webkit-scrollbar-thumb:hover {
+  background: #aaa;
+}
+
+/* === Contêiner do bloco do gráfico === */
+.wtss-chart-block {
+  margin: 10px 0;
+  border: 1px solid #e6e6e6;
+  border-radius: 8px;
+  padding: 6px;
+  transition: transform 160ms ease, box-shadow 160ms ease,
+    border-color 160ms ease;
+  background: linear-gradient(180deg, #ffffff 0%, #fbfbfb 100%);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+}
+.wtss-chart-block:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+}
+.wtss-chart-block.selected {
+  border-color: #2e7d32;
+  box-shadow: 0 12px 30px rgba(46, 125, 50, 0.12);
+  background: linear-gradient(180deg, #f6ffef 0%, #ffffff 100%);
+}
+
+/* Summary / cabeçalho */
+.wtss-summary-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 4px;
+  cursor: pointer;
+}
+.wtss-summary-header label {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Checkbox customizado */
+.wtss-select-checkbox {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  border: 2px solid #cfcfcf;
+  background: #fff;
+  display: inline-block;
+  vertical-align: middle;
+  position: relative;
+  transition: all 140ms ease;
+  box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.03);
+}
+.wtss-select-checkbox:checked {
+  background: linear-gradient(135deg, #4caf50, #2e7d32);
+  border-color: #2e7d32;
+  box-shadow: 0 4px 12px rgba(46, 125, 50, 0.12);
+}
+.wtss-select-checkbox:checked::after {
+  content: "✓";
+  color: #fff;
+  font-size: 12px;
+  position: absolute;
+  left: 3px;
+  top: -1px;
+  font-weight: 700;
+}
+
+/* Canvas wrapper com altura fixa para manter layout */
+.wtss-canvas-wrapper {
+  height: 260px;
+  display: block;
+}
+.wtss-panel {
+  padding: 8px 6px 12px 6px;
+  background: transparent;
+}
+
+/* Pequeno destaque do título */
+.wtss-summary-header span {
+  font-weight: 600;
+  color: #222;
+}
+
+/* === MODAL WTSS === */
+#wtss-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+#wtss-modal {
+  background: #fff;
+  width: 90%;
+  max-width: 1200px;
+  max-height: 90%;
+  overflow: auto;
+  border-radius: 8px;
+  padding: 12px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4);
+  color: #333;
+}
+
+.wtss-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.wtss-modal-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.wtss-modal-card {
+  background: #fafafa;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #eee;
+}
+
+.wtss-modal-card-title {
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.wtss-modal-canvas-wrapper {
+  height: 260px;
+}
+/* /* ========================================================
+   WIDGET FLUTUANTE DE HISTÓRICO
+   ======================================================== */
+#history-floating-widget {
+  position: fixed;
+  left: 250px;
+  width: 270px;
+  background: linear-gradient(145deg, #1a1a1a 20%, #4a59ff);
+  color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  z-index: 1005;
+  padding: 10px;
+
+  /* Propriedades para simular a abertura/fechamento */
+  max-height: 350px; /* Altura máxima do painel */
+  opacity: 1;
+  visibility: visible;
+
+  transform: translateY(0);
+  transition: all 0.4s ease-in-out;
+}
+#history-floating-widget.hidden {
+  /* Manda o painel para baixo para simular o fechamento */
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(
+    350px
+  ); /* Move o painel para fora da tela (para baixo) */
+}
+.widget-header {
+  font-weight: 600;
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  cursor: grab;
+  user-select: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.close-btn-widget {
+  background: transparent;
+  border: none;
+  color: #ccc;
+  font-size: 1.2rem;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0 5px;
+  transition: color 0.2s;
+}
+
+.close-btn-widget:hover {
+  color: #fff;
+}
+
+/* Regras do Item de Histórico */
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 200px;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+.history-item {
+  background: linear-gradient(180deg, #1a57ffff 0%, #444444ff 100%);
+  border: 1px solid #e2e2e2;
+  border-radius: 6px;
+  padding: 4px 5px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  cursor: pointer;
+  gap: 7px; /* Espaçamento corrigido */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+.history-item:hover {
+  background: linear-gradient(180deg,   #3b6efaff 0%, #727272ff 100%);
+}
+
+.history-coords {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #ffffff; /* Visibilidade */
+  flex-grow: 1;
+}
+.history-coords span {
+  /* Define largura suficiente para o texto caber sem apertar demais */
+  min-width: 100px;
+  line-height: 1.2;
+}
+.history-icon {
+  font-size: 16px;
+}
+.history-time {
+  font-size: 10px;
+  text-align: right;
+  flex-shrink: 0;
+  min-width: 35px;
+  color: #cccccc; /* Visibilidade */
+}
+
+.empty-history {
+  color: #ffc107;
+  font-size: 13px;
+  text-align: center;
+  padding: 8px;
+}
+.clear-history-btn {
+  margin-top: 10px;
+  width: 100%;
+  font-size: 13px;
+}
+
+.floating-widget {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+
+  /* Posição inicial usada pelo script */
+  transform: translate(0, 0);
+
+  z-index: 9999;
+}

@@ -893,7 +893,7 @@ window.showWTSSElectionPanel = async function (lat, lng) {
   
   </div>
 
-  <button id="wtss-show-selected" class="action-button primary-button">🖥️ Mostrar Selecionados</button>
+  <button id="wtss-show-selected" class="action-button primary-button">🖥️ Mostrar Selecionados</button><br>
 <button id="wtss-select-first-six" class="action-button" style="background-color: #ffc107; border-color: #ffc107; color: #333;">✅ Selecionar 6 Primeiros</button>  <div id="wtss-graph-area"></div>
 `;
 
@@ -2214,4 +2214,5 @@ function makeDraggable(widget, handle) {
     widget.style.transform = `translate(${widgetX + dx}px, ${widgetY + dy}px)`;
   });
 }
+
 

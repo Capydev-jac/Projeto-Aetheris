@@ -894,8 +894,7 @@ window.showWTSSElectionPanel = async function (lat, lng) {
   </div>
 
   <button id="wtss-show-selected" class="action-button primary-button">🖥️ Mostrar Selecionados</button>
-
-  <div id="wtss-graph-area"></div>
+<button id="wtss-select-first-six" class="action-button" style="background-color: #ffc107; border-color: #ffc107; color: #333;">✅ Selecionar 6 Primeiros</button>  <div id="wtss-graph-area"></div>
 `;
 
   const wtssTab = document.getElementById("wtss-tab");
@@ -913,6 +912,7 @@ window.showWTSSElectionPanel = async function (lat, lng) {
   const plotBtn = document.getElementById("wtss-plot-selected");
   const clearBtn = document.getElementById("wtss-clear-all");
   const showSelectedBtn = document.getElementById("wtss-show-selected");
+  const selectFirstSixBtn = document.getElementById("wtss-select-first-six");
 
   function updateAttributeInfoBox() {
     const box = document.getElementById("wtss-attribute-info");
@@ -1010,6 +1010,10 @@ window.showWTSSElectionPanel = async function (lat, lng) {
     if (typeof showSelectedWTSSInModal === "function")
       showSelectedWTSSInModal();
   });
+  // NOVO: Listener para o botão de Selecionar 6 Primeiros
+  if (selectFirstSixBtn) {
+    selectFirstSixBtn.addEventListener("click", window.selectFirstSixCharts);
+  }
 };
 
 // Busca série temporal WTSS
@@ -1126,6 +1130,43 @@ window.fetchWTSSTimeSeriesAndPlot = async function (
     const lm = document.getElementById(loadingId);
     if (lm) lm.remove();
   }
+};
+// --------------------------------------
+// FUNÇÃO: Seleciona as primeiras 6 checkboxes plotadas
+// --------------------------------------
+window.selectFirstSixCharts = function() {
+    const checkboxes = document.querySelectorAll(".wtss-select-checkbox");
+    
+    // 1. Limpa todas as seleções existentes primeiro
+    checkboxes.forEach(cb => {
+        cb.checked = false;
+        // Simula o evento change para atualizar a classe 'selected' no bloco
+        cb.closest('.wtss-chart-block')?.classList.remove('selected'); 
+    });
+
+    const chartsToSelect = [];
+    
+    // 2. Coleta os primeiros 6
+    for (let i = 0; i < Math.min(checkboxes.length, 6); i++) {
+        chartsToSelect.push(checkboxes[i]);
+    }
+    
+    // 3. Marca os selecionados
+    chartsToSelect.forEach(cb => {
+        cb.checked = true;
+        cb.closest('.wtss-chart-block')?.classList.add('selected');
+    });
+
+    if (checkboxes.length > 6) {
+        alert(`Foram plotados ${checkboxes.length} gráficos. Apenas os 6 primeiros foram selecionados para comparação.`);
+    } else if (checkboxes.length > 0) {
+        // Notificação mais suave para mostrar que a seleção ocorreu
+        // Pode ser aprimorada, mas alert simples serve por enquanto
+        const total = checkboxes.length;
+        alert(`${total} gráfico(s) selecionado(s) e pronto(s) para visualização. Clique em "🖥️ Mostrar Selecionados".`);
+    } else {
+        alert("Nenhum gráfico plotado ainda para ser selecionado.");
+    }
 };
 
 // Modal para exibir gráficos selecionados (com legenda)
@@ -1555,8 +1596,7 @@ const tutorialSteps = [
     text: "✅ **Passo 4: Visualizar Lado a Lado.** Para visualizar os gráficos lado a lado e compará-los de forma limpa, use o botão '🖥️ Mostrar Selecionados' no painel de controle.",
   },
   {
-    text: "⬇️ **Passo 5: Exportar.** Você pode usar o botão 'Exportar Todos Gráficos' para baixar um arquivo .zip com todas as suas séries plotadas em PNG.",
-  },
+ text: "⬇️ **Passo 5: Exportar.** Você pode usar o botão 'Exportar PNG/ZIP' para baixar um arquivo .zip com todas as suas séries plotadas em PNG.",  },
   {
     text: "✨ Pronto! Use o filtro de satélites na barra lateral e o botão 'Limpar Gráficos' para gerenciar sua análise.",
   },
@@ -2174,3 +2214,4 @@ function makeDraggable(widget, handle) {
     widget.style.transform = `translate(${widgetX + dx}px, ${widgetY + dy}px)`;
   });
 }
+

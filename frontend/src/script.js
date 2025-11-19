@@ -857,12 +857,15 @@ window.showWTSSElectionPanel = async function (lat, lng) {
     .join("");
 
   // Conteúdo da aba: select de coleção + select de atributo + botões + área de gráficos
-  const panelContent = `
+const panelContent = `
   <div id="wtss-controls-panel" class="wtss-panel wtss-controls-sticky">
       <h3>WTSS — Seleção</h3>
-      <p>Período solicitado: ${calculated_start_date} → ${calculated_end_date}</p>
+      <p style="margin-bottom:6px;">
+        Período padrão sugerido: ${calculated_start_date} → ${calculated_end_date}
+      </p>
       <hr class="satelite-popup-divider">
 
+      <!-- 🔹 Seleção da coleção (mantém o que você já tinha depois) -->
       <div class="wtss-selection-row">
           <label for="wtss-collection-select"><strong>Coleção</strong></label>
           <select id="wtss-collection-select" class="wtss-full-width-select">
@@ -870,12 +873,36 @@ window.showWTSSElectionPanel = async function (lat, lng) {
           </select>
       </div>
 
+      <!-- 🔹 NOVO BLOCO: seleção de datas -->
+      <div class="wtss-selection-row" style="margin-top:8px;">
+          <label><strong>Período da série</strong></label>
+          <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
+            <input 
+              type="date" 
+              id="wtss-start-date" 
+              class="wtss-date-input"
+              value="${calculated_start_date}"
+            />
+            <span style="font-size:0.85em;">até</span>
+            <input 
+              type="date" 
+              id="wtss-end-date" 
+              class="wtss-date-input"
+              value="${calculated_end_date}"
+            />
+          </div>
+          <p style="margin: 4px 0 0; font-size: 0.8em; opacity: 0.9;">
+            Se você não escolher datas, o sistema usa automaticamente o último ano.
+          </p>
+      </div>
+
       <div class="wtss-selection-row" style="margin-top:8px;">
           <label for="wtss-attribute-select"><strong>Atributos</strong></label>
           <select id="wtss-attribute-select" class="wtss-full-width-select" multiple
               title="Segure Ctrl (Windows/Linux) ou ⌘ Command (Mac) para selecionar mais de um."></select>
           <p style="margin: 6px 0 0; font-size: 0.85em; opacity: 0.9;">
-            💡 <b>Dica:</b> para selecionar <u>mais de um</u> atributo, mantenha pressionado <b>Ctrl</b> (Windows/Linux) ou <b>⌘ Command</b> (Mac) ao clicar nas opções.
+            💡 <b>Dica:</b> para selecionar <u>mais de um</u> atributo, segure 
+            <b>Ctrl</b> (Windows/Linux) ou <b>⌘ Command</b> (Mac) ao clicar nas opções.
           </p>
       </div>
 
@@ -1024,17 +1051,40 @@ window.fetchWTSSTimeSeriesAndPlot = async function (
   attribute
 ) {
   const baseUrl = "https://data.inpe.br/bdc/wtss/v4/";
-  const startDate = new Date();
-  startDate.setFullYear(startDate.getFullYear() - 1);
-  const startISO = startDate.toISOString().split("T")[0];
-  const endISO = new Date().toISOString().split("T")[0];
+
+  // 🔹 Tenta usar o intervalo escolhido pelo usuário
+  let startISO;
+  let endISO;
+
+  const startInput = document.getElementById("wtss-start-date");
+  const endInput = document.getElementById("wtss-end-date");
+
+  if (startInput && endInput && startInput.value && endInput.value) {
+    const start = new Date(startInput.value);
+    const end = new Date(endInput.value);
+
+    if (start > end) {
+      alert("A data inicial não pode ser maior que a data final.");
+      return;
+    }
+
+    // WTSS já aceita YYYY-MM-DD, que é o formato do input date
+    startISO = startInput.value;
+    endISO = endInput.value;
+  } else {
+    // 🔁 Fallback: mantém o padrão de 1 ano, igual ao comportamento antigo
+    const startDate = new Date();
+    startDate.setFullYear(startDate.getFullYear() - 1);
+    startISO = startDate.toISOString().split("T")[0];
+    endISO = new Date().toISOString().split("T")[0];
+  }
 
   const graphArea = document.getElementById("wtss-graph-area");
   const loadingId = "wtss-loading-message";
   if (graphArea) {
     const msg = document.createElement("div");
     msg.id = loadingId;
-    msg.innerHTML = `<p>Carregando série WTSS: <strong>${coverage}</strong> / ${attribute} ...</p>`;
+    msg.innerHTML = `<p>Carregando série WTSS: <strong>${coverage}</strong> / ${attribute} (${startISO} → ${endISO})...</p>`;
     graphArea.prepend(msg);
   }
 

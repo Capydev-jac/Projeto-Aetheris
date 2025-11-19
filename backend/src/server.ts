@@ -2,7 +2,7 @@ import express, { Request, Response } from 'express';
 import cors from 'cors';
 import path from 'path';
 import axios from 'axios';
-import { connectToDatabase, getDb } from './database'; // Assumindo que './database' é o arquivo de conexão
+import { connectToDatabase, getDb } from './database';
 
 const app = express();
 const PORT = 3000;

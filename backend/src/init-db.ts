@@ -7,11 +7,6 @@ const MONGO_URL = 'mongodb://localhost:27017';
 const DB_NAME = 'aetheris_db';
  
 const platformMapping: { [key: string]: string } = {
-    // ... Mantenha o que já funciona (S2, GOES, etc.)
- 
-    // Novas adições/ajustes para Landsat:
-   // Ajuste CRÍTICO para Landsat: USE APENAS 'landsat' como ID DE PLATAFORMA.
-   
     'LANDSAT': 'landsat-2', // Captura coleções que contêm 'LANDSAT' no nome (ex: 'LANDSAT-16D-1')
     'L8': 'landsat-2', // Para Landsat 8
  
